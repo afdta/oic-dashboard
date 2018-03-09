@@ -5,13 +5,64 @@
   <title>MPP Interactive Feature</title>
   <meta name="author" content="Alec Friedhoff">
 
+  <link href="https://fonts.googleapis.com/css?family=PT+Serif:400,400i,700" rel="stylesheet">
+  <link rel="stylesheet" href="brookings-single.scss">
+
   <link rel="stylesheet" href="app.css">
   <script src="app.js" type="text/javascript"></script>
+
+  <style>
+    html{
+        font-size:18px;
+        font-family: "PT Serif", Times, serif;
+        line-height:1.7em;
+        background-color:#fafafa;
+        }
+
+    body{
+        margin:0px;
+        padding:0px;
+    }
+  </style>
 </head>
 
 <body>
-<div id="metro-interactive">
-
+<div class="metro-interactive" style="max-width:780px;margin:2rem auto;">
+  <h1>Draft of OIC dashboard</h1>
+  <p>Status update:</p>
+  <ul>
+    <li>Please only look at this on a widescreen desktop for now so that the three panels appear side-by-side. Once I finalize all the graphics, I'll make this responsive to various device widths.</li>
+    <li>The data for the OICs are live, though the charts are nonsensical because I don't have real data yet for the other aggregates. I need to get those data from Cecile.</li>
+    <li>I will add data labels to the charts</li>
+    <li>The other graphics (typology, legend, and "what makes an OIC") are just stand-ins</li>
+    <li>I will clean up the spacing and sizing of the various elements in the next iteration. In particular, I think the first panel which includes the city image could be a little larger.</li>
+    <li>I will tweak color to create more continuity between the panels. One challenge here is that the city images will vary in color.</li>
+    <li>I am mostly concerned about whether this includes the right content and whether it presents it clearly, but please let me know any concerns.</li>
+  </ul>
 </div>
+
+
+<div class="metro-interactive">
+    <div class="dashboard-wrap c-fix" id="oic-dashboard">
+        
+
+        <div class="dashboard-menu c-fix" id="dashboard-menu" style="">
+            <div>
+              <p class="dashboard-title" style="font-size:2.5rem;font-weight:bold;margin-bottom:0px;">
+                <span class="oic-name" style="margin-right:1rem;">OIC Dashboard</span>
+                <span class="county-name" style="color:#999999;font-size:1.25rem;text-transform:uppercase">_</span>
+              </p>
+            </div>
+        </div>
+
+        <div class="c-fix">
+            <div class="dashboard-panel" id="dash-panel-1"></div>
+            <div class="dashboard-panel" id="dash-panel-2"></div>
+            <div class="dashboard-panel" id="dash-panel-3"></div>
+        </div>
+    </div>
+</div>
+
 </body>
+
 </html>

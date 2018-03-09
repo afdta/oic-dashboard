@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="407"
+   height="60"
+   viewBox="0 0 407 60"
+   version="1.1"
+   id="svg6020"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="legend.svg">
+  <defs
+     id="defs6013" />
+  <sodipodi:namedview
+     inkscape:document-units="px"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.9143529"
+     inkscape:cx="124.02493"
+     inkscape:cy="43.5123"
+     inkscape:current-layer="layer1"
+     id="namedview6015"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1865"
+     inkscape:window-height="1025"
+     inkscape:window-x="55"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata6017">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(880.96938,-239.90119)">
+    <rect
+       style="display:inline;opacity:1;fill:#cd3d4b;fill-opacity:1;stroke:none;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect848-31-8"
+       width="20"
+       height="20"
+       x="-880.96936"
+       y="240.7355" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:25px;font-family:'PT Serif';-inkscape-font-specification:'PT Serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#000000;fill-opacity:1;stroke:none"
+       x="-850.96936"
+       y="255.89224"
+       id="text2651"><tspan
+         sodipodi:role="line"
+         id="tspan2649"
+         x="-850.96936"
+         y="255.89224">Rochester, NY</tspan></text>
+    <rect
+       style="display:inline;opacity:1;fill:#324661;fill-opacity:1;stroke:none;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect848-31"
+       width="20"
+       height="20"
+       x="-880.96936"
+       y="277.90118" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:25px;font-family:'PT Serif';-inkscape-font-specification:'PT Serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#000000;fill-opacity:1;stroke:none"
+       x="-850.96936"
+       y="293.05792"
+       id="text2651-5"><tspan
+         sodipodi:role="line"
+         id="tspan2649-5"
+         x="-850.96936"
+         y="293.05792">Urban counties</tspan></text>
+    <rect
+       style="display:inline;opacity:1;fill:#578f82;fill-opacity:1;stroke:none;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect848-31-8-7"
+       width="20"
+       height="20"
+       x="-706.22943"
+       y="277.90118" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:25px;font-family:'PT Serif';-inkscape-font-specification:'PT Serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#000000;fill-opacity:1;stroke:none"
+       x="-676.22943"
+       y="293.05792"
+       id="text2651-0"><tspan
+         sodipodi:role="line"
+         id="tspan2649-1"
+         x="-676.22943"
+         y="293.05792">Urban industrial counties</tspan></text>
+    <rect
+       style="display:inline;opacity:1;fill:#ffcf00;fill-opacity:1;stroke:none;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect848-31-8-7-4"
+       width="20"
+       height="20"
+       x="-710.67688"
+       y="240.7355" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:25px;font-family:'PT Serif';-inkscape-font-specification:'PT Serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#000000;fill-opacity:1;stroke:none"
+       x="-680.67688"
+       y="255.89224"
+       id="text2651-0-8"><tspan
+         sodipodi:role="line"
+         id="tspan2649-1-5"
+         x="-680.67688"
+         y="255.89224">All older industrial cities</tspan></text>
+    <path
+       style="display:inline;fill:none;stroke:#ffffff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m -908.08685,147.0666 h 265.17368"
+       id="path2772"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;stroke:#ffffff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m -908.08685,190.0666 h 265.17368"
+       id="path2772-6"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
