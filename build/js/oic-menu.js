@@ -22,32 +22,19 @@ export default function oic_menu(button, options, callback){
         .style("overflow","auto")
         ;
 
-    var opanel_inner = opanel.append("div")
-            .style("max-width","1400px")
-            .style("margin","5% auto")
-            .style("padding","1rem")
-            .classed("c-fix",true)
-            ;
-    opanel_inner.append("p").style("text-align","right").text("- close -")
-        .style("margin","1rem 2rem").style("cursor","pointer");
+    var opanel_map = opanel.append("div")
+        .style()
 
-    var options = opanel_inner.selectAll("div").data(opt);
-    var optionse = options.enter().append("div").classed("dashboard-options-button",true);
-        optionse.append("p").style("background-color","#ffffff");
-    optionse.merge(options).sort(function(a,b){
-        var s = 1;
-        if(a.city==b.city){
-            s = 0;
-        }
-        else if(a.city < b.city){
-            s = -1;
-        }
-        return s;
-    })
-    .on("click", function(d){
-        callback.call(d, d.stcofips);
-    }).style("float","left").style("margin","5px")
-    .select("p").text(function(d){return d.city});
+    var opanel_buttons = opanel.append("div")
+        .style("max-width","1400px")
+        .style("margin","5% auto")
+        .style("padding","1rem")
+        .classed("c-fix",true)
+        .style("display","none")
+        ;
+
+    opanel_buttons.append("p").style("text-align","right").text("- close -")
+        .style("margin","1rem 2rem").style("cursor","pointer");
 
     //show panel
     button.on("click", function(){
@@ -57,6 +44,7 @@ export default function oic_menu(button, options, callback){
             .on("end", function(){
                 d3.select("body").classed("disable-scroll",true);
             });
+        fillOptions();
     });
 
     //hide panel
@@ -68,9 +56,44 @@ export default function oic_menu(button, options, callback){
             });
     })
 
-    function scroll(){
+    function fillOptions(){
 
     }
 
-    window.addEventListener("scroll", scroll); 
+    //fillOptions
+    function fillOptionsMobile(width){
+        opanel_buttons.style("display","block");
+        opanel_map.style("display","none");
+
+        var options = opanel_buttons.selectAll("div").data(opt);
+            options.exit().remove();
+        var optionse = options.enter().append("div").classed("dashboard-options-button",true);
+            optionse.append("p").style("background-color","#ffffff");
+        optionse.merge(options).sort(function(a,b){
+            var s = 1;
+            if(a.city==b.city){
+                s = 0;
+            }
+            else if(a.city < b.city){
+                s = -1;
+            }
+            return s;
+        })
+        .style("float","left").style("margin","5px")
+        .on("click", function(d){
+            callback.call(d, d.stcofips);
+        })
+        .select("p").text(function(d){return d.city});
+        ;
+    }
+
+    function fillOptionsMap(width){
+        opanel_buttons.style("display","none");
+        opanel_map.style("display","block");
+
+    }
+
+
+
+ 
 }
