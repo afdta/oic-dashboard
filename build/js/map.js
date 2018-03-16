@@ -35,6 +35,7 @@ export default function map(container){
     dom.canvas = dom.wrap.append("canvas").style("width","100%").style("height","100%").style("position","absolute").style("z-index","2").style("top","0px").style("left","0px");
     dom.svg = dom.wrap.append("svg").attr("width","100%").attr("height","100%").style("position","relative").style("z-index","3");
       dom.gmain = dom.svg.append("g"); //umbrella grouping, used for panning
+        dom.g0 = dom.gmain.append("g"); //used for any background features
         dom.g = dom.gmain.append("g"); //main feature group
         dom.g2 = dom.gmain.append("g"); //annotation group, used for highlighting
     
@@ -215,7 +216,8 @@ export default function map(container){
             layer.bbox = map.bbox;
 
             //layer methods
-            //get selection
+            //get selection -- importantly, selection isn't available until a draw is done
+            //redraw map upon each layer added? -- need to specify projection to layer?
             layer.selection = function(){
                 return selection;
             }
@@ -279,6 +281,16 @@ export default function map(container){
                 return this;
             }
 
+            layer.attr = function(){
+
+                return this;
+            }
+
+            layer.style = function(){
+
+                return this;
+            }
+
             layer.aes = function(){
 
                 return this;
@@ -293,6 +305,7 @@ export default function map(container){
                 try{
                     var index = layers.indexOf(this);
                     if(index > -1){
+                        //remove from layers array
                         layers.splice(index, 1);
                     }
                 }
@@ -301,6 +314,7 @@ export default function map(container){
                 }
 
                 try{
+                    //remove the main grouping
                     g.remove();
                 }
                 catch(e){
@@ -326,7 +340,7 @@ export default function map(container){
                         update.exit().remove();
 
                     selection = update.enter().append("path").merge(update).attr("d", path)
-                        .attr("stroke","blue").attr("fill","none");
+                        .attr("stroke","#0033cc").attr("fill","#0099ff").attr("fill-opacity","0.25");
                 }
                 else{
                     //console.log("NO FEATURES");
@@ -346,21 +360,34 @@ export default function map(container){
     function dummy_geojson(){
 
         //map.bbox = [[left, bottom], [right, top]]
-        var left = map.bbox[0][0]; 
-        var right = map.bbox[1][0]; 
+        var bb = map.bbox;
 
-        var top = map.bbox[1][1]; 
-        var bottom = map.bbox[0][1];
+        var left = bb[0][0]; 
+        var right = bb[1][0]; 
 
-        var p0 = [left, top];
-        var p1 = [right, top];
-        var p2 = [right, bottom];
-        var p3 = [left, bottom];
+        var top = bb[1][1]; 
+        var bottom = bb[0][1];
+
+        //console.log(left + " | " + top + " | " + right + " | " + bottom);
+
+        //follow constant latitude/longitude, rather than great circle arcs 
+        //(great circle arcs are the default if you were to just include the for corners)
+        var x = d3.interpolateNumber(left, right);
+        var y = d3.interpolateNumber(top, bottom);
+
+        //interpolators
+        var fsteps = d3.range(0.1, 1.1, 0.1);
+        var bsteps = d3.range(0.9, -0.1, -0.1);
+
+        var t = fsteps.map(function(d){return [x(d), top]});
+        var r = fsteps.map(function(d){return [right, y(d)]});
+        var b = bsteps.map(function(d){return [x(d), bottom]});
+        var l = bsteps.map(function(d){return [left, y(d)]});
 
         var geometry = {
            "type": "Polygon",
            "coordinates": [
-               [ p0, p1, p2, p3, p0 ]
+               [[left, top]].concat(t, r, b, l, [[left, top]])
            ]
         }
 
@@ -381,7 +408,7 @@ export default function map(container){
     //calling with no arguments updates existing projection based on container size and returns updated projection
     //calling with a projection sets the new projection and updates it according to map container size. returns map object.
     map.projection = function(proj){
-        
+
         if(arguments.length==0){proj = par.proj;}
         else{par.proj = proj}
 
@@ -392,20 +419,15 @@ export default function map(container){
         var bboxgeo = dummy_geojson(); //bounding box as geojson polygon
 
         //establish aspect ratio
-        //to do: fitExtent mutates projection? if so, just operate on proj
-        var proj2 = proj.fitExtent([[5,5], [cwidth-5, cwidth-5]], bboxgeo); //adjust proj to fit bboxgeo in a square box defined by width of container (with 5px pad)
-        var bounds = d3.geoPath(proj2).bounds(bboxgeo); //planar bounds of bbox
+        proj.fitExtent([[0,0], [cwidth, cwidth]], bboxgeo); //adjust proj to fit bboxgeo in a square box defined by width of container
+        var path = d3.geoPath(proj);
+        var bounds = path.bounds(bboxgeo); //planar bounds of bbox
 
         var bboxHeight = bounds[1][1]-bounds[0][1];
         var bboxWidth = bounds[1][0]-bounds[0][0];
 
         //track the aspect ratio of the map
         par.aspect = Math.abs(bboxHeight/bboxWidth); //max lat becomes min due to svg coords
-
-        console.log("BBOX coords: " + JSON.stringify(this.bbox));
-        console.log("BBOX planar:" + JSON.stringify(bounds));
-        console.log(bboxgeo);
-        console.log("Aspect ratio: " + par.aspect);
 
         //width of map
         var mwidth = cwidth*par.scalar;
@@ -414,12 +436,12 @@ export default function map(container){
         //set width of container (will clip map when scalar > 1)
         dom.wrap.style("width",cwidth+"px").style("height",(cwidth*par.aspect)+"px");
 
-        //final adjustment to proj to fit final dimensions
-        par.proj = proj2.fitExtent([[5,5], [mwidth-5, mheight-5]], bboxgeo);
+        //final adjustment to proj to fit final dimensions with 5px pad
+        proj.fitExtent([[5,5], [mwidth-5, mheight-5]], bboxgeo);
 
-        //return
+        //return updated proj if no args, otherwise map object
         if(arguments.length == 0){
-            return par.proj;
+            return proj;
         }
         else{
             return this;
@@ -427,28 +449,30 @@ export default function map(container){
 
     }
 
-    //for testing -- add a bounding box layer
-    //map.layer("bbox").features([dummy_geojson()]);
+    map.draw = function(proj){
 
-    map.draw = function(){
+        //for testing -- add a bounding box layer and refresh with current bounding box each time draw is called
+        map.layer("bbox").features([dummy_geojson()]);
+
         //updated projection
-        this.projection();
-
-        //update features in bbox layer -- delete this for production -- to do
-        //map.layer("bbox").features([dummy_geojson()]);
+        if(arguments.length == 0){
+            this.projection(); 
+        }
+        else{
+            this.projection(proj);
+        }
 
         layers.forEach(function(d){
             d.draw();
         });
 
+        var group_bbox = dom.g.node().getBBox();
+        var group_aspect = group_bbox.height/group_bbox.width;
+
+        console.log("Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
+
         return this;
     }
-
-
-    
-
-
-
 
     return map;
 }

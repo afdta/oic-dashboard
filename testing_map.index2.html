@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Testing</title>
+</head>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+<p>Version that includes <a href="https://d3js.org/d3-geo.v1.min.js">https://d3js.org/d3-geo.v1.min.js</a></p>
+<svg width="600px" height="300px" id="map"></svg>
+
+<script>
+    var svg = d3.select("#map").style("border","0px solid #000000");
+
+    var width = 600;
+    var height = 300;
+
+    var proj = d3.geoEquirectangular().scale(90).translate([300,150]);
+    var path = d3.geoPath(proj);
+
+    //countries from natural earth dataset
+    var url = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson";
+    
+    d3.json(url, function(err, json){
+
+        //draw paths once
+        svg.selectAll("path").data(json.features).enter().append("path")
+            .attr("d", path).attr("stroke","#00aaff");
+            
+    });
+
+</script>
