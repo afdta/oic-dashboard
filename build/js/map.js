@@ -6,6 +6,8 @@
 //4 - legends
 //5 - titles?
 
+//Notes -- keep a tight coupling of layer addition/subtraction, projection mutation, and drawing
+
 //browser requirements: indexOf, map, filter, svg methods (Promises? - not yet)
 
 export default function map(container){
@@ -235,6 +237,7 @@ export default function map(container){
             var points; //x-y data passed into layer.points
             var data;
             var onePolygon = false; //draw features individually, not as one polygon
+            var geokey;
             var aes = {};
 
             //layer object
@@ -255,6 +258,9 @@ export default function map(container){
                 return selection;
             }
 
+            //need to specify a geo key function (geokey) that will used to (1) retrieve data from a lookup table
+            //and (2) be used as a key function when regenerating a layer's selection
+            //make sure to check for duplicates in layer features based on the key function
             layer.features = function(f, proj, asOnePolygon){
                 if(arguments.length==0){
                     return features;
@@ -288,6 +294,7 @@ export default function map(container){
             }
 
             //create geojson features from an array of lon-lat data data objects: [{lon:x, lat:y, other:z, ...}, ...]
+            //also need geo key function here. user should have the option to include all data in p
             layer.points = function(p, lonlat_accessor, proj){
                 if(arguments.length==0){
                     return points;
@@ -348,12 +355,6 @@ export default function map(container){
                 return this;
             }
 
-            //register key functions
-            layer.key = function(geoid, datid){
-
-                return this;
-            }
-
             layer.attr = function(){
 
                 return this;
@@ -369,7 +370,9 @@ export default function map(container){
                 return this;
             }
 
-            layer.data = function(){
+            //key function used to create a lookup table that 
+            //remove and check for dups -- see mapd.js
+            layer.data = function(data, key){
 
                 return this;
             }
@@ -434,8 +437,8 @@ export default function map(container){
     //update projection, size of map, size of map container. accounts for zoom scalar
     //calling with no arguments updates existing projection based on container size and returns updated projection
     //calling with a projection sets the new projection and updates it according to map container size. returns map object.
-    //projection can be set or retrieved before any features are added to map. in this case, the projection is not updated.
-    map.projection = function(proj){
+    //projection can be set or retrieved before any features are added to map. in this case, the projection scale/translate is not updated here.
+    map_projection = function(proj){
 
         //if no proj is passed, update existing map projection, otherwise establish proj as map projection
         if(proj==null){proj = par.proj;}
@@ -474,16 +477,8 @@ export default function map(container){
             //to do--consider padding by size of largest radius
         }
         else{
-            console.log("null composite");
+            //console.log("null composite");
         }
-
-        //return updated proj if no args, otherwise map object
-        if(arguments.length == 0){
-            return proj;
-        }
-        else{
-            return this;
-        } 
     }
 
     map.draw = function(proj){
@@ -491,7 +486,7 @@ export default function map(container){
         //update or assign new projection
         //if proj is undefined, update existing map projection to accommodate any changes to viewport dimensions
         //or the addition/subtraction of map layers
-        this.projection(proj);
+        map_projection(proj);
 
         layers.forEach(function(d){
             d.draw();
@@ -502,7 +497,7 @@ export default function map(container){
 
     //layer resizing merely redraw "d", "cx", and "cy" attributes
     map.resize = function(proj){
-        this.projection(proj);
+        map_projection(proj);
 
         layers.forEach(function(d){
             d.draw(true); //true implies resize only
@@ -510,6 +505,35 @@ export default function map(container){
 
         return this;
     }
+
+    //public projection method is basically a wrapper of map.resize
+    //allow the user to specify a projection or retrieve curernt projection
+    map.projection = function(proj){
+
+        //apply new projection or update existing (proj==null/undefined) and 
+        //resize all layers with updated projection  
+        this.resize(proj);
+
+        return arguments.length == 0 ? par.proj : this; 
+    }
+
+    map.albers = function(){
+        //create and apply localized albers projection
+        //see L.get_albers() in mapd.js
+
+        this.resize(albers);
+    }
+
+    //resize
+    var window_resize_timer;
+    window.addEventListener("resize", function(){
+        clearTimeout(window_resize_timer);
+        if(par.responsive){
+            window_resize_timer = setTimeout(function(){
+                map.resize();
+            }, 150);
+        }
+    })
 
     return map;
 }
