@@ -51,24 +51,47 @@ function main(){
     
 
     var m = map(document.getElementById("metro-map"));
+
     
     //m.draw(d3.geoEquirectangular());
 
 
-    
+    //d3.geoConicConformal()
+    var nofeature_layer = m.layer();
 
-    var state_layer = m.layer().features(geo.states);
-    m.draw();
+    var states = m.layer().features(geo.states, d3.geoAlbersUsa());
+      states.selection().attr("fill","#ffffff").attr("stroke","#111111");
+    var lakes;
+    var countries;
+    var city;
+
+    //m.draw();
+
+console.log(m.composite());
 
     setTimeout(function(){
-      var countries = m.layer().features(geo.countries);
-      m.draw(d3.geoEquirectangular());
-    }, 10000)
+      countries = m.layer().features(geo.countries, d3.geoEquirectangular());
+      console.log(m.composite());
+    }, 1000)
+
 
     setTimeout(function(){
-      var lakes = m.layer().features(geo.lakes);
-      m.draw();
-    }, 20000)
+      lakes = m.layer().features(geo.lakes);
+      lakes.selection().attr("fill","blue");
+      console.log(m.composite());
+    }, 2000)
+
+    setTimeout(function(){
+      lakes.remove();
+      countries.remove();
+
+      console.log(m.composite());
+
+      city = m.layer().points([{lon:-110, lat:20},{lon:-140, lat:40}, {lon:120, lat:50}]);
+      city.selection().attr("fill","red").attr("r","5");
+
+      m.draw(d3.geoAlbers());
+    }, 3000);
 
     //var lakes = m.layer().features(geo.lakes);
     //m.draw(d3.geoEquirectangular());

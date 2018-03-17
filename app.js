@@ -753,6 +753,8 @@ function map(container){
         responsive: true
     };
 
+    //a composite geo with all features concatenated into a feature collection
+    var composite_geo = null;
 
     // ===================== map layers ==================================================== //
 
@@ -829,6 +831,35 @@ function map(container){
         }
     }
 
+    //concatenate all features into a single geojson feature collection
+    function composite_geojson(){
+        var all_features = [];
+        layers.forEach(function(l){
+            var f = l.features();
+            if(f != null){
+                f.forEach(function(feature){
+                    all_features.push(feature);
+                });
+            }
+        });
+
+        if(all_features.length > 0){
+            var comp =  {
+                "type": "FeatureCollection",
+                "features": all_features
+            };
+        }
+        else{
+            comp = null;
+        }
+
+        composite_geo = comp;
+    }
+
+    map.composite = function(){
+        return composite_geo;
+    };
+
 
 
     //add in the map.layer method that adds new layers
@@ -836,9 +867,11 @@ function map(container){
     //if a layer with name already exists in map, return the layer object
     map.layer = function(name){
         if(arguments.length > 0 && find_layer(name) !== null){
+            //return existing layer
             return find_layer(name);
         }
         else{
+            //create new layer
             var g = dom.g.append("g");
             var selection;
             var features; //as in "features" array of FeatureCollection: each feature object type is any geo type accepted by D3
@@ -861,14 +894,14 @@ function map(container){
                 return selection;
             };
 
-            layer.features = function(f, asOnePolygon){
+            layer.features = function(f, proj, asOnePolygon){
                 if(arguments.length==0){
                     return features;
                 }
-                else if(f.hasOwnProperty("type") && f.type=="FeatureCollection"){
+                else if(f.hasOwnProperty("type") && f.type=="FeatureCollection" && f.features.length > 0){
                     features = f.features;
                 }
-                else if(f instanceof Array){
+                else if(f instanceof Array && f.length > 0){
                     features = f;
                 }
                 else{
@@ -876,41 +909,81 @@ function map(container){
                 }
             
                 this.bbox = layer_bbox(features);
+                
+                //set composite map bbox and geojson object -- do before any drawing
                 map_bbox();
+                composite_geojson();
 
-                if(arguments.length > 1 && !!asOnePolygon){
+                if(arguments.length > 2 && !!asOnePolygon){
                     onePolygon = true;
                 }
+
+                //redraw all layers "d", "cx", and "cy" attributes to accommodate any resizing introduced by this layer
+                //and to populate the selection for immediate styling after registering features -- avoids having to call
+                //map.draw() directly when implementing a map
+                map.resize(proj);
 
                 return this;
             };
 
             //create geojson features from an array of lon-lat data data objects: [{lon:x, lat:y, other:z, ...}, ...]
-            layer.points = function(p, lon_name, lat_name){
+            layer.points = function(p, lonlat_accessor, proj){
                 if(arguments.length==0){
                     return points;
                 }
                 else if(p instanceof Array){
-                    var lon = arguments.length > 1 ? lon_name : "lon";
-                    var lat = arguments.length > 2 ? lat_name : "lat";
 
-                    features = p.map(function(d,i){
+                    var ll = (typeof lonlat_accessor == "function") ? lonlat_accessor : function(d){return [d.lon, d.lat]};
+
+                    var f = p.map(function(d,i){
                         return {
                                 "type": "Feature",
                                 "geometry": {
                                     "type": "Point",
-                                    "coordinates": [d[lon], d[lat]]
+                                    "coordinates": ll(d)
                                 },
                                 "properties": d
                         }   
                     });
+
+                    //now that data is standardized, pass off to layer.features()
+                    this.features(f, proj);
                 }
                 else{
                     throw new Error("Argument must be an array");
                 }
 
-                this.bbox = layer_bbox(features);
+                return this;
+            };
+
+            layer.remove = function(){
+                try{
+                    var index = layers.indexOf(this);
+                    if(index > -1){
+                        //remove from layers array
+                        layers.splice(index, 1);
+                    }
+                }
+                catch(e){
+                    //
+                }
+
+                try{
+                    //remove the main grouping
+                    g.remove();
+                    selection = null;
+                }
+                catch(e){
+                    //selection undefined, no-op
+                }
+
+                //set composite map bbox and geojson object -- do before any drawing
                 map_bbox();
+                composite_geojson();
+
+                //redraw "d", "cx", and "cy" attributes of all map layers
+                map.resize();
+
                 return this;
             };
 
@@ -940,46 +1013,40 @@ function map(container){
                 return this;
             };
 
-            layer.remove = function(){
-                try{
-                    var index = layers.indexOf(this);
-                    if(index > -1){
-                        //remove from layers array
-                        layers.splice(index, 1);
-                    }
-                }
-                catch(e){
-                    //
-                }
-
-                try{
-                    //remove the main grouping
-                    g.remove();
-                }
-                catch(e){
-                    //selection undefined, no-op
-                }
-
-                map_bbox();
-                return this;
-            };
 
             //to do -- change mark (path vs circle) depending on feature type
-            layer.draw = function(){
+            layer.draw = function(resizeOnly){
                 if(features != null){
                     //check feature type, then render circle or paths accordingly
+                    console.log("FEATURES:");
+                    console.log(features);
+                    console.log("++++++++++");
+                    var isPoint = features[0].geometry.type == "Point";
 
-                    //if drawing one polygon, embed features in a single FeatureCollection
-                    var f = onePolygon ? [{"type":"FeatureCollection", "features":features}] : features;
-
-                    //for now, just poly
-                    var path = d3.geoPath(par.proj);
-
-                    var update = g.selectAll("path").data(f);
+                    if(isPoint){
+                        var update = g.selectAll("circle").data(features);
                         update.exit().remove();
 
-                    selection = update.enter().append("path").merge(update).attr("d", path)
-                        .attr("stroke","#0033cc").attr("fill","#0099ff").attr("fill-opacity","0.25");
+                        selection = update.enter().append("circle").merge(update)
+                                        .attr("cx", function(d){return par.proj(d.geometry.coordinates)[0]})
+                                        .attr("cy", function(d){return par.proj(d.geometry.coordinates)[1]});
+                    }
+                    else{
+                        //if drawing one polygon, embed features in a single FeatureCollection
+                        var f = onePolygon ? [{"type":"FeatureCollection", "features":features}] : features;
+
+                        //for now, just poly
+                        var path = d3.geoPath(par.proj);
+
+                        var update = g.selectAll("path").data(f);
+                            update.exit().remove();
+
+                        //always update "d", "cx", and "cy" (i.e. positional) attributes where appropriate
+                        selection = update.enter().append("path").merge(update).attr("d", path);                        
+                    }
+
+                    //update aesthetics if not resizeOnly
+                         
                 }
                 else{
                     //console.log("NO FEATURES");
@@ -995,88 +1062,55 @@ function map(container){
 
     // ========================== core map functions and methods =========================== //
     
-    //create a geojson feature out of map bbox
-    function dummy_geojson(){
-
-        //map.bbox = [[left, bottom], [right, top]]
-        var bb = map.bbox;
-
-        var left = bb[0][0]; 
-        var right = bb[1][0]; 
-
-        var top = bb[1][1]; 
-        var bottom = bb[0][1];
-
-        //console.log(left + " | " + top + " | " + right + " | " + bottom);
-
-        //follow constant latitude/longitude, rather than great circle arcs 
-        //(great circle arcs are the default if you were to just include the for corners)
-        var x = d3.interpolateNumber(left, right);
-        var y = d3.interpolateNumber(top, bottom);
-
-        //interpolators
-        var fsteps = d3.range(0.1, 1.1, 0.1);
-        var bsteps = d3.range(0.9, -0.1, -0.1);
-
-        var t = fsteps.map(function(d){return [x(d), top]});
-        var r = fsteps.map(function(d){return [right, y(d)]});
-        var b = bsteps.map(function(d){return [x(d), bottom]});
-        var l = bsteps.map(function(d){return [left, y(d)]});
-
-        var geometry = {
-           "type": "Polygon",
-           "coordinates": [
-               [[left, top]].concat(t, r, b, l, [[left, top]])
-           ]
-        };
-
-        var feature = {
-            "type": "Feature",
-            "geometry": geometry
-        };
-
-        return feature;
-
-    }
 
     map.get_aspect = function(){
         return par.aspect;
     };
 
-    //update projection
+    //update projection, size of map, size of map container. accounts for zoom scalar
     //calling with no arguments updates existing projection based on container size and returns updated projection
     //calling with a projection sets the new projection and updates it according to map container size. returns map object.
+    //projection can be set or retrieved before any features are added to map. in this case, the projection is not updated.
     map.projection = function(proj){
 
-        if(arguments.length==0){proj = par.proj;}
+        //if no proj is passed, update existing map projection, otherwise establish proj as map projection
+        if(proj==null){proj = par.proj;}
         else{par.proj = proj;}
 
-        //width of container
-        var bbox = dom.outer_wrap.node().getBoundingClientRect();
-        var cwidth = bbox.right - bbox.left;
+        //if any geo features are available, scale and translate the projection
+        if(composite_geo != null){
+            //width of container
+            var cbox = dom.outer_wrap.node().getBoundingClientRect();
+            var cwidth = cbox.right - cbox.left;
 
-        var bboxgeo = dummy_geojson(); //bounding box as geojson polygon
+            //adjust projection scale and translate to fit a square defined by container width
+            proj.fitExtent([[0,0], [cwidth, cwidth]], composite_geo);
 
-        //establish aspect ratio
-        proj.fitExtent([[0,0], [cwidth, cwidth]], bboxgeo); //adjust proj to fit bboxgeo in a square box defined by width of container
-        var path = d3.geoPath(proj);
-        var bounds = path.bounds(bboxgeo); //planar bounds of bbox
+            //create a geo path generator
+            var path = d3.geoPath(proj); 
 
-        var bboxHeight = bounds[1][1]-bounds[0][1];
-        var bboxWidth = bounds[1][0]-bounds[0][0];
+            //construct a planar bounding box around composite geo
+            var bounds = path.bounds(composite_geo);
 
-        //track the aspect ratio of the map
-        par.aspect = Math.abs(bboxHeight/bboxWidth); //max lat becomes min due to svg coords
+            //derive aspect ratio from the bounding box
+            par.aspect = Math.abs(bounds[1][1]-bounds[0][1]) / (bounds[1][0]-bounds[0][0]);
 
-        //width of map
-        var mwidth = cwidth*par.scalar;
-        var mheight = mwidth*par.aspect;
+            //width of map
+            var mwidth = cwidth*par.scalar;
+            var mheight = mwidth*par.aspect;
 
-        //set width of container (will clip map when scalar > 1)
-        dom.wrap.style("width",cwidth+"px").style("height",(cwidth*par.aspect)+"px");
+            //set width of wrap to match container (will clip map when scalar > 1)
+            dom.wrap.style("width",cwidth+"px").style("height",(cwidth*par.aspect)+"px");
 
-        //final adjustment to proj to fit final dimensions with 5px pad
-        proj.fitExtent([[5,5], [mwidth-5, mheight-5]], bboxgeo);
+            //final adjustment to proj to fit final dimensions of scaled map with 5px pad
+            //proj.fitExtent([[5,5], [mwidth-5, mheight-5]], composite_geo);
+            //to do: points at edge of composite geo will get cut off because bounds above will go through
+            //center of circles 
+            proj.fitExtent([[0,0], [mwidth, mheight]], composite_geo); 
+        }
+        else{
+            console.log("null composite");
+        }
 
         //return updated proj if no args, otherwise map object
         if(arguments.length == 0){
@@ -1084,31 +1118,47 @@ function map(container){
         }
         else{
             return this;
-        }
-
+        } 
     };
 
     map.draw = function(proj){
 
-        //for testing -- add a bounding box layer and refresh with current bounding box each time draw is called
-        map.layer("bbox").features([dummy_geojson()]);
 
-        //updated projection
-        if(arguments.length == 0){
-            this.projection(); 
-        }
-        else{
-            this.projection(proj);
-        }
+
+        //update or assign new projection
+        //if proj is undefined, update existing map projection to accommodate any changes to viewport dimensions
+        //or the addition/subtraction of map layers
+        this.projection(proj);
+
+                //for testing -- add a bounding box layer (first time this is called) and 
+                //refresh with current bounding box each time draw is subsequently called
+                if(composite_geo != null){
+                    map.layer("bbox").features(composite_geo); //composite_geo is a FeatureCollectiom
+                }
 
         layers.forEach(function(d){
             d.draw();
         });
 
-        var group_bbox = dom.g.node().getBBox();
-        var group_aspect = group_bbox.height/group_bbox.width;
+                //for testing
+                var group_bbox = dom.g.node().getBBox();
+                var group_aspect = group_bbox.height/group_bbox.width;
+                console.log("(Draw) Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
 
-        console.log("Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
+        return this;
+    };
+
+    //layer resizing merely redraw "d", "cx", and "cy" attributes
+    map.resize = function(proj){
+        this.projection(proj);
+        layers.forEach(function(d){
+            d.draw(true);
+        });
+
+                //for testing
+                var group_bbox = dom.g.node().getBBox();
+                var group_aspect = group_bbox.height/group_bbox.width;
+                console.log("(Resize) Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
 
         return this;
     };
@@ -1161,24 +1211,47 @@ function main(){
     
 
     var m = map(document.getElementById("metro-map"));
+
     
     //m.draw(d3.geoEquirectangular());
 
 
-    
+    //d3.geoConicConformal()
+    var nofeature_layer = m.layer();
 
-    var state_layer = m.layer().features(geo.states);
-    m.draw();
+    var states = m.layer().features(geo.states, d3.geoAlbersUsa());
+      states.selection().attr("fill","#ffffff").attr("stroke","#111111");
+    var lakes;
+    var countries;
+    var city;
+
+    //m.draw();
+
+console.log(m.composite());
 
     setTimeout(function(){
-      var countries = m.layer().features(geo.countries);
-      m.draw(d3.geoEquirectangular());
-    }, 10000);
+      countries = m.layer().features(geo.countries, d3.geoEquirectangular());
+      console.log(m.composite());
+    }, 1000);
+
 
     setTimeout(function(){
-      var lakes = m.layer().features(geo.lakes);
-      m.draw();
-    }, 20000);
+      lakes = m.layer().features(geo.lakes);
+      lakes.selection().attr("fill","blue");
+      console.log(m.composite());
+    }, 2000);
+
+    setTimeout(function(){
+      lakes.remove();
+      countries.remove();
+
+      console.log(m.composite());
+
+      city = m.layer().points([{lon:-110, lat:20},{lon:-140, lat:40}, {lon:120, lat:50}]);
+      city.selection().attr("fill","red").attr("r","5");
+
+      m.draw(d3.geoAlbers());
+    }, 3000);
 
     //var lakes = m.layer().features(geo.lakes);
     //m.draw(d3.geoEquirectangular());

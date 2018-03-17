@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Testing</title>
+</head>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+<h2>Sample planar bounding boxes using path.bounds() on the same GeoJSON object</h2>
+<p>Different projections will obviously produce different planar bounding boxes...</p>
+
+<p id="box1"></p>
+<p id="box2"></p>
+
+<h2>Why doesn't inverting a corner (say, left-top) of each planar bounding box return the same sperical coordinate (lon, lat)?</h2>
+<p>Using projection.invert()...</p>
+
+<p id="coord1"></p>
+<p id="coord2"></p>
+
+<svg width="600px" height="300px" id="map"></svg>
+
+
+
+<script>
+    var svg = d3.select("#map").style("border","0px solid #000000");
+
+    var width = 600;
+    var height = 300;
+
+    var equirectangular = d3.geoEquirectangular();
+    var path_equirectangular = d3.geoPath(equirectangular);
+
+    var stereographic = d3.geoStereographic();
+    var path_stereographic = d3.geoPath(stereographic)
+
+
+    //simple geojson object
+    var polygon = {
+       "type": "Polygon",
+       "coordinates": [
+          [ [-150, 50], [150, 50], [150, -50], [-150, -50], [-150, 50] ]
+       ]
+    }
+
+    var json = {
+        "type": "Feature",
+        "geometry": polygon
+    }
+
+    //compute planar bounding box of features
+    var bounds_equirectangular = path_equirectangular.bounds(json);
+    var bounds_stereographic = path_stereographic.bounds(json);
+
+    //invert the top-left corner of the planar bounding box
+    var invert_equirectangular = equirectangular.invert(bounds_equirectangular[0]);
+    var invert_stereographic = stereographic.invert(bounds_stereographic[0]);
+
+    //add results to dom
+    d3.select("#box1").html("<strong>Bounds projected by default d3.geoEquirectangular():</strong> " + JSON.stringify(bounds_equirectangular))
+    d3.select("#box2").html("<strong>Bounds projected by default d3.geoStereographic():</strong> " + JSON.stringify(bounds_stereographic))
+
+    d3.select("#coord1").html("<strong>Lon, Lat of top-left corner of planar bounding box (equirectangular): </strong> " + JSON.stringify(invert_equirectangular))
+    d3.select("#coord2").html("<strong>Lon, Lat of top-left corner of planar bounding box (stereograhic):</strong> " + JSON.stringify(invert_stereographic))
+
+
+</script>
