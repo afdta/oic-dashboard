@@ -87,7 +87,7 @@ console.log(m.composite());
 
       console.log(m.composite());
 
-      city = m.layer().points([{lon:-110, lat:20},{lon:-140, lat:40}, {lon:120, lat:50}]);
+      city = m.layer().points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
       city.selection().attr("fill","red").attr("r","5");
 
       m.draw(d3.geoAlbers());

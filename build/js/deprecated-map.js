@@ -85,3 +85,31 @@
             var aspect = 0.75;
         }
     }
+
+
+    map.draw = function(proj){
+
+
+
+        //update or assign new projection
+        //if proj is undefined, update existing map projection to accommodate any changes to viewport dimensions
+        //or the addition/subtraction of map layers
+        this.projection(proj);
+
+                //for testing -- add a bounding box layer (first time this is called) and 
+                //refresh with current bounding box each time draw is subsequently called
+                if(composite_geo != null){
+                    map.layer("bbox").features(composite_geo); //composite_geo is a FeatureCollectiom
+                }
+
+        layers.forEach(function(d){
+            d.draw();
+        });
+
+                //for testing
+                var group_bbox = dom.g.node().getBBox();
+                var group_aspect = group_bbox.height/group_bbox.width;
+                console.log("(Draw) Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
+
+        return this;
+    }

@@ -376,13 +376,11 @@ export default function map(container){
 
 
             //to do -- change mark (path vs circle) depending on feature type
-            //support layers of mixed feature type: e.g. polygons and points in a FeatureCollection
+            //support layers of mixed feature type: e.g. polygons and points in a FeatureCollection? keep it simple
             layer.draw = function(resizeOnly){
                 if(features != null){
                     //check feature type, then render circle or paths accordingly
-                    console.log("FEATURES:")
-                    console.log(features);
-                    console.log("++++++++++")
+                    //to do: do this on a feature-by-feature basis? -- figure out key functions here first -- keep it simple
                     var isPoint = features[0].geometry.type == "Point";
 
                     if(isPoint){
@@ -473,6 +471,7 @@ export default function map(container){
             //to do: points at edge of composite geo will get cut off because bounds above will go through
             //center of circles 
             proj.fitExtent([[0,0], [mwidth, mheight]], composite_geo); 
+            //to do--consider padding by size of largest radius
         }
         else{
             console.log("null composite");
@@ -489,27 +488,14 @@ export default function map(container){
 
     map.draw = function(proj){
 
-
-
         //update or assign new projection
         //if proj is undefined, update existing map projection to accommodate any changes to viewport dimensions
         //or the addition/subtraction of map layers
         this.projection(proj);
 
-                //for testing -- add a bounding box layer (first time this is called) and 
-                //refresh with current bounding box each time draw is subsequently called
-                if(composite_geo != null){
-                    map.layer("bbox").features(composite_geo); //composite_geo is a FeatureCollectiom
-                }
-
         layers.forEach(function(d){
             d.draw();
         });
-
-                //for testing
-                var group_bbox = dom.g.node().getBBox();
-                var group_aspect = group_bbox.height/group_bbox.width;
-                console.log("(Draw) Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
 
         return this;
     }
@@ -517,14 +503,10 @@ export default function map(container){
     //layer resizing merely redraw "d", "cx", and "cy" attributes
     map.resize = function(proj){
         this.projection(proj);
-        layers.forEach(function(d){
-            d.draw(true);
-        });
 
-                //for testing
-                var group_bbox = dom.g.node().getBBox();
-                var group_aspect = group_bbox.height/group_bbox.width;
-                console.log("(Resize) Pre-aspect: " + par.aspect + " | " + "Rendered-aspect: " + group_aspect);
+        layers.forEach(function(d){
+            d.draw(true); //true implies resize only
+        });
 
         return this;
     }
