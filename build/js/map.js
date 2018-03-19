@@ -496,15 +496,15 @@ export default function map(container, map_proj){
         return par.aspect;
     }
 
-    //update projection, size of map, size of map container. accounts for zoom scalar
-    //calling with no arguments updates existing projection based on container size and returns updated projection
-    //calling with a projection sets the new projection and updates it according to map container size. returns map object.
-    //projection can be set or retrieved before any features are added to map. in this case, the projection scale/translate is not updated here.
-    function map_projection(proj){
+    //update projection/size of map and size of map container. accounts for zoom scalar
+    //projection scale and translate are updated to fit all map features in the map container
+    //if there aren't any features on the map yet, this is a no-op.
+    //the map projection, stored in par.proj is updated in two places: 
+    //(1) in arg to map initialization, and (2) using the map.projection() method
+    function map_projection(){
 
-        //if no proj is passed, update existing map projection, otherwise establish proj as map projection
-        if(proj==null){proj = par.proj;}
-        else{par.proj = proj}
+        //mutate par.proj via local proj variable
+        var proj = par.proj;
 
         //if any geo features are available, scale and translate the projection
         if(composite_geo != null){
@@ -531,15 +531,14 @@ export default function map(container, map_proj){
             //set width of wrap to match container (will clip map when scalar > 1)
             dom.wrap.style("width",cwidth+"px").style("height",(cwidth*par.aspect)+"px");
 
-            //final adjustment to proj to fit final dimensions of scaled map with 5px pad
-            //proj.fitExtent([[5,5], [mwidth-5, mheight-5]], composite_geo);
-            //to do: points at edge of composite geo will get cut off because bounds above will go through
+            //final adjustment to proj to fit final dimensions of scaled map
+            //to do: points/circles at edge of composite geo will get cut off because bounds above will go through
             //center of circles 
             proj.fitExtent([[0,0], [mwidth, mheight]], composite_geo); 
             //to do--consider padding by size of largest radius
         }
         else{
-            //console.log("null composite");
+            //null composite, no-op
         }
     }
 
