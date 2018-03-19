@@ -18,7 +18,9 @@
 //                                                    1. features(), 2. points(), and 3. remove().
 //                                                    And each calls map.resize() after updating
 //                                                    composite geo. So, proj is always up-to-date
-//                                                    with existing map features.
+//                                                    with existing map features. Setting new projection
+//                                                    subsequently calls map.resize() to keep all existing
+//                                                    layers up to date with par.proj.
 
 
 /////////////// UNIT TESTS /////////////////////////////////////////////////////////////////////////
@@ -27,7 +29,7 @@
 //
 // 2) Validate layer bounding boxes against known geo bounds after initializing, then updating features
 
-export default function map(container){
+export default function map(container, map_proj){
     
     // ================================= dom structure ===================================== //
     
@@ -123,7 +125,7 @@ export default function map(container){
 
     //map parameters
     var par = {
-        proj:d3.geoAlbersUsa(), 
+        proj: arguments.length > 1 ? map_proj : d3.geoAlbersUsa(), 
         aspect:0.66, 
         scalar:1, 
         responsive: true
@@ -300,7 +302,7 @@ export default function map(container){
             //need to specify a geo key function (geokey) that will used to (1) retrieve data from a lookup table
             //and (2) be used as a key function when regenerating a layer's selection
             //make sure to check for duplicates in layer features based on the key function
-            layer.features = function(f, proj, asOnePolygon){
+            layer.features = function(f, key, asOnePolygon){
                 if(arguments.length==0){
                     return features;
                 }
@@ -327,14 +329,14 @@ export default function map(container){
                 //redraw all layers "d", "cx", and "cy" attributes to accommodate any resizing introduced by this layer
                 //and to populate the selection for immediate styling after registering features -- avoids having to call
                 //map.draw() directly when implementing a map
-                map.resize(proj);
+                map.resize();
 
                 return this;
             }
 
             //create geojson features from an array of lon-lat data data objects: [{lon:x, lat:y, other:z, ...}, ...]
             //also need geo key function here. user should have the option to include all data in p
-            layer.points = function(p, lonlat_accessor, proj){
+            layer.points = function(p, key, lonlat_accessor){
                 if(arguments.length==0){
                     return points;
                 }
@@ -354,7 +356,7 @@ export default function map(container){
                     });
 
                     //now that data is standardized, pass off to layer.features()
-                    this.features(f, proj);
+                    this.features(f, key);
                 }
                 else{
                     throw new Error("Argument must be an array");
@@ -431,8 +433,26 @@ export default function map(container){
                         update.exit().remove();
 
                         selection = update.enter().append("circle").merge(update)
-                                        .attr("cx", function(d){return par.proj(d.geometry.coordinates)[0]})
-                                        .attr("cy", function(d){return par.proj(d.geometry.coordinates)[1]})
+                                        .attr("cx", function(d){
+                                            try{
+                                                var x = par.proj(d.geometry.coordinates)[0];
+                                            }
+                                            catch(e){
+                                                console.warn("Point cannot be projected");
+                                                var x = 0;
+                                            }
+                                            return x;
+                                        })
+                                        .attr("cy", function(d){
+                                            try{
+                                                var y = par.proj(d.geometry.coordinates)[1];
+                                            }
+                                            catch(e){
+                                                console.warn("Point cannot be projected");
+                                                var y = 0;
+                                            }
+                                            return y;
+                                        });
                     }
                     else{
                         //if drawing one polygon, embed features in a single FeatureCollection
@@ -458,6 +478,8 @@ export default function map(container){
                 else{
                     //console.log("NO FEATURES");
                 }
+
+                return this;
             }
 
             return layer;
@@ -521,12 +543,10 @@ export default function map(container){
         }
     }
 
-    map.draw = function(proj){
+    map.draw = function(){
 
-        //update or assign new projection
-        //if proj is undefined, update existing map projection to accommodate any changes to viewport dimensions
-        //or the addition/subtraction of map layers
-        map_projection(proj);
+        //update existing projection
+        map_projection();
 
         layers.forEach(function(d){
             d.draw();
@@ -536,8 +556,10 @@ export default function map(container){
     }
 
     //layer resizing merely redraw "d", "cx", and "cy" attributes
-    map.resize = function(proj){
-        map_projection(proj);
+    map.resize = function(){
+        
+        //update existing projection
+        map_projection();
 
         layers.forEach(function(d){
             d.draw(true); //true implies resize only
@@ -546,22 +568,30 @@ export default function map(container){
         return this;
     }
 
-    //public projection method is basically a wrapper of map.resize
-    //allow the user to specify a projection or retrieve curernt projection
+    //public projection method gets/sets the map projection. when setting a new
+    //projection, the map is redrawn using map.resize();
+    // review this
     map.projection = function(proj){
+        if(arguments.length==0 || proj == null){
+            return par.proj;
+        }
+        else{
+            //set new projection directly -- avoid calling duplicate map_projection 
+            //because it is called by resize() immediately after
+            par.proj = proj;
+            //resize all layers with updated projection  
+            this.resize();
 
-        //apply new projection or update existing (proj==null/undefined) and 
-        //resize all layers with updated projection  
-        this.resize(proj);
-
-        return arguments.length == 0 ? par.proj : this; 
+            return this;
+        }
     }
 
     map.albers = function(){
         //create and apply localized albers projection
         //see L.get_albers() in mapd.js
+        var albers = d3.geoAlbersUsa();
 
-        this.resize(albers);
+        this.projection(albers);
     }
 
     //resize
