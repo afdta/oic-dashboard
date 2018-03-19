@@ -28,6 +28,7 @@
 // at layers list. Verify removal also updates and that no trace remains of layer within map
 //
 // 2) Validate layer bounding boxes against known geo bounds after initializing, then updating features
+// 3) Validate geo merging in three cases: user provided 1) function, 2) string, or 3) no key -- no duplicating/removing erroneously?
 
 export default function map(container, map_proj){
     
@@ -128,7 +129,8 @@ export default function map(container, map_proj){
         proj: arguments.length > 1 ? map_proj : d3.geoAlbersUsa(), 
         aspect:0.66, 
         scalar:1, 
-        responsive: true
+        responsive: true,
+        zoomlevels: 1
     };
 
     //a composite geo with all features concatenated into a feature collection
@@ -322,7 +324,20 @@ export default function map(container, map_proj){
                 set_map_bbox();
                 set_composite_geojson();
 
-                if(arguments.length > 2 && !!asOnePolygon){
+                //set geo key function prior to drawing in map.resize()
+                if(typeof key == "function"){
+                    geokey = key;
+                }
+                else if(typeof key == "string"){
+                    geokey = function(feature){
+                        return feature.properties[key];
+                    }
+                }
+                else{
+                    geokey = null;
+                }
+
+                if(!!asOnePolygon){
                     onePolygon = true;
                 }
 
@@ -420,52 +435,58 @@ export default function map(container, map_proj){
             }
 
 
-            //to do -- change mark (path vs circle) depending on feature type
-            //support layers of mixed feature type: e.g. polygons and points in a FeatureCollection? keep it simple
+            //known issue: this may fail with mixed feature arrays, especially if points come before polygons in array
+            //to do: support mixed feature type layers -- would need to evaluate on feature-by-feature basis
+            //consider filtering into arrays of feature by type?
             layer.draw = function(resizeOnly){
                 if(features != null){
+
                     //check feature type, then render circle or paths accordingly
-                    //to do: do this on a feature-by-feature basis? -- figure out key functions here first -- keep it simple
                     var isPoint = features[0].geometry.type == "Point";
+                    var mark = isPoint ? "circle" : "path";
+                    var update; //update selection
 
-                    if(isPoint){
-                        var update = g.selectAll("circle").data(features);
-                        update.exit().remove();
+                    //if drawing one polygon, embed features in a single FeatureCollection
+                    var f = onePolygon ? [{"type":"FeatureCollection", "features":features}] : features;
 
-                        selection = update.enter().append("circle").merge(update)
-                                        .attr("cx", function(d){
-                                            try{
-                                                var x = par.proj(d.geometry.coordinates)[0];
-                                            }
-                                            catch(e){
-                                                console.warn("Point cannot be projected");
-                                                var x = 0;
-                                            }
-                                            return x;
-                                        })
-                                        .attr("cy", function(d){
-                                            try{
-                                                var y = par.proj(d.geometry.coordinates)[1];
-                                            }
-                                            catch(e){
-                                                console.warn("Point cannot be projected");
-                                                var y = 0;
-                                            }
-                                            return y;
-                                        });
+                    if(geokey == null || onePolygon){
+                        update = g.selectAll(mark+".feature").data(f); //no key function in these cases
                     }
                     else{
-                        //if drawing one polygon, embed features in a single FeatureCollection
-                        var f = onePolygon ? [{"type":"FeatureCollection", "features":features}] : features;
+                        update = g.selectAll(mark+".feature").data(f, geokey);
+                    }
 
-                        //for now, just poly
+                    //finalize current selection
+                    update.exit().remove();
+                    selection = update.enter().append(mark).classed("feature", true).merge(update);
+
+                    //always update cx and cy OR d
+                    if(isPoint){
+                        selection.attr("cx", function(d){
+                                    try{
+                                        var x = par.proj(d.geometry.coordinates)[0];
+                                    }
+                                    catch(e){
+                                        console.warn("Point cannot be projected");
+                                        var x = 0;
+                                    }
+                                    return x;
+                                })
+                                .attr("cy", function(d){
+                                    try{
+                                        var y = par.proj(d.geometry.coordinates)[1];
+                                    }
+                                    catch(e){
+                                        console.warn("Point cannot be projected");
+                                        var y = 0;
+                                    }
+                                    return y;
+                                });
+                    }
+                    else{
                         var path = d3.geoPath(par.proj);
 
-                        var update = g.selectAll("path").data(f);
-                            update.exit().remove();
-
-                        //always update "d", "cx", and "cy" (i.e. positional) attributes where appropriate
-                        selection = update.enter().append("path").merge(update).attr("d", path);                        
+                        selection.attr("d", path);                        
                     }
 
                     //update aesthetics if not resizeOnly
