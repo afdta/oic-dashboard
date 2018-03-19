@@ -57,41 +57,48 @@ function main(){
 
 
     //d3.geoConicConformal()
-    var nofeature_layer = m.layer();
+    //var nofeature_layer = m.layer();
 
-    var states = m.layer().features(geo.states, d3.geoAlbersUsa());
-      states.selection().attr("fill","#ffffff").attr("stroke","#111111");
+    var states = m.layer("states").features(geo.states, d3.geoAlbersUsa());
+      console.log("Num states: " + states.selection().attr("fill","#ffffff").attr("stroke","#111111").size());
     var lakes;
     var countries;
     var city;
+    var composite;
 
     //m.draw();
 
-console.log(m.composite());
+//console.log(m.composite());
 
     setTimeout(function(){
-      countries = m.layer().features(geo.countries, d3.geoEquirectangular());
-      console.log(m.composite());
-    }, 1000)
+      countries = m.layer("countries").features(geo.countries, d3.geoEquirectangular());
+      console.log("Num countries: " + countries.selection().attr("fill","#ffffff").size());
+
+
+      composite = m.layer("composite").features(m.composite());
+      console.log(composite.selection().attr("fill", "red").attr("stroke-width","3").attr("stroke","red").size());
+      //console.log(m.composite());
+    }, 5000)
 
 
     setTimeout(function(){
-      lakes = m.layer().features(geo.lakes);
-      lakes.selection().attr("fill","blue");
-      console.log(m.composite());
-    }, 2000)
+      lakes = m.layer("lakes").features(geo.lakes);
+      console.log("Num lakes: " + lakes.selection().attr("fill","blue").size());
+      console.log(m.layer("composite").features(m.composite()).selection().attr("fill", "yellow").size());
+    }, 10000)
 
     setTimeout(function(){
       lakes.remove();
       countries.remove();
 
-      console.log(m.composite());
+      //console.log(m.composite());
 
-      city = m.layer().points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
-      city.selection().attr("fill","red").attr("r","5");
+      city = m.layer("cities").points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
+      console.log("Num cities: " + city.selection().attr("fill","red").attr("r","5").size());
+      console.log(m.layer("composite").features(m.composite()).selection().size());
 
       m.draw(d3.geoAlbers());
-    }, 3000);
+    }, 15000);
 
     //var lakes = m.layer().features(geo.lakes);
     //m.draw(d3.geoEquirectangular());

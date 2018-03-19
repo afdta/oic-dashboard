@@ -343,7 +343,7 @@ function oic_menu(button, options, callback){
 }
 
 function oic_profile(store){
-    console.log(store);
+    //console.log(store)
 
     var dash_wrap = d3.select("#oic-dashboard");
     //d3.select(dash_wrap.node().parentNode).style("background-color","#162231");
@@ -778,14 +778,13 @@ function map(container){
     // ===================== map layers ==================================================== //
 
     //stack of layer objects in the layers array
-    //layer objects look like {name:"layer name", method1:fn, method2:fn, ...}
     var layers = [];
 
     function find_layer(name){
         var l = null;
         var i = -1;
         while(++i < layers.length){
-            if(layers[i].name == name){
+            if(layers[i].name() == name){
                 l = layers[i];
                 break;
             }
@@ -827,11 +826,15 @@ function map(container){
                 var min_lat = [];
                 var max_lon = [];
                 var max_lat = [];
-                layers.forEach(function(l){
-                    min_lon.push(l.bbox[0][0]);
-                    min_lat.push(l.bbox[0][1]);
-                    max_lon.push(l.bbox[1][0]);
-                    max_lat.push(l.bbox[1][1]);
+                layers.forEach(function(l, i){
+                    var l_bbox = l.bbox();
+                    min_lon.push(l_bbox[0][0]);
+                    min_lat.push(l_bbox[0][1]);
+                    max_lon.push(l_bbox[1][0]);
+                    max_lat.push(l_bbox[1][1]);
+
+                    //console.log("LAYER " + i +  " BBOX")
+                    //console.log(JSON.stringify(l_bbox));
                 });
 
                 var mins = [d3.min(min_lon), d3.min(min_lat)];
@@ -849,6 +852,8 @@ function map(container){
             var bbox = [[-180, -90], [180, 90]];
         }
         finally{
+            //console.log("COMPOSITE MAP BBOX")
+            //console.log(JSON.stringify(bbox));
             map_bbox = bbox;
         }
     }
@@ -905,18 +910,24 @@ function map(container){
             var points; //x-y data passed into layer.points
             var layer_bbox = map_bbox; //default is existing map bbox
             var onePolygon = false; //draw features individually, not as one polygon
+            var layer_name = arguments.length > 0 ? name : null; //fallback name is null
             var layer = {};
 
             //push layer on to layers stack
             layers.push(layer);
 
-            layer.name = arguments.length > 0 ? name : null;
+            g.attr("data-name", layer_name);
             
             //layer methods
             //get selection -- importantly, selection isn't available until a draw is done
             //redraw map upon each layer added? -- need to specify projection to layer?
             layer.selection = function(){
                 return selection;
+            };
+
+            //getter for layer name
+            layer.name = function(){
+                return layer_name;  
             };
 
             //getter for layer bbox
@@ -1252,41 +1263,48 @@ function main(){
 
 
     //d3.geoConicConformal()
-    var nofeature_layer = m.layer();
+    //var nofeature_layer = m.layer();
 
-    var states = m.layer().features(geo.states, d3.geoAlbersUsa());
-      states.selection().attr("fill","#ffffff").attr("stroke","#111111");
+    var states = m.layer("states").features(geo.states, d3.geoAlbersUsa());
+      console.log("Num states: " + states.selection().attr("fill","#ffffff").attr("stroke","#111111").size());
     var lakes;
     var countries;
     var city;
+    var composite;
 
     //m.draw();
 
-console.log(m.composite());
+//console.log(m.composite());
 
     setTimeout(function(){
-      countries = m.layer().features(geo.countries, d3.geoEquirectangular());
-      console.log(m.composite());
-    }, 1000);
+      countries = m.layer("countries").features(geo.countries, d3.geoEquirectangular());
+      console.log("Num countries: " + countries.selection().attr("fill","#ffffff").size());
+
+
+      composite = m.layer("composite").features(m.composite());
+      console.log(composite.selection().attr("fill", "red").attr("stroke-width","3").attr("stroke","red").size());
+      //console.log(m.composite());
+    }, 5000);
 
 
     setTimeout(function(){
-      lakes = m.layer().features(geo.lakes);
-      lakes.selection().attr("fill","blue");
-      console.log(m.composite());
-    }, 2000);
+      lakes = m.layer("lakes").features(geo.lakes);
+      console.log("Num lakes: " + lakes.selection().attr("fill","blue").size());
+      console.log(m.layer("composite").features(m.composite()).selection().attr("fill", "yellow").size());
+    }, 10000);
 
     setTimeout(function(){
       lakes.remove();
       countries.remove();
 
-      console.log(m.composite());
+      //console.log(m.composite());
 
-      city = m.layer().points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
-      city.selection().attr("fill","red").attr("r","5");
+      city = m.layer("cities").points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
+      console.log("Num cities: " + city.selection().attr("fill","red").attr("r","5").size());
+      console.log(m.layer("composite").features(m.composite()).selection().size());
 
       m.draw(d3.geoAlbers());
-    }, 3000);
+    }, 15000);
 
     //var lakes = m.layer().features(geo.lakes);
     //m.draw(d3.geoEquirectangular());

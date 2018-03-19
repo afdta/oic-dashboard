@@ -6,7 +6,7 @@ import palette from "./palette.js";
 import oic_menu from "./oic-menu.js";
 
 export default function oic_profile(store){
-    console.log(store)
+    //console.log(store)
 
     var dash_wrap = d3.select("#oic-dashboard");
     //d3.select(dash_wrap.node().parentNode).style("background-color","#162231");

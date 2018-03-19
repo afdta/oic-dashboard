@@ -135,14 +135,13 @@ export default function map(container){
     // ===================== map layers ==================================================== //
 
     //stack of layer objects in the layers array
-    //layer objects look like {name:"layer name", method1:fn, method2:fn, ...}
     var layers = [];
 
     function find_layer(name){
         var l = null;
         var i = -1;
         while(++i < layers.length){
-            if(layers[i].name == name){
+            if(layers[i].name() == name){
                 l = layers[i];
                 break;
             }
@@ -184,11 +183,15 @@ export default function map(container){
                 var min_lat = [];
                 var max_lon = [];
                 var max_lat = [];
-                layers.forEach(function(l){
-                    min_lon.push(l.bbox[0][0]);
-                    min_lat.push(l.bbox[0][1]);
-                    max_lon.push(l.bbox[1][0]);
-                    max_lat.push(l.bbox[1][1]);
+                layers.forEach(function(l, i){
+                    var l_bbox = l.bbox();
+                    min_lon.push(l_bbox[0][0]);
+                    min_lat.push(l_bbox[0][1]);
+                    max_lon.push(l_bbox[1][0]);
+                    max_lat.push(l_bbox[1][1]);
+
+                    //console.log("LAYER " + i +  " BBOX")
+                    //console.log(JSON.stringify(l_bbox));
                 });
 
                 var mins = [d3.min(min_lon), d3.min(min_lat)];
@@ -206,6 +209,8 @@ export default function map(container){
             var bbox = [[-180, -90], [180, 90]];
         }
         finally{
+            //console.log("COMPOSITE MAP BBOX")
+            //console.log(JSON.stringify(bbox));
             map_bbox = bbox;
         }
     }
@@ -264,6 +269,7 @@ export default function map(container){
             var data;
             var onePolygon = false; //draw features individually, not as one polygon
             var geokey;
+            var layer_name = arguments.length > 0 ? name : null; //fallback name is null
             var aes = {};
 
             //layer object
@@ -272,13 +278,18 @@ export default function map(container){
             //push layer on to layers stack
             layers.push(layer);
 
-            layer.name = arguments.length > 0 ? name : null;
+            g.attr("data-name", layer_name);
             
             //layer methods
             //get selection -- importantly, selection isn't available until a draw is done
             //redraw map upon each layer added? -- need to specify projection to layer?
             layer.selection = function(){
                 return selection;
+            }
+
+            //getter for layer name
+            layer.name = function(){
+                return layer_name;  
             }
 
             //getter for layer bbox
