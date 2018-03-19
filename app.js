@@ -653,6 +653,23 @@ function oic_profile(store){
 
 //browser requirements: indexOf, map, filter, svg methods (Promises? - not yet)
 
+/////////////// LAYER DRAW - PROJ UPDATE CONTINGENCIES /////////////////////////////////////////////
+// layer.draw() is called directly by...        par.proj up to date?
+// ...map.draw()                                yes - map_projection() called prior to layer.draw()
+// ...map.resize()                              yes - "
+// ...itself (by user)                          yes - three methods add/remove features to map:
+//                                                    1. features(), 2. points(), and 3. remove().
+//                                                    And each calls map.resize() after updating
+//                                                    composite geo. So, proj is always up-to-date
+//                                                    with existing map features.
+
+
+/////////////// UNIT TESTS /////////////////////////////////////////////////////////////////////////
+// 1) Add 3 layers, testing bbox and composite geo each time (draw them with opacity) and look
+// at layers list. Verify removal also updates and that no trace remains of layer within map
+//
+// 2) Validate layer bounding boxes against known geo bounds after initializing, then updating features
+
 function map(container){
     
     // ================================= dom structure ===================================== //
@@ -745,7 +762,7 @@ function map(container){
     var map = {}; //map object returned to user
 
     //initial map bounding box: [[min lon, min lat], [max lon, max lat]] covers entire earth
-    map.bbox = [[-180, -90], [180, 90]];
+    var map_bbox = [[-180, -90], [180, 90]];
 
     //map parameters
     var par = {
@@ -779,10 +796,13 @@ function map(container){
     //return bounding box of a single layer's features as 
     //bbox structure described here: https://github.com/d3/d3-geo#geoBounds
     //[[min lon, min lat], [max lon, max lat]]
-    function layer_bbox(features){
+    function get_layer_bbox(layer){
+
+        var features = layer.features();
+
         try{
             if(features==null){
-                throw new Error("You must pass a valid features array");
+                throw new Error("BBox is undefined without features");
             }
             //embed features in a feature collection
             var asFC = {
@@ -792,7 +812,7 @@ function map(container){
             var bbox = d3.geoBounds(asFC);
         }
         catch(e){
-            var bbox = map.bbox;
+            var bbox = map_bbox;
         }
         finally{
             return bbox;
@@ -800,7 +820,7 @@ function map(container){
     }
 
     //calculate and set bbox of map, incorporating all layers
-    function map_bbox(){
+    function set_map_bbox(){
         try{
             if(layers.length > 0){
                 var min_lon = [];
@@ -829,12 +849,12 @@ function map(container){
             var bbox = [[-180, -90], [180, 90]];
         }
         finally{
-            map.bbox = bbox;
+            map_bbox = bbox;
         }
     }
 
     //concatenate all features into a single geojson feature collection
-    function composite_geojson(){
+    function set_composite_geojson(){
         var all_features = [];
         layers.forEach(function(l){
             var f = l.features();
@@ -858,8 +878,13 @@ function map(container){
         composite_geo = comp;
     }
 
+    //getters for composite geojson and map bbox
     map.composite = function(){
         return composite_geo;
+    };
+
+    map.bbox = function(){
+        return map_bbox;
     };
 
 
@@ -878,6 +903,7 @@ function map(container){
             var selection;
             var features; //as in "features" array of FeatureCollection: each feature object type is any geo type accepted by D3
             var points; //x-y data passed into layer.points
+            var layer_bbox = map_bbox; //default is existing map bbox
             var onePolygon = false; //draw features individually, not as one polygon
             var layer = {};
 
@@ -885,16 +911,18 @@ function map(container){
             layers.push(layer);
 
             layer.name = arguments.length > 0 ? name : null;
-
-            //default is existing map bbox
-            layer.bbox = map.bbox;
-
+            
             //layer methods
             //get selection -- importantly, selection isn't available until a draw is done
             //redraw map upon each layer added? -- need to specify projection to layer?
             layer.selection = function(){
                 return selection;
             };
+
+            //getter for layer bbox
+            layer.bbox = function(){
+                return layer_bbox;
+            };            
 
             //need to specify a geo key function (geokey) that will used to (1) retrieve data from a lookup table
             //and (2) be used as a key function when regenerating a layer's selection
@@ -913,11 +941,11 @@ function map(container){
                     throw new Error("Argument must be a FeatureCollection or an array of D3-supported geojson feature objects");
                 }
             
-                this.bbox = layer_bbox(features);
+                layer_bbox = get_layer_bbox(this);
                 
                 //set composite map bbox and geojson object -- do before any drawing
-                map_bbox();
-                composite_geojson();
+                set_map_bbox();
+                set_composite_geojson();
 
                 if(arguments.length > 2 && !!asOnePolygon){
                     onePolygon = true;
@@ -963,29 +991,30 @@ function map(container){
             };
 
             layer.remove = function(){
+                //remove this layer from map layers array
                 try{
                     var index = layers.indexOf(this);
                     if(index > -1){
-                        //remove from layers array
                         layers.splice(index, 1);
                     }
                 }
                 catch(e){
-                    //
+                    //no-op
                 }
 
                 try{
                     //remove the main grouping
                     g.remove();
                     selection = null;
+                    features = null;
                 }
                 catch(e){
                     //selection undefined, no-op
                 }
 
                 //set composite map bbox and geojson object -- do before any drawing
-                map_bbox();
-                composite_geojson();
+                set_map_bbox();
+                set_composite_geojson();
 
                 //redraw "d", "cx", and "cy" attributes of all map layers
                 map.resize();
@@ -1072,7 +1101,7 @@ function map(container){
     //calling with no arguments updates existing projection based on container size and returns updated projection
     //calling with a projection sets the new projection and updates it according to map container size. returns map object.
     //projection can be set or retrieved before any features are added to map. in this case, the projection scale/translate is not updated here.
-    map_projection = function(proj){
+    function map_projection(proj){
 
         //if no proj is passed, update existing map projection, otherwise establish proj as map projection
         if(proj==null){proj = par.proj;}
@@ -1113,7 +1142,7 @@ function map(container){
         else{
             //console.log("null composite");
         }
-    };
+    }
 
     map.draw = function(proj){
 

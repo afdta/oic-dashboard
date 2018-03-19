@@ -119,7 +119,7 @@ export default function map(container){
     var map = {}; //map object returned to user
 
     //initial map bounding box: [[min lon, min lat], [max lon, max lat]] covers entire earth
-    map_bbox = [[-180, -90], [180, 90]];
+    var map_bbox = [[-180, -90], [180, 90]];
 
     //map parameters
     var par = {
@@ -467,7 +467,7 @@ export default function map(container){
     //calling with no arguments updates existing projection based on container size and returns updated projection
     //calling with a projection sets the new projection and updates it according to map container size. returns map object.
     //projection can be set or retrieved before any features are added to map. in this case, the projection scale/translate is not updated here.
-    map_projection = function(proj){
+    function map_projection(proj){
 
         //if no proj is passed, update existing map projection, otherwise establish proj as map projection
         if(proj==null){proj = par.proj;}
