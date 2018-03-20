@@ -28,7 +28,7 @@
 // at layers list. Verify removal also updates and that no trace remains of layer within map
 //
 // 2) Validate layer bounding boxes against known geo bounds after initializing, then updating features
-// 3) Validate geo merging in three cases: user provided 1) function, 2) string, or 3) no key -- no duplicating/removing erroneously?
+// 3) Validate geo merging in three cases: user provided 1) function, 2) string, or 3) no key
 
 export default function map(container, map_proj){
     
@@ -271,7 +271,7 @@ export default function map(container, map_proj){
             var points; //x-y data passed into layer.points
             var layer_bbox = map_bbox; //default is existing map bbox
             var data;
-            var onePolygon = false; //draw features individually, not as one polygon
+            var onePath = false; //draw features individually, not as one path
             var geokey;
             var layer_name = arguments.length > 0 ? name : null; //fallback name is null
             var aes = {};
@@ -304,7 +304,7 @@ export default function map(container, map_proj){
             //need to specify a geo key function (geokey) that will used to (1) retrieve data from a lookup table
             //and (2) be used as a key function when regenerating a layer's selection
             //make sure to check for duplicates in layer features based on the key function
-            layer.features = function(f, key, asOnePolygon){
+            layer.features = function(f, key, asOnePath){
                 if(arguments.length==0){
                     return features;
                 }
@@ -337,14 +337,29 @@ export default function map(container, map_proj){
                     geokey = null;
                 }
 
-                if(!!asOnePolygon){
-                    onePolygon = true;
+                if(!!asOnePath){
+                    onePath = true;
                 }
 
                 //redraw all layers "d", "cx", and "cy" attributes to accommodate any resizing introduced by this layer
                 //and to populate the selection for immediate styling after registering features -- avoids having to call
                 //map.draw() directly when implementing a map
                 map.resize();
+
+                //duplicate geo features?
+                if(geokey != null){
+                    var counts = d3.nest().key(geokey).rollup(function(d){
+                        return d.length;
+                    }).entries(features);
+
+                    counts.forEach(function(d){
+                        if(d.value > 1){
+                            console.warn("Duplicate feature warning: " + d.value + " features with id value of " + d.key);
+                        }
+                    });
+
+                    console.log(counts);
+                }
 
                 return this;
             }
@@ -447,9 +462,9 @@ export default function map(container, map_proj){
                     var update; //update selection
 
                     //if drawing one polygon, embed features in a single FeatureCollection
-                    var f = onePolygon ? [{"type":"FeatureCollection", "features":features}] : features;
+                    var f = onePath ? [{"type":"FeatureCollection", "features":features}] : features;
 
-                    if(geokey == null || onePolygon){
+                    if(geokey == null || onePath){
                         update = g.selectAll(mark+".feature").data(f); //no key function in these cases
                     }
                     else{
@@ -506,6 +521,10 @@ export default function map(container, map_proj){
             return layer;
         }
     } //end map.layer()
+
+    map.layers = function(){
+        return layers;
+    }
 
     // ================= end map layers ==================================================== //
 
@@ -608,10 +627,26 @@ export default function map(container, map_proj){
 
     map.albers = function(){
         //create and apply localized albers projection
-        //see L.get_albers() in mapd.js
-        var albers = d3.geoAlbersUsa();
+        var bbox = map_bbox;
+
+        var top = bbox[1][1];
+        var bottom = bbox[0][1];
+        var left = bbox[0][0];
+        var right = bbox[1][0];
+
+        var lat_delta = top - bottom; //max lat - min lat
+
+        var parallel1 = top - (lat_delta/4); //higher (1/4 lower than top)
+        var parallel0 = bottom + (lat_delta/4); //lower
+
+        var rotateX = left + ((right - left)/2);
+        var centerY = bottom + (lat_delta/2);
+
+        var albers = d3.geoAlbers().rotate([-rotateX,0]).center([0,centerY]).parallels([parallel0, parallel1]);        
 
         this.projection(albers);
+
+        return this;
     }
 
     //resize

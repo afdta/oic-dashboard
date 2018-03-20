@@ -60,7 +60,7 @@ function main(){
     //var nofeature_layer = m.layer();
     var composite = m.layer("composite");
     var countries = m.layer("countries").features(geo.countries);
-      console.log("Num countries: " + countries.selection().attr("fill","none").attr("stroke","purple").size());
+      countries.selection().attr("fill","none").attr("stroke","purple");
 
     var states
     var lakes;
@@ -73,43 +73,70 @@ function main(){
 
     setTimeout(function(){
       states = m.projection(d3.geoAlbers()).layer("states").features(geo.states);
-      console.log("Num states: " + states.selection().attr("fill","#ffffff").attr("stroke","#111111").size());
+      //console.log("Num states: " + states.selection().attr("fill","#ffffff").attr("stroke","#111111").size());
 
       composite = m.layer("composite").features(m.composite());
-      console.log(composite.selection().attr("fill", "red").attr("stroke-width","1").attr("stroke","red").size());
-
+      //console.log(composite.selection().attr("fill", "red").attr("stroke-width","1").attr("stroke","red").size());
+       m.layers().forEach(function(l){
+        console.log(l.name());
+      })
+      console.log("-------");
     }, 1000)
 
 
     setTimeout(function(){
       lakes = m.layer("lakes").features(geo.lakes);
-      console.log("Num lakes: " + lakes.selection().attr("fill","blue").size());
-      console.log(m.layer("composite").features(m.composite()).selection().attr("fill", "yellow").size());
+      //console.log("Num lakes: " + lakes.selection().attr("fill","blue").size());
+      //console.log(m.layer("composite").features(m.composite()).selection().attr("fill", "yellow").size());
     }, 2000)
 
     setTimeout(function(){
       lakes.remove();
       countries.remove();
+        m.layers().forEach(function(l){
+        console.log(l.name());
+      })
+      console.log("-------");
 
       //console.log(m.composite());
 
       city = m.projection(d3.geoAlbersUsa()).layer("cities").points([{lon:-110, lat:50},{lon:-100, lat:40}, {lon:-50, lat:30}]);
-      console.log("Num cities: " + city.selection().attr("fill","red").attr("r","5").size());
+      //console.log("Num cities: " + city.selection().attr("fill","red").attr("r","5").size());
       //console.log(m.layer("composite").features(m.composite()).selection().size());
 
-      //m.draw();
+      m.layers().forEach(function(l){
+        console.log(l.name());
+      })
+      console.log("-------");
     }, 3000);
 
-    //var lakes = m.layer().features(geo.lakes);
-    //m.draw(d3.geoEquirectangular());
 
-    
-    //m.draw();
+    //test merging features
+    var M = map(document.getElementById("merge-test"));
+
+    M.layer("states").features(geo.states).selection().attr("stroke","#ffffff").attr("fill","orange");
+
+    setTimeout(function(){
+      var TX = geo.states.features.filter(function(d){return d.properties.geo_name2=="MN"});
+
+      M.layer("states").features(TX, "geo_name2");
+
+      setTimeout(function(){M.albers();},1000)
+
+      //M.albers();
 
 
-    //world_layer.remove();
-    //console.log(JSON.stringify(m.bbox));
-    //m.projection();
+      /*M.albers().layer("states").features(geo.states, function(d){
+        var stabbr = d.properties.geo_name2;
+        if(stabbr in {"WA":1, "VA":1, "FL":1, "CA":1}){
+          return stabbr + Math.random();
+        }
+        else{
+          return stabbr;
+        }
+      });*/
+    },4000);
+
   };
 
 } //close main()
