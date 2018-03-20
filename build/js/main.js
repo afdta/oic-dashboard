@@ -59,19 +59,18 @@ function main(){
     //d3.geoConicConformal()
     //var nofeature_layer = m.layer();
     var composite = m.layer("composite");
-    var countries = m.layer("countries").features(geo.countries);
-      countries.selection().attr("fill","none").attr("stroke","purple");
+    var countries = m.layer("countries").features(geo.countries).attr("fill","none").attr("stroke","blue");
 
-    var states
+    /*var states
     var lakes;
-    var city;
+    var city;*/
     
 
     //m.draw();
 
 //console.log(m.composite());
 
-    setTimeout(function(){
+  /*    setTimeout(function(){
       states = m.projection(d3.geoAlbers()).layer("states").features(geo.states);
       //console.log("Num states: " + states.selection().attr("fill","#ffffff").attr("stroke","#111111").size());
 
@@ -109,19 +108,48 @@ function main(){
       })
       console.log("-------");
     }, 3000);
+    */
 
 
     //test merging features
     var M = map(document.getElementById("merge-test"));
 
-    M.layer("states").features(geo.states).selection().attr("stroke","#ffffff").attr("fill","orange");
+    var st1 = M.layer("states").features(geo.states, "geo_name2").attr("stroke","#ffffff").attr("fill","orange").attr("fill-opacity",0.5)
+        .data([{id:"AK"}, {id:"MN"}, {id:"TX"}, {id:"TX", note:"Duplicate!"}], function(d){return d.id}).attr("stroke", function(d, i, v){
+          
+          if(v !== null){
+            console.log(this);
+            console.log(d);
+            console.log(i);
+            console.log(v);
+            return "purple";
+          }
+          else{
+            return "#ffffff";
+          }
+        });
+
+    st1.filter(function(d, i, v){
+      return v !== null;
+    }).raise().transition().duration(2000).attr("fill-opacity",1);
+
+    console.log(st1.data());
 
     setTimeout(function(){
-      var TX = geo.states.features.filter(function(d){return d.properties.geo_name2=="MN"});
+      st1.data([{id:"AK", c:"purple"}, 
+                {id:"WA", c:"red"}, 
+                {id:"MN", c:"#ffffff"}, 
+                {id:"TX", c:"#555555"},
+                {id:"TX", c:"#000000", note:"Duplicate!"}], function(d){return d.id}).attr("fill", function(d, i, v){
+                  return v==null ? "#999999" : v.c;
+                })
 
-      M.layer("states").features(TX, "geo_name2");
 
-      setTimeout(function(){M.albers();},1000)
+      //var TX = geo.states.features.filter(function(d){return d.properties.geo_name2=="MN"});
+
+      //M.layer("states").features(TX, "geo_name2");
+
+      //setTimeout(function(){M.albers();},1000)
 
       //M.albers();
 

@@ -4,11 +4,13 @@ library("jsonlite")
 
 setwd("~/Projects/Brookings/older-industrial-cities/build/data/")
 
-load("OIC_DATA_FOR_INTERACTIVE.Rdata")
+oicdata <- read_excel("OIC_INTERACTIVE_DATA.xlsx")
 
 cities <- read_excel("OIC List.xlsx") %>% 
             select(stcofips, cbsa, county=`County Name`, metro=`Metro Name`, 
-                   stabbr=State, city=`Largest City`, pop=`2016 Population`)
+                   stabbr=State, city2=`Largest City`, pop=`2016 Population`)
+
+cities$city <- sub("\\s*city|")
 
 ubox <- function(e){
   cat(nrow(e))

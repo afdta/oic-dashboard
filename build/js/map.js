@@ -29,6 +29,9 @@
 //
 // 2) Validate layer bounding boxes against known geo bounds after initializing, then updating features
 // 3) Validate geo merging in three cases: user provided 1) function, 2) string, or 3) no key
+// 4) Validate attr and style functions -- all cases
+// 5) Validate data bind and handling of dupes and missings. missing should always be null, never undefined
+//    Special cases: update features after binding data, update data after drawing features once
 
 export default function map(container, map_proj){
     
@@ -270,9 +273,9 @@ export default function map(container, map_proj){
             var features; //as in "features" array of FeatureCollection: each feature object type is any geo type accepted by D3
             var points; //x-y data passed into layer.points
             var layer_bbox = map_bbox; //default is existing map bbox
-            var data;
+            var layer_data = null; //data store for layer
             var onePath = false; //draw features individually, not as one path
-            var geokey;
+            var geokey = null;
             var layer_name = arguments.length > 0 ? name : null; //fallback name is null
             var aes = {};
 
@@ -357,8 +360,6 @@ export default function map(container, map_proj){
                             console.warn("Duplicate feature warning: " + d.value + " features with id value of " + d.key);
                         }
                     });
-
-                    console.log(counts);
                 }
 
                 return this;
@@ -371,6 +372,8 @@ export default function map(container, map_proj){
                     return points;
                 }
                 else if(p instanceof Array){
+
+                    points = p; //set globally
 
                     var ll = (typeof lonlat_accessor == "function") ? lonlat_accessor : function(d){return [d.lon, d.lat]}
 
@@ -397,25 +400,18 @@ export default function map(container, map_proj){
 
             layer.remove = function(){
                 //remove this layer from map layers array
-                try{
-                    var index = layers.indexOf(this);
-                    if(index > -1){
-                        layers.splice(index, 1);
-                    }
-                }
-                catch(e){
-                    //no-op
+                var index = layers.indexOf(this);
+                if(index > -1){
+                    layers.splice(index, 1);
                 }
 
-                try{
-                    //remove the main grouping
-                    g.remove();
-                    selection = null;
-                    features = null;
-                }
-                catch(e){
-                    //selection undefined, no-op
-                }
+                //remove the main grouping from DOM and set variables back to null
+                g.remove();
+                selection = null;
+                features = null;
+                geokey = null;
+                layer_data = null;
+                points = null;
 
                 //set composite map bbox and geojson object -- do before any drawing
                 set_map_bbox();
@@ -427,28 +423,184 @@ export default function map(container, map_proj){
                 return this;
             }
 
-            layer.attr = function(){
+            var layer_attrs = {};
+            var layer_styles = {};
+
+            //register attributes/styles
+            //value can be a string, a number, or a function
+            //if value is a function, it behaves as you'd expect with D3, being passed feature data, and index as first two args
+            //here, it also receives a third arg which corresponds to the bound data value (by layer.data()), if applicable (otherwise null)
+            layer.attr = function(attr, value){
+                if(arguments.length==1){
+                    return layer_attrs[attr];
+                }
+                else if(typeof value == "string" || typeof value == "number" || value === null){
+                    layer_attrs[attr] = value;
+
+                    if(selection != null){selection.attr(attr, value);} //null removes the attr
+                }
+                else if(typeof value == "function"){
+                    
+                    //function which is actually called on selection (e.g. selection.attr(attr, attr_fn))
+                    //it wraps the value fn, passing a third parameter for a bound data object (bound by layer.data() -- null if not bound)
+                    var attr_fn = function(feature, index){
+                        var that = this; //feature node
+                        var obs = null;
+
+                        if(typeof geokey == "function" && layer_data != null){
+                            obs = layer_data.lookup(geokey(feature)); //lookup returns null if nothing found
+                        }
+
+                        //while index may not be that useful, it is valuable to maintain similarity to the D3 API
+                        return value.call(that, feature, index, obs);
+                    }
+
+                    layer_attrs[attr] = attr_fn;
+
+                    if(selection == null){
+                        console.warn("You're setting an attribute before features have been added. Make sure to call map.draw()")
+                    }
+                    else{
+                        selection.attr(attr, attr_fn);
+                    }
+                }
+                else{
+                    //no-op
+                }
 
                 return this;
             }
 
-            layer.style = function(){
+            layer.style = function(style, value){
+
+
+
+                    //make sure to include this warning
+                    //if(selection == null){
+                     //   console.warn("You're setting a style before features have been added. Make sure to call map.draw()")
+                    //}
+                    //else{
+                     //   selection.style(attr, style_fn);
+                    //}
+
 
                 return this;
             }
 
-            layer.aes = function(){
+            //fn arg analagous to value as function arg in layer.attr -- important to note that this does not return
+            //a new map layer (should it?). it returns the underlying (filtered) selection
+            layer.filter = function(fn){
+                if(selection != null){
+                    var filter_fn = function(feature, index){
+                        var that = this; //feature node
+                        var obs = null;
 
-                return this;
+                        if(typeof geokey == "function" && layer_data != null){
+                            obs = layer_data.lookup(geokey(feature)); //lookup returns null if nothing found
+                        }
+                        return fn.call(that, feature, index, obs);
+                    }
+                    return selection.filter(filter_fn);
+                }
+                else{
+                    return null;
+                }
             }
 
-            //key function used to create a lookup table that 
-            //remove and check for dups -- see mapd.js
+                //use case -- 
+                layer.scales = {};
+
+                layer.scales.radius = function(variable, max_radius){
+                    //look at distriubtion, build scale
+
+                    //generate sensible ticks for legend
+
+                    //register with layer.attr()?
+                    //should the scale update automatically with new data bind -- not in v1. 
+                    //same issue with auto projections -- keep it simple for now
+
+                    //what to return? something like:
+                    return {
+                        // scale: value to radius
+                        // ticks: [array of values/labels for legend]
+                        // methods to mutate scale (e.g. reverse, max/min)
+                    }
+                }
+
+                layer.scales.gradient = function(variable, start, end){
+                    //start could be a pre-defined
+
+                }
+
+                layer.scales.quantile = function(variable, cols){
+
+                }
+
+                layer.scales.categorical = function(variable, cols){
+                    //have one default set
+
+                }
+
+            //register data in the form: [{idvar: "id", val:1, ...}, {}, {}, ... {}]
+            //must include key function that uniquely identifies each geo -- used to merge using geokey above
+            //note that dupes are removed.
+            //this doesn't actually bind data as we should strive to keep geojson data bound and not mutate it.
+            //also, not binding allows missing data values without removing those features from map
             layer.data = function(data, key){
+                if(arguments.length==0){
+                    return layer_data;
+                }
+                else if(data===null){
+                    layer_data = null;
+                }
+                else if(arguments.length < 2){
+                    throw new Error("You must specify a key function to merge data");
+                }
+                else if(data instanceof Array){
+                    layer_data = build_layer_data(data, key);
+                }
+                else{
+                    throw new Error("Data must be an array of objects or null")
+                }
 
                 return this;
             }
 
+            //layer_data is either null or equal to the result of below
+            function build_layer_data(data, key){
+                //de-duped array of data
+                var de_duped = [];
+
+                var lookup = {};
+
+                //keep track of dupes
+                var dupes = []; 
+
+                //de-duped data -- keep only first obs encountered for a geo
+                data.forEach(function(d,i){
+
+                    var id = key(d);
+
+                    if(lookup.hasOwnProperty(id)){
+                        //lookup already has data for geography -- observation is a duplicate
+                        dupes.push(d);
+                    }
+                    else{
+                        lookup[id] = d;
+                        de_duped.push(d);
+                    }
+                });
+
+                if(dupes.length > 0){
+                    console.warn(dupes.length + " duplicate records found in data.");
+                }
+
+                return {
+                    lookup: function(idvalue){return lookup.hasOwnProperty(idvalue) ? lookup[idvalue] : null},
+                    data: de_duped,
+                    dupes: dupes
+                }
+            }
 
             //known issue: this may fail with mixed feature arrays, especially if points come before polygons in array
             //to do: support mixed feature type layers -- would need to evaluate on feature-by-feature basis
@@ -504,11 +656,19 @@ export default function map(container, map_proj){
                         selection.attr("d", path);                        
                     }
 
-                    //update aesthetics if not resizeOnly
+                    //update aesthetics and styles if not resizeOnly
                     if(resizeOnly==null || !resizeOnly){
-                        //selection.attr("stroke","#0033cc")
-                        //         .attr("fill","#0099ff")
-                        //         .attr("fill-opacity","0.25");
+                        for(var attr in layer_attrs){
+                            if(layer_attrs.hasOwnProperty(attr)){
+                                selection.attr(attr, layer_attrs[attr]);
+                            }
+                        }
+
+                        for(var style in layer_styles){
+                            if(layer_styles.hasOwnProperty(style)){
+                                selection.style(style, layer_styles[style]);
+                            }
+                        }                        
                     }     
                 }
                 else{
@@ -659,6 +819,12 @@ export default function map(container, map_proj){
             }, 150);
         }
     })
+
+
+    //private bar chart component to be used by layer objects above
+    function bar_chart(){
+
+    }
 
     return map;
 }
