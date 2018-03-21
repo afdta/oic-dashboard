@@ -34,12 +34,10 @@
   <p>Status update:</p>
   <ul>
     <li>Please only look at this on a widescreen desktop for now so that the three panels appear side-by-side. Once I finalize all the graphics, I'll make this responsive to various device widths.</li>
-    <li>The data for the OICs are live, though the charts are nonsensical because I don't have real data yet for the other aggregates. I need to get those data from Cecile.</li>
     <li>I will add data labels to the charts</li>
-    <li>The other graphics (typology, legend, and "what makes an OIC") are just stand-ins</li>
-    <li>I will clean up the spacing and sizing of the various elements in the next iteration. In particular, I think the first panel which includes the city image could be a little larger.</li>
-    <li>I will tweak color to create more continuity between the panels. One challenge here is that the city images will vary in color.</li>
-    <li>I am mostly concerned about whether this includes the right content and whether it presents it clearly, but please let me know any concerns.</li>
+    <li>The left panel needs to be styled properly. In particular, the typology graphic needs to be done properly.</li>
+
+    <li>A couple remaining data items: (1) Stat sig. calcs are for absolute change, should we use those? (2) Need range of z-scores for typology. (3) See notes in dashboard (ALL CAPS)</li>
   </ul>
 
   <div id="metro-map"></div>
@@ -48,13 +46,13 @@
 
 
 <div class="metro-interactive">
-    <div class="dashboard-wrap c-fix" id="oic-dashboard">
+    <div class="dashboard-wrap c-fix" id="oic-dashboard" style="background-color:#f0f0f0;">
         
 
         <div class="dashboard-menu c-fix" id="dashboard-menu" style="">
             <div>
               <p class="dashboard-title" style="font-size:2.5rem;font-weight:bold;margin-bottom:0px;">
-                <span class="oic-name" style="margin-right:1rem;">OIC Dashboard</span>
+                <span class="oic-name" style="margin-right:0.5rem;">OIC Dashboard</span>
                 <span class="county-name" style="color:#999999;font-size:1.25rem;text-transform:uppercase">_</span>
               </p>
             </div>

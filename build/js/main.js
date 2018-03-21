@@ -38,6 +38,7 @@ function main(){
 
     //MAP
     //geodata -- move to separate module with updated data
+    /*
     var topo = {}; //hold topojson
     var geo = {}; //hold geojson
 
@@ -51,15 +52,15 @@ function main(){
     
 
     var m = map(document.getElementById("metro-map"), d3.geoEquirectangular());
-
+*/
     
     //m.draw(d3.geoEquirectangular());
 
 
     //d3.geoConicConformal()
     //var nofeature_layer = m.layer();
-    var composite = m.layer("composite");
-    var countries = m.layer("countries").features(geo.countries).attr("fill","none").attr("stroke","blue");
+    //var composite = m.layer("composite");
+    //var countries = m.layer("countries").features(geo.countries).attr("fill","none").attr("stroke","blue");
 
     /*var states
     var lakes;
@@ -112,7 +113,7 @@ function main(){
 
 
     //test merging features
-    var M = map(document.getElementById("merge-test"));
+    /*var M = map(document.getElementById("merge-test"));
 
     var st1 = M.layer("states").features(geo.states, "geo_name2").attr("stroke","#ffffff").attr("fill","orange").attr("fill-opacity",0.5)
         .data([{id:"AK"}, {id:"MN"}, {id:"TX"}, {id:"TX", note:"Duplicate!"}], function(d){return d.id}).attr("stroke", function(d, i, v){
@@ -144,7 +145,6 @@ function main(){
                   return v==null ? "#999999" : v.c;
                 })
 
-
       //var TX = geo.states.features.filter(function(d){return d.properties.geo_name2=="MN"});
 
       //M.layer("states").features(TX, "geo_name2");
@@ -162,8 +162,10 @@ function main(){
         else{
           return stabbr;
         }
-      });*/
+      });
     },4000);
+
+    */
 
   };
 

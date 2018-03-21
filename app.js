@@ -265,6 +265,165 @@ format.fn0 = function(fmt){
 	}
 };
 
+//v1.0 developed for congressional district poverty and gig economy
+
+function select_menu(container){
+	var sel = {};
+	var options = null; //the actual <option> selection
+	var option_data = [{value:null, text:"Option 1", disabled:false}];
+	var callback = null;
+
+	var wrap = d3.select(container);
+	var prompt = wrap.append("p").classed("select-prompt", true);
+
+	var select = wrap.append("select").style("font-family","Arial, Helvetica, sans").style("width","100%");
+
+	var select_node = select.node();
+
+	var apply_callback = function(){
+		if(callback !== null){
+			select.on("change", function(){
+				var val = this.value;
+				try{
+					var d = option_data[this.selectedIndex];
+
+					if(d.value !== val){
+						throw "ERROR";
+					}
+				}
+				catch(e){
+					var d = option_data[0];
+					select_node.value = d.value;
+				}
+
+				callback.call(val, d);
+			});
+		}
+		else{
+			//remove listener
+			select.on("change", null);
+		}
+	};
+
+	sel.prompt = function(text){
+		prompt.text(text);
+		return sel;
+	};
+
+	sel.callback = function(c){
+		callback = c;
+		
+		apply_callback();
+		return sel;
+	};
+
+	//programatically select
+	sel.select = function(value){
+
+		//get option data
+		var i = -1;
+		var d = null;
+		while(++i < option_data.length){
+			if(option_data[i].value == value){
+				d = option_data[i];
+				break;
+			}
+		}
+
+		if(d!==null && callback!==null){
+			select_node.value = d.value;
+			callback.call(value, d);
+		}
+
+		return sel;
+	};
+
+	sel.lookup = function(v){return v};
+
+	//optdata should be array of {value:code/id/etc, text:label, disabled:true/false/missing}
+	sel.options = function(optdata){
+		option_data = optdata;
+		var opts = select.selectAll("option").data(optdata);
+		opts.exit().remove();
+		options = opts.enter().append("option").merge(opts);
+
+		options.attr("value", function(d,i){return d.value})
+			   .text(function(d,i){return d.text})
+			   .attr("disabled", function(d,i){
+			   		return d.hasOwnProperty("disabled") && !!d.disabled ? "yes" : null;
+			   	});
+
+		apply_callback();
+
+		var lookup = {};
+		var i = -1;
+		while(++i < option_data.length){
+			lookup[option_data[i].value] = option_data[i].text; 
+		}
+
+		sel.lookup = function(value){
+			return lookup[value];
+		};
+
+		return sel;
+	};
+
+	//analogous to sel.options, but for grouped options
+	//expects data in form outputted by d3.nest().entries()
+	//this function is limited in functionality -- use carefully
+	sel.optgroups = function(optdata){
+		var optgroups = select.selectAll("optgroup").data(optdata);
+		optgroups.exit().remove();
+
+		var options = optgroups.enter().append("optgroup").merge(optgroups).attr("label", function(d){return d.key})
+							.selectAll("option").data(function(d){return d.value});
+
+		options.exit().remove();
+		var all_options = options.enter().append("option").merge(options)
+			.attr("value", function(d){return d.value})
+			.text(function(d){return d.text});
+
+		return select;
+	};
+
+	sel.states = function(){
+		var states = [{"STATE":"01","STUSAB":"AL","STATE_NAME":"Alabama","STATENS":"01779775"},{"STATE":"02","STUSAB":"AK","STATE_NAME":"Alaska","STATENS":"01785533"},{"STATE":"04","STUSAB":"AZ","STATE_NAME":"Arizona","STATENS":"01779777"},{"STATE":"05","STUSAB":"AR","STATE_NAME":"Arkansas","STATENS":"00068085"},{"STATE":"06","STUSAB":"CA","STATE_NAME":"California","STATENS":"01779778"},{"STATE":"08","STUSAB":"CO","STATE_NAME":"Colorado","STATENS":"01779779"},{"STATE":"09","STUSAB":"CT","STATE_NAME":"Connecticut","STATENS":"01779780"},{"STATE":"10","STUSAB":"DE","STATE_NAME":"Delaware","STATENS":"01779781"},{"STATE":"11","STUSAB":"DC","STATE_NAME":"District of Columbia","STATENS":"01702382"},{"STATE":"12","STUSAB":"FL","STATE_NAME":"Florida","STATENS":"00294478"},{"STATE":"13","STUSAB":"GA","STATE_NAME":"Georgia","STATENS":"01705317"},{"STATE":"15","STUSAB":"HI","STATE_NAME":"Hawaii","STATENS":"01779782"},{"STATE":"16","STUSAB":"ID","STATE_NAME":"Idaho","STATENS":"01779783"},{"STATE":"17","STUSAB":"IL","STATE_NAME":"Illinois","STATENS":"01779784"},{"STATE":"18","STUSAB":"IN","STATE_NAME":"Indiana","STATENS":"00448508"},{"STATE":"19","STUSAB":"IA","STATE_NAME":"Iowa","STATENS":"01779785"},{"STATE":"20","STUSAB":"KS","STATE_NAME":"Kansas","STATENS":"00481813"},{"STATE":"21","STUSAB":"KY","STATE_NAME":"Kentucky","STATENS":"01779786"},{"STATE":"22","STUSAB":"LA","STATE_NAME":"Louisiana","STATENS":"01629543"},{"STATE":"23","STUSAB":"ME","STATE_NAME":"Maine","STATENS":"01779787"},{"STATE":"24","STUSAB":"MD","STATE_NAME":"Maryland","STATENS":"01714934"},{"STATE":"25","STUSAB":"MA","STATE_NAME":"Massachusetts","STATENS":"00606926"},{"STATE":"26","STUSAB":"MI","STATE_NAME":"Michigan","STATENS":"01779789"},{"STATE":"27","STUSAB":"MN","STATE_NAME":"Minnesota","STATENS":"00662849"},{"STATE":"28","STUSAB":"MS","STATE_NAME":"Mississippi","STATENS":"01779790"},{"STATE":"29","STUSAB":"MO","STATE_NAME":"Missouri","STATENS":"01779791"},{"STATE":"30","STUSAB":"MT","STATE_NAME":"Montana","STATENS":"00767982"},{"STATE":"31","STUSAB":"NE","STATE_NAME":"Nebraska","STATENS":"01779792"},{"STATE":"32","STUSAB":"NV","STATE_NAME":"Nevada","STATENS":"01779793"},{"STATE":"33","STUSAB":"NH","STATE_NAME":"New Hampshire","STATENS":"01779794"},{"STATE":"34","STUSAB":"NJ","STATE_NAME":"New Jersey","STATENS":"01779795"},{"STATE":"35","STUSAB":"NM","STATE_NAME":"New Mexico","STATENS":"00897535"},{"STATE":"36","STUSAB":"NY","STATE_NAME":"New York","STATENS":"01779796"},{"STATE":"37","STUSAB":"NC","STATE_NAME":"North Carolina","STATENS":"01027616"},{"STATE":"38","STUSAB":"ND","STATE_NAME":"North Dakota","STATENS":"01779797"},{"STATE":"39","STUSAB":"OH","STATE_NAME":"Ohio","STATENS":"01085497"},{"STATE":"40","STUSAB":"OK","STATE_NAME":"Oklahoma","STATENS":"01102857"},{"STATE":"41","STUSAB":"OR","STATE_NAME":"Oregon","STATENS":"01155107"},{"STATE":"42","STUSAB":"PA","STATE_NAME":"Pennsylvania","STATENS":"01779798"},{"STATE":"44","STUSAB":"RI","STATE_NAME":"Rhode Island","STATENS":"01219835"},{"STATE":"45","STUSAB":"SC","STATE_NAME":"South Carolina","STATENS":"01779799"},{"STATE":"46","STUSAB":"SD","STATE_NAME":"South Dakota","STATENS":"01785534"},{"STATE":"47","STUSAB":"TN","STATE_NAME":"Tennessee","STATENS":"01325873"},{"STATE":"48","STUSAB":"TX","STATE_NAME":"Texas","STATENS":"01779801"},{"STATE":"49","STUSAB":"UT","STATE_NAME":"Utah","STATENS":"01455989"},{"STATE":"50","STUSAB":"VT","STATE_NAME":"Vermont","STATENS":"01779802"},{"STATE":"51","STUSAB":"VA","STATE_NAME":"Virginia","STATENS":"01779803"},{"STATE":"53","STUSAB":"WA","STATE_NAME":"Washington","STATENS":"01779804"},{"STATE":"54","STUSAB":"WV","STATE_NAME":"West Virginia","STATENS":"01779805"},{"STATE":"55","STUSAB":"WI","STATE_NAME":"Wisconsin","STATENS":"01779806"},{"STATE":"56","STUSAB":"WY","STATE_NAME":"Wyoming","STATENS":"01779807"},{"STATE":"60","STUSAB":"AS","STATE_NAME":"American Samoa","STATENS":"01802701"},{"STATE":"66","STUSAB":"GU","STATE_NAME":"Guam","STATENS":"01802705"},{"STATE":"69","STUSAB":"MP","STATE_NAME":"Northern Mariana Islands","STATENS":"01779809"},{"STATE":"72","STUSAB":"PR","STATE_NAME":"Puerto Rico","STATENS":"01779808"},{"STATE":"74","STUSAB":"UM","STATE_NAME":"U.S. Minor Outlying Islands","STATENS":"01878752"},{"STATE":"78","STUSAB":"VI","STATE_NAME":"U.S. Virgin Islands","STATENS":"01802710"}];
+
+		//user can pass an arbitrary number of states to remove, using USPS abbrev.
+		var rm = {};
+		if(arguments.length > 0){
+			var r = -1;
+			while(++r < arguments.length){
+				rm[arguments[r]] = 1;
+			}
+		}
+
+		var st = states.filter(function(d){
+			return +d.STATE <= 56 && !(rm.hasOwnProperty(d.STUSAB)); //don't include territories
+		})
+		.map(function(d,i){
+			return {value: d.STATE, text:d.STATE_NAME}
+		});
+
+		sel.options(st);
+
+		return sel;
+	};
+
+	//metros
+	sel.metros = function(include_small){
+		var metros = {"large":[{"CBSA_Code":"10420","CBSA_Title":"Akron, OH","POP2010":703200,"lon":-81.3497,"lat":41.1482},{"CBSA_Code":"10580","CBSA_Title":"Albany-Schenectady-Troy, NY","POP2010":870716,"lon":-73.9377,"lat":42.7891},{"CBSA_Code":"10740","CBSA_Title":"Albuquerque, NM","POP2010":887077,"lon":-106.4708,"lat":35.1212},{"CBSA_Code":"10900","CBSA_Title":"Allentown-Bethlehem-Easton, PA-NJ","POP2010":821173,"lon":-75.4018,"lat":40.7883},{"CBSA_Code":"12060","CBSA_Title":"Atlanta-Sandy Springs-Roswell, GA","POP2010":5286728,"lon":-84.3966,"lat":33.6959},{"CBSA_Code":"12260","CBSA_Title":"Augusta-Richmond County, GA-SC","POP2010":564873,"lon":-81.9804,"lat":33.4571},{"CBSA_Code":"12420","CBSA_Title":"Austin-Round Rock, TX","POP2010":1716289,"lon":-97.655,"lat":30.2628},{"CBSA_Code":"12540","CBSA_Title":"Bakersfield, CA","POP2010":839631,"lon":-118.7278,"lat":35.3433},{"CBSA_Code":"12580","CBSA_Title":"Baltimore-Columbia-Towson, MD","POP2010":2710489,"lon":-76.6722,"lat":39.3838},{"CBSA_Code":"12940","CBSA_Title":"Baton Rouge, LA","POP2010":802484,"lon":-91.1324,"lat":30.5709},{"CBSA_Code":"13820","CBSA_Title":"Birmingham-Hoover, AL","POP2010":1128047,"lon":-86.8144,"lat":33.464},{"CBSA_Code":"14260","CBSA_Title":"Boise City, ID","POP2010":616561,"lon":-116.1417,"lat":43.0153},{"CBSA_Code":"14460","CBSA_Title":"Boston-Cambridge-Newton, MA-NH","POP2010":4552402,"lon":-71.1034,"lat":42.5538},{"CBSA_Code":"14860","CBSA_Title":"Bridgeport-Stamford-Norwalk, CT","POP2010":916829,"lon":-73.3891,"lat":41.2683},{"CBSA_Code":"15380","CBSA_Title":"Buffalo-Cheektowaga-Niagara Falls, NY","POP2010":1135509,"lon":-78.7384,"lat":42.9121},{"CBSA_Code":"15980","CBSA_Title":"Cape Coral-Fort Myers, FL","POP2010":618754,"lon":-81.8207,"lat":26.5787},{"CBSA_Code":"16700","CBSA_Title":"Charleston-North Charleston, SC","POP2010":664607,"lon":-80.0441,"lat":33.0416},{"CBSA_Code":"16740","CBSA_Title":"Charlotte-Concord-Gastonia, NC-SC","POP2010":2217012,"lon":-80.8689,"lat":35.1871},{"CBSA_Code":"16860","CBSA_Title":"Chattanooga, TN-GA","POP2010":528143,"lon":-85.3589,"lat":35.0505},{"CBSA_Code":"16980","CBSA_Title":"Chicago-Naperville-Elgin, IL-IN-WI","POP2010":9461105,"lon":-87.964,"lat":41.7035},{"CBSA_Code":"17140","CBSA_Title":"Cincinnati, OH-KY-IN","POP2010":2114580,"lon":-84.4279,"lat":39.0708},{"CBSA_Code":"17460","CBSA_Title":"Cleveland-Elyria, OH","POP2010":2077240,"lon":-81.6839,"lat":41.3755},{"CBSA_Code":"17820","CBSA_Title":"Colorado Springs, CO","POP2010":645613,"lon":-104.6585,"lat":38.8427},{"CBSA_Code":"17900","CBSA_Title":"Columbia, SC","POP2010":767598,"lon":-81.0434,"lat":34.0902},{"CBSA_Code":"18140","CBSA_Title":"Columbus, OH","POP2010":1901974,"lon":-82.8385,"lat":39.9669},{"CBSA_Code":"19100","CBSA_Title":"Dallas-Fort Worth-Arlington, TX","POP2010":6426214,"lon":-97.0252,"lat":32.8182},{"CBSA_Code":"19380","CBSA_Title":"Dayton, OH","POP2010":799232,"lon":-84.14,"lat":39.8295},{"CBSA_Code":"19660","CBSA_Title":"Deltona-Daytona Beach-Ormond Beach, FL","POP2010":590289,"lon":-81.2182,"lat":29.1699},{"CBSA_Code":"19740","CBSA_Title":"Denver-Aurora-Lakewood, CO","POP2010":2543482,"lon":-104.8942,"lat":39.4342},{"CBSA_Code":"19780","CBSA_Title":"Des Moines-West Des Moines, IA","POP2010":569633,"lon":-93.9431,"lat":41.5479},{"CBSA_Code":"19820","CBSA_Title":"Detroit-Warren-Dearborn, MI","POP2010":4296250,"lon":-83.2333,"lat":42.7203},{"CBSA_Code":"21340","CBSA_Title":"El Paso, TX","POP2010":804123,"lon":-105.5386,"lat":31.5118},{"CBSA_Code":"23420","CBSA_Title":"Fresno, CA","POP2010":930450,"lon":-119.6492,"lat":36.7566},{"CBSA_Code":"24340","CBSA_Title":"Grand Rapids-Wyoming, MI","POP2010":988938,"lon":-85.4883,"lat":42.9988},{"CBSA_Code":"24660","CBSA_Title":"Greensboro-High Point, NC","POP2010":723801,"lon":-79.7913,"lat":36.0264},{"CBSA_Code":"24860","CBSA_Title":"Greenville-Anderson-Mauldin, SC","POP2010":824112,"lon":-82.4168,"lat":34.6889},{"CBSA_Code":"25420","CBSA_Title":"Harrisburg-Carlisle, PA","POP2010":549475,"lon":-77.0945,"lat":40.3278},{"CBSA_Code":"25540","CBSA_Title":"Hartford-West Hartford-East Hartford, CT","POP2010":1212381,"lon":-72.5789,"lat":41.7326},{"CBSA_Code":"26420","CBSA_Title":"Houston-The Woodlands-Sugar Land, TX","POP2010":5920416,"lon":-95.3965,"lat":29.7819},{"CBSA_Code":"26900","CBSA_Title":"Indianapolis-Carmel-Anderson, IN","POP2010":1887877,"lon":-86.2069,"lat":39.7468},{"CBSA_Code":"27140","CBSA_Title":"Jackson, MS","POP2010":567122,"lon":-90.2216,"lat":32.3171},{"CBSA_Code":"27260","CBSA_Title":"Jacksonville, FL","POP2010":1345596,"lon":-81.7926,"lat":30.2365},{"CBSA_Code":"28140","CBSA_Title":"Kansas City, MO-KS","POP2010":2009342,"lon":-94.4464,"lat":38.9368},{"CBSA_Code":"28940","CBSA_Title":"Knoxville, TN","POP2010":837571,"lon":-84.1358,"lat":36.0434},{"CBSA_Code":"29460","CBSA_Title":"Lakeland-Winter Haven, FL","POP2010":602095,"lon":-81.6991,"lat":27.9503},{"CBSA_Code":"29820","CBSA_Title":"Las Vegas-Henderson-Paradise, NV","POP2010":1951269,"lon":-115.0156,"lat":36.2149},{"CBSA_Code":"30780","CBSA_Title":"Little Rock-North Little Rock-Conway, AR","POP2010":699757,"lon":-92.396,"lat":34.7559},{"CBSA_Code":"31080","CBSA_Title":"Los Angeles-Long Beach-Anaheim, CA","POP2010":12828837,"lon":-118.1388,"lat":34.2474},{"CBSA_Code":"31140","CBSA_Title":"Louisville/Jefferson County, KY-IN","POP2010":1235708,"lon":-85.67,"lat":38.3371},{"CBSA_Code":"31540","CBSA_Title":"Madison, WI","POP2010":605435,"lon":-89.591,"lat":43.0794},{"CBSA_Code":"32580","CBSA_Title":"McAllen-Edinburg-Mission, TX","POP2010":774769,"lon":-98.1806,"lat":26.3964},{"CBSA_Code":"32820","CBSA_Title":"Memphis, TN-MS-AR","POP2010":1324829,"lon":-89.8152,"lat":35.0076},{"CBSA_Code":"33100","CBSA_Title":"Miami-Fort Lauderdale-West Palm Beach, FL","POP2010":5564635,"lon":-80.5059,"lat":26.1607},{"CBSA_Code":"33340","CBSA_Title":"Milwaukee-Waukesha-West Allis, WI","POP2010":1555908,"lon":-88.1734,"lat":43.1773},{"CBSA_Code":"33460","CBSA_Title":"Minneapolis-St. Paul-Bloomington, MN-WI","POP2010":3348859,"lon":-93.3463,"lat":45.0657},{"CBSA_Code":"34980","CBSA_Title":"Nashville-Davidson--Murfreesboro--Franklin, TN","POP2010":1670890,"lon":-86.7249,"lat":36.0881},{"CBSA_Code":"35300","CBSA_Title":"New Haven-Milford, CT","POP2010":862477,"lon":-72.9377,"lat":41.412},{"CBSA_Code":"35380","CBSA_Title":"New Orleans-Metairie, LA","POP2010":1189866,"lon":-89.9602,"lat":29.9184},{"CBSA_Code":"35620","CBSA_Title":"New York-Newark-Jersey City, NY-NJ-PA","POP2010":19567410,"lon":-74.0892,"lat":40.9223},{"CBSA_Code":"35840","CBSA_Title":"North Port-Sarasota-Bradenton, FL","POP2010":702281,"lon":-82.3224,"lat":27.3478},{"CBSA_Code":"36260","CBSA_Title":"Ogden-Clearfield, UT","POP2010":597159,"lon":-112.8181,"lat":41.4327},{"CBSA_Code":"36420","CBSA_Title":"Oklahoma City, OK","POP2010":1252987,"lon":-97.5049,"lat":35.4287},{"CBSA_Code":"36540","CBSA_Title":"Omaha-Council Bluffs, NE-IA","POP2010":865350,"lon":-95.9998,"lat":41.2904},{"CBSA_Code":"36740","CBSA_Title":"Orlando-Kissimmee-Sanford, FL","POP2010":2134411,"lon":-81.3636,"lat":28.4335},{"CBSA_Code":"37100","CBSA_Title":"Oxnard-Thousand Oaks-Ventura, CA","POP2010":823318,"lon":-119.0789,"lat":34.4731},{"CBSA_Code":"37340","CBSA_Title":"Palm Bay-Melbourne-Titusville, FL","POP2010":543376,"lon":-80.7325,"lat":28.2938},{"CBSA_Code":"37980","CBSA_Title":"Philadelphia-Camden-Wilmington, PA-NJ-DE-MD","POP2010":5965343,"lon":-75.3032,"lat":39.9046},{"CBSA_Code":"38060","CBSA_Title":"Phoenix-Mesa-Scottsdale, AZ","POP2010":4192887,"lon":-112.0707,"lat":33.1858},{"CBSA_Code":"38300","CBSA_Title":"Pittsburgh, PA","POP2010":2356285,"lon":-79.8309,"lat":40.4394},{"CBSA_Code":"38900","CBSA_Title":"Portland-Vancouver-Hillsboro, OR-WA","POP2010":2226009,"lon":-122.4783,"lat":45.5976},{"CBSA_Code":"39300","CBSA_Title":"Providence-Warwick, RI-MA","POP2010":1600852,"lon":-71.3998,"lat":41.7242},{"CBSA_Code":"39340","CBSA_Title":"Provo-Orem, UT","POP2010":526810,"lon":-112.3536,"lat":39.8642},{"CBSA_Code":"39580","CBSA_Title":"Raleigh, NC","POP2010":1130490,"lon":-78.4617,"lat":35.7539},{"CBSA_Code":"40060","CBSA_Title":"Richmond, VA","POP2010":1208101,"lon":-77.4725,"lat":37.4604},{"CBSA_Code":"40140","CBSA_Title":"Riverside-San Bernardino-Ontario, CA","POP2010":4224851,"lon":-116.1282,"lat":34.5522},{"CBSA_Code":"40380","CBSA_Title":"Rochester, NY","POP2010":1079671,"lon":-77.5095,"lat":42.9688},{"CBSA_Code":"40900","CBSA_Title":"Sacramento--Roseville--Arden-Arcade, CA","POP2010":2149127,"lon":-120.9985,"lat":38.7812},{"CBSA_Code":"41180","CBSA_Title":"St. Louis, MO-IL","POP2010":2787701,"lon":-90.3499,"lat":38.7336},{"CBSA_Code":"41620","CBSA_Title":"Salt Lake City, UT","POP2010":1087873,"lon":-113.0109,"lat":40.4709},{"CBSA_Code":"41700","CBSA_Title":"San Antonio-New Braunfels, TX","POP2010":2142508,"lon":-98.6015,"lat":29.4283},{"CBSA_Code":"41740","CBSA_Title":"San Diego-Carlsbad, CA","POP2010":3095313,"lon":-116.7319,"lat":33.0335},{"CBSA_Code":"41860","CBSA_Title":"San Francisco-Oakland-Hayward, CA","POP2010":4335391,"lon":-122.0149,"lat":37.7021},{"CBSA_Code":"41940","CBSA_Title":"San Jose-Sunnyvale-Santa Clara, CA","POP2010":1836911,"lon":-121.3745,"lat":36.909},{"CBSA_Code":"42540","CBSA_Title":"Scranton--Wilkes-Barre--Hazleton, PA","POP2010":563631,"lon":-75.8945,"lat":41.3231},{"CBSA_Code":"42660","CBSA_Title":"Seattle-Tacoma-Bellevue, WA","POP2010":3439809,"lon":-121.8656,"lat":47.5534},{"CBSA_Code":"44060","CBSA_Title":"Spokane-Spokane Valley, WA","POP2010":527753,"lon":-117.5722,"lat":48.1934},{"CBSA_Code":"44140","CBSA_Title":"Springfield, MA","POP2010":621570,"lon":-72.6448,"lat":42.2292},{"CBSA_Code":"44700","CBSA_Title":"Stockton-Lodi, CA","POP2010":685306,"lon":-121.2723,"lat":37.9323},{"CBSA_Code":"45060","CBSA_Title":"Syracuse, NY","POP2010":662577,"lon":-76.0338,"lat":43.1568},{"CBSA_Code":"45300","CBSA_Title":"Tampa-St. Petersburg-Clearwater, FL","POP2010":2783243,"lon":-82.4056,"lat":28.1543},{"CBSA_Code":"45780","CBSA_Title":"Toledo, OH","POP2010":610001,"lon":-83.7804,"lat":41.4986},{"CBSA_Code":"46060","CBSA_Title":"Tucson, AZ","POP2010":980263,"lon":-111.79,"lat":32.0974},{"CBSA_Code":"46140","CBSA_Title":"Tulsa, OK","POP2010":937478,"lon":-96.1654,"lat":36.2496},{"CBSA_Code":"46520","CBSA_Title":"Urban Honolulu, HI","POP2010":953207,"lon":-157.9757,"lat":21.4604},{"CBSA_Code":"47260","CBSA_Title":"Virginia Beach-Norfolk-Newport News, VA-NC","POP2010":1676822,"lon":-76.4147,"lat":36.6557},{"CBSA_Code":"47900","CBSA_Title":"Washington-Arlington-Alexandria, DC-VA-MD-WV","POP2010":5636232,"lon":-77.4724,"lat":38.8319},{"CBSA_Code":"48620","CBSA_Title":"Wichita, KS","POP2010":630919,"lon":-97.3981,"lat":37.625},{"CBSA_Code":"49180","CBSA_Title":"Winston-Salem, NC","POP2010":640595,"lon":-80.3451,"lat":36.0724},{"CBSA_Code":"49340","CBSA_Title":"Worcester, MA-CT","POP2010":916980,"lon":-71.9287,"lat":42.2188},{"CBSA_Code":"49660","CBSA_Title":"Youngstown-Warren-Boardman, OH-PA","POP2010":565773,"lon":-80.5642,"lat":41.2417}],"small":[{"CBSA_Code":"10180","CBSA_Title":"Abilene, TX","POP2010":165252,"lon":-99.7176,"lat":32.4498},{"CBSA_Code":"10500","CBSA_Title":"Albany, GA","POP2010":157308,"lon":-84.1702,"lat":31.5866},{"CBSA_Code":"10540","CBSA_Title":"Albany, OR","POP2010":116672,"lon":-122.5384,"lat":44.4886},{"CBSA_Code":"10780","CBSA_Title":"Alexandria, LA","POP2010":153922,"lon":-92.5438,"lat":31.3346},{"CBSA_Code":"11020","CBSA_Title":"Altoona, PA","POP2010":127089,"lon":-78.3472,"lat":40.4834},{"CBSA_Code":"11100","CBSA_Title":"Amarillo, TX","POP2010":251933,"lon":-101.9104,"lat":35.2488},{"CBSA_Code":"11180","CBSA_Title":"Ames, IA","POP2010":89542,"lon":-93.465,"lat":42.0362},{"CBSA_Code":"11260","CBSA_Title":"Anchorage, AK","POP2010":380821,"lon":-149.5429,"lat":62.237},{"CBSA_Code":"11460","CBSA_Title":"Ann Arbor, MI","POP2010":344791,"lon":-83.8385,"lat":42.2531},{"CBSA_Code":"11500","CBSA_Title":"Anniston-Oxford-Jacksonville, AL","POP2010":118572,"lon":-85.8243,"lat":33.7738},{"CBSA_Code":"11540","CBSA_Title":"Appleton, WI","POP2010":225666,"lon":-88.3714,"lat":44.2887},{"CBSA_Code":"11700","CBSA_Title":"Asheville, NC","POP2010":424858,"lon":-82.6853,"lat":35.6016},{"CBSA_Code":"12020","CBSA_Title":"Athens-Clarke County, GA","POP2010":192541,"lon":-83.2169,"lat":33.9503},{"CBSA_Code":"12100","CBSA_Title":"Atlantic City-Hammonton, NJ","POP2010":274549,"lon":-74.6609,"lat":39.4777},{"CBSA_Code":"12220","CBSA_Title":"Auburn-Opelika, AL","POP2010":140247,"lon":-85.3593,"lat":32.6077},{"CBSA_Code":"12620","CBSA_Title":"Bangor, ME","POP2010":153923,"lon":-68.6504,"lat":45.4015},{"CBSA_Code":"12700","CBSA_Title":"Barnstable Town, MA","POP2010":215888,"lon":-70.2921,"lat":41.7237},{"CBSA_Code":"12980","CBSA_Title":"Battle Creek, MI","POP2010":136146,"lon":-85.0049,"lat":42.2463},{"CBSA_Code":"13020","CBSA_Title":"Bay City, MI","POP2010":107771,"lon":-83.9916,"lat":43.7014},{"CBSA_Code":"13140","CBSA_Title":"Beaumont-Port Arthur, TX","POP2010":403190,"lon":-94.0707,"lat":30.305},{"CBSA_Code":"13220","CBSA_Title":"Beckley, WV","POP2010":124898,"lon":-81.1611,"lat":37.9103},{"CBSA_Code":"13380","CBSA_Title":"Bellingham, WA","POP2010":201140,"lon":-121.7125,"lat":48.8258},{"CBSA_Code":"13460","CBSA_Title":"Bend-Redmond, OR","POP2010":157733,"lon":-121.2277,"lat":43.9145},{"CBSA_Code":"13740","CBSA_Title":"Billings, MT","POP2010":158934,"lon":-108.7152,"lat":45.7811},{"CBSA_Code":"13780","CBSA_Title":"Binghamton, NY","POP2010":251725,"lon":-76.0265,"lat":42.1623},{"CBSA_Code":"13900","CBSA_Title":"Bismarck, ND","POP2010":114778,"lon":-100.9905,"lat":46.7286},{"CBSA_Code":"13980","CBSA_Title":"Blacksburg-Christiansburg-Radford, VA","POP2010":178237,"lon":-80.5332,"lat":37.1201},{"CBSA_Code":"14010","CBSA_Title":"Bloomington, IL","POP2010":186133,"lon":-88.8634,"lat":40.4122},{"CBSA_Code":"14020","CBSA_Title":"Bloomington, IN","POP2010":159549,"lon":-86.6768,"lat":39.2341},{"CBSA_Code":"14100","CBSA_Title":"Bloomsburg-Berwick, PA","POP2010":85562,"lon":-76.457,"lat":41.0392},{"CBSA_Code":"14500","CBSA_Title":"Boulder, CO","POP2010":294567,"lon":-105.3586,"lat":40.0934},{"CBSA_Code":"14540","CBSA_Title":"Bowling Green, KY","POP2010":158599,"lon":-86.4092,"lat":37.0426},{"CBSA_Code":"14740","CBSA_Title":"Bremerton-Silverdale, WA","POP2010":251133,"lon":-122.6769,"lat":47.6121},{"CBSA_Code":"15180","CBSA_Title":"Brownsville-Harlingen, TX","POP2010":406220,"lon":-97.5333,"lat":26.128},{"CBSA_Code":"15260","CBSA_Title":"Brunswick, GA","POP2010":112370,"lon":-81.6329,"lat":31.3194},{"CBSA_Code":"15500","CBSA_Title":"Burlington, NC","POP2010":151131,"lon":-79.3989,"lat":36.0436},{"CBSA_Code":"15540","CBSA_Title":"Burlington-South Burlington, VT","POP2010":211261,"lon":-73.0301,"lat":44.6905},{"CBSA_Code":"15680","CBSA_Title":"California-Lexington Park, MD","POP2010":105151,"lon":-76.609,"lat":38.3027},{"CBSA_Code":"15940","CBSA_Title":"Canton-Massillon, OH","POP2010":404422,"lon":-81.2498,"lat":40.7179},{"CBSA_Code":"16020","CBSA_Title":"Cape Girardeau, MO-IL","POP2010":96275,"lon":-89.7715,"lat":37.3235},{"CBSA_Code":"16060","CBSA_Title":"Carbondale-Marion, IL","POP2010":126575,"lon":-89.1905,"lat":37.7622},{"CBSA_Code":"16180","CBSA_Title":"Carson City, NV","POP2010":55274,"lon":-119.7423,"lat":39.1584},{"CBSA_Code":"16220","CBSA_Title":"Casper, WY","POP2010":75450,"lon":-106.798,"lat":42.9624},{"CBSA_Code":"16300","CBSA_Title":"Cedar Rapids, IA","POP2010":257940,"lon":-91.6314,"lat":42.0915},{"CBSA_Code":"16540","CBSA_Title":"Chambersburg-Waynesboro, PA","POP2010":149618,"lon":-77.7185,"lat":39.9289},{"CBSA_Code":"16580","CBSA_Title":"Champaign-Urbana, IL","POP2010":231891,"lon":-88.2963,"lat":40.226},{"CBSA_Code":"16620","CBSA_Title":"Charleston, WV","POP2010":227078,"lon":-81.495,"lat":38.2708},{"CBSA_Code":"16820","CBSA_Title":"Charlottesville, VA","POP2010":218705,"lon":-78.5765,"lat":37.8507},{"CBSA_Code":"16940","CBSA_Title":"Cheyenne, WY","POP2010":91738,"lon":-104.6888,"lat":41.3071},{"CBSA_Code":"17020","CBSA_Title":"Chico, CA","POP2010":220000,"lon":-121.5987,"lat":39.6692},{"CBSA_Code":"17300","CBSA_Title":"Clarksville, TN-KY","POP2010":260625,"lon":-87.5642,"lat":36.7475},{"CBSA_Code":"17420","CBSA_Title":"Cleveland, TN","POP2010":115788,"lon":-84.6643,"lat":35.1362},{"CBSA_Code":"17660","CBSA_Title":"Coeur d'Alene, ID","POP2010":138494,"lon":-116.7006,"lat":47.6732},{"CBSA_Code":"17780","CBSA_Title":"College Station-Bryan, TX","POP2010":228660,"lon":-96.491,"lat":30.7573},{"CBSA_Code":"17860","CBSA_Title":"Columbia, MO","POP2010":162642,"lon":-92.3056,"lat":38.9881},{"CBSA_Code":"17980","CBSA_Title":"Columbus, GA-AL","POP2010":294865,"lon":-84.9134,"lat":32.4419},{"CBSA_Code":"18020","CBSA_Title":"Columbus, IN","POP2010":76794,"lon":-85.8967,"lat":39.2091},{"CBSA_Code":"18580","CBSA_Title":"Corpus Christi, TX","POP2010":428185,"lon":-97.4954,"lat":27.9026},{"CBSA_Code":"18700","CBSA_Title":"Corvallis, OR","POP2010":85579,"lon":-123.4291,"lat":44.4911},{"CBSA_Code":"18880","CBSA_Title":"Crestview-Fort Walton Beach-Destin, FL","POP2010":235865,"lon":-86.3655,"lat":30.6655},{"CBSA_Code":"19060","CBSA_Title":"Cumberland, MD-WV","POP2010":103299,"lon":-78.8059,"lat":39.5294},{"CBSA_Code":"19140","CBSA_Title":"Dalton, GA","POP2010":142227,"lon":-84.8458,"lat":34.8014},{"CBSA_Code":"19180","CBSA_Title":"Danville, IL","POP2010":81625,"lon":-87.732,"lat":40.1818},{"CBSA_Code":"19300","CBSA_Title":"Daphne-Fairhope-Foley, AL","POP2010":182265,"lon":-87.7227,"lat":30.7294},{"CBSA_Code":"19340","CBSA_Title":"Davenport-Moline-Rock Island, IA-IL","POP2010":379690,"lon":-90.4685,"lat":41.3966},{"CBSA_Code":"19460","CBSA_Title":"Decatur, AL","POP2010":153829,"lon":-87.1009,"lat":34.4885},{"CBSA_Code":"19500","CBSA_Title":"Decatur, IL","POP2010":110768,"lon":-88.9634,"lat":39.8606},{"CBSA_Code":"20020","CBSA_Title":"Dothan, AL","POP2010":145639,"lon":-85.4551,"lat":31.2583},{"CBSA_Code":"20100","CBSA_Title":"Dover, DE","POP2010":162310,"lon":-75.5683,"lat":39.0857},{"CBSA_Code":"20220","CBSA_Title":"Dubuque, IA","POP2010":93653,"lon":-90.8809,"lat":42.4687},{"CBSA_Code":"20260","CBSA_Title":"Duluth, MN-WI","POP2010":279771,"lon":-92.407,"lat":47.3334},{"CBSA_Code":"20500","CBSA_Title":"Durham-Chapel Hill, NC","POP2010":504357,"lon":-79.1005,"lat":35.994},{"CBSA_Code":"20700","CBSA_Title":"East Stroudsburg, PA","POP2010":169842,"lon":-75.3433,"lat":41.0587},{"CBSA_Code":"20740","CBSA_Title":"Eau Claire, WI","POP2010":161151,"lon":-91.2827,"lat":44.9392},{"CBSA_Code":"20940","CBSA_Title":"El Centro, CA","POP2010":174528,"lon":-115.3627,"lat":33.0405},{"CBSA_Code":"21060","CBSA_Title":"Elizabethtown-Fort Knox, KY","POP2010":148338,"lon":-85.9718,"lat":37.7352},{"CBSA_Code":"21140","CBSA_Title":"Elkhart-Goshen, IN","POP2010":197559,"lon":-85.8588,"lat":41.5977},{"CBSA_Code":"21300","CBSA_Title":"Elmira, NY","POP2010":88830,"lon":-76.7638,"lat":42.1393},{"CBSA_Code":"21500","CBSA_Title":"Erie, PA","POP2010":280566,"lon":-80.033,"lat":41.9925},{"CBSA_Code":"21660","CBSA_Title":"Eugene, OR","POP2010":351715,"lon":-122.8454,"lat":43.938},{"CBSA_Code":"21780","CBSA_Title":"Evansville, IN-KY","POP2010":311552,"lon":-87.5767,"lat":37.9678},{"CBSA_Code":"21820","CBSA_Title":"Fairbanks, AK","POP2010":97581,"lon":-146.5673,"lat":64.8071},{"CBSA_Code":"22020","CBSA_Title":"Fargo, ND-MN","POP2010":208777,"lon":-96.9612,"lat":46.9175},{"CBSA_Code":"22140","CBSA_Title":"Farmington, NM","POP2010":130044,"lon":-108.3204,"lat":36.5082},{"CBSA_Code":"22180","CBSA_Title":"Fayetteville, NC","POP2010":366383,"lon":-78.9786,"lat":35.0347},{"CBSA_Code":"22220","CBSA_Title":"Fayetteville-Springdale-Rogers, AR-MO","POP2010":463204,"lon":-94.1206,"lat":36.1954},{"CBSA_Code":"22380","CBSA_Title":"Flagstaff, AZ","POP2010":134421,"lon":-111.7711,"lat":35.8392},{"CBSA_Code":"22420","CBSA_Title":"Flint, MI","POP2010":425790,"lon":-83.7059,"lat":43.0224},{"CBSA_Code":"22500","CBSA_Title":"Florence, SC","POP2010":205566,"lon":-79.8073,"lat":34.1537},{"CBSA_Code":"22520","CBSA_Title":"Florence-Muscle Shoals, AL","POP2010":147137,"lon":-87.7207,"lat":34.8082},{"CBSA_Code":"22540","CBSA_Title":"Fond du Lac, WI","POP2010":101633,"lon":-88.4889,"lat":43.7535},{"CBSA_Code":"22660","CBSA_Title":"Fort Collins, CO","POP2010":299630,"lon":-105.4614,"lat":40.6664},{"CBSA_Code":"22900","CBSA_Title":"Fort Smith, AR-OK","POP2010":280467,"lon":-94.5662,"lat":35.1873},{"CBSA_Code":"23060","CBSA_Title":"Fort Wayne, IN","POP2010":416257,"lon":-85.2165,"lat":41.0055},{"CBSA_Code":"23460","CBSA_Title":"Gadsden, AL","POP2010":104430,"lon":-86.0365,"lat":34.0425},{"CBSA_Code":"23540","CBSA_Title":"Gainesville, FL","POP2010":264275,"lon":-82.4723,"lat":29.6891},{"CBSA_Code":"23580","CBSA_Title":"Gainesville, GA","POP2010":179684,"lon":-83.8197,"lat":34.3217},{"CBSA_Code":"23900","CBSA_Title":"Gettysburg, PA","POP2010":101407,"lon":-77.2204,"lat":39.8677},{"CBSA_Code":"24020","CBSA_Title":"Glens Falls, NY","POP2010":128923,"lon":-73.6492,"lat":43.4454},{"CBSA_Code":"24140","CBSA_Title":"Goldsboro, NC","POP2010":122623,"lon":-77.9985,"lat":35.3583},{"CBSA_Code":"24220","CBSA_Title":"Grand Forks, ND-MN","POP2010":98461,"lon":-96.8452,"lat":47.8362},{"CBSA_Code":"24260","CBSA_Title":"Grand Island, NE","POP2010":81850,"lon":-98.2761,"lat":41.0339},{"CBSA_Code":"24300","CBSA_Title":"Grand Junction, CO","POP2010":146723,"lon":-108.4687,"lat":39.0175},{"CBSA_Code":"24420","CBSA_Title":"Grants Pass, OR","POP2010":82713,"lon":-123.5563,"lat":42.3642},{"CBSA_Code":"24500","CBSA_Title":"Great Falls, MT","POP2010":81327,"lon":-111.3472,"lat":47.3087},{"CBSA_Code":"24540","CBSA_Title":"Greeley, CO","POP2010":252825,"lon":-104.393,"lat":40.5551},{"CBSA_Code":"24580","CBSA_Title":"Green Bay, WI","POP2010":306241,"lon":-88.0775,"lat":44.7753},{"CBSA_Code":"24780","CBSA_Title":"Greenville, NC","POP2010":168148,"lon":-77.3716,"lat":35.5907},{"CBSA_Code":"25060","CBSA_Title":"Gulfport-Biloxi-Pascagoula, MS","POP2010":370702,"lon":-89.0197,"lat":30.5005},{"CBSA_Code":"25180","CBSA_Title":"Hagerstown-Martinsburg, MD-WV","POP2010":251599,"lon":-77.8997,"lat":39.5465},{"CBSA_Code":"25220","CBSA_Title":"Hammond, LA","POP2010":121097,"lon":-90.4062,"lat":30.629},{"CBSA_Code":"25260","CBSA_Title":"Hanford-Corcoran, CA","POP2010":152982,"lon":-119.8139,"lat":36.0761},{"CBSA_Code":"25500","CBSA_Title":"Harrisonburg, VA","POP2010":125228,"lon":-78.8717,"lat":38.5116},{"CBSA_Code":"25620","CBSA_Title":"Hattiesburg, MS","POP2010":142842,"lon":-89.2307,"lat":31.186},{"CBSA_Code":"25860","CBSA_Title":"Hickory-Lenoir-Morganton, NC","POP2010":365497,"lon":-81.4572,"lat":35.8141},{"CBSA_Code":"25940","CBSA_Title":"Hilton Head Island-Bluffton-Beaufort, SC","POP2010":187010,"lon":-80.8718,"lat":32.4067},{"CBSA_Code":"25980","CBSA_Title":"Hinesville, GA","POP2010":77917,"lon":-81.6045,"lat":31.798},{"CBSA_Code":"26140","CBSA_Title":"Homosassa Springs, FL","POP2010":141236,"lon":-82.4596,"lat":28.8547},{"CBSA_Code":"26300","CBSA_Title":"Hot Springs, AR","POP2010":96024,"lon":-93.1492,"lat":34.5769},{"CBSA_Code":"26380","CBSA_Title":"Houma-Thibodaux, LA","POP2010":208178,"lon":-90.662,"lat":29.4694},{"CBSA_Code":"26580","CBSA_Title":"Huntington-Ashland, WV-KY-OH","POP2010":364908,"lon":-82.3832,"lat":38.3789},{"CBSA_Code":"26620","CBSA_Title":"Huntsville, AL","POP2010":417593,"lon":-86.7352,"lat":34.7831},{"CBSA_Code":"26820","CBSA_Title":"Idaho Falls, ID","POP2010":133265,"lon":-112.4338,"lat":43.6242},{"CBSA_Code":"26980","CBSA_Title":"Iowa City, IA","POP2010":152586,"lon":-91.6495,"lat":41.5112},{"CBSA_Code":"27060","CBSA_Title":"Ithaca, NY","POP2010":101564,"lon":-76.4705,"lat":42.4487},{"CBSA_Code":"27100","CBSA_Title":"Jackson, MI","POP2010":160248,"lon":-84.4226,"lat":42.2481},{"CBSA_Code":"27180","CBSA_Title":"Jackson, TN","POP2010":130011,"lon":-88.8467,"lat":35.609},{"CBSA_Code":"27340","CBSA_Title":"Jacksonville, NC","POP2010":177772,"lon":-77.4262,"lat":34.7271},{"CBSA_Code":"27500","CBSA_Title":"Janesville-Beloit, WI","POP2010":160331,"lon":-89.0715,"lat":42.6713},{"CBSA_Code":"27620","CBSA_Title":"Jefferson City, MO","POP2010":149807,"lon":-92.0909,"lat":38.6398},{"CBSA_Code":"27740","CBSA_Title":"Johnson City, TN","POP2010":198716,"lon":-82.3373,"lat":36.2518},{"CBSA_Code":"27780","CBSA_Title":"Johnstown, PA","POP2010":143679,"lon":-78.7205,"lat":40.4911},{"CBSA_Code":"27860","CBSA_Title":"Jonesboro, AR","POP2010":121026,"lon":-90.648,"lat":35.6986},{"CBSA_Code":"27900","CBSA_Title":"Joplin, MO","POP2010":175518,"lon":-94.34,"lat":37.0568},{"CBSA_Code":"27980","CBSA_Title":"Kahului-Wailuku-Lahaina, HI","POP2010":154924,"lon":-156.3397,"lat":20.7937},{"CBSA_Code":"28020","CBSA_Title":"Kalamazoo-Portage, MI","POP2010":326589,"lon":-85.7836,"lat":42.2486},{"CBSA_Code":"28100","CBSA_Title":"Kankakee, IL","POP2010":113449,"lon":-87.8621,"lat":41.1375},{"CBSA_Code":"28420","CBSA_Title":"Kennewick-Richland, WA","POP2010":253340,"lon":-119.2565,"lat":46.3638},{"CBSA_Code":"28660","CBSA_Title":"Killeen-Temple, TX","POP2010":405300,"lon":-97.7876,"lat":31.2079},{"CBSA_Code":"28700","CBSA_Title":"Kingsport-Bristol-Bristol, TN-VA","POP2010":309544,"lon":-82.4389,"lat":36.6113},{"CBSA_Code":"28740","CBSA_Title":"Kingston, NY","POP2010":182493,"lon":-74.2626,"lat":41.8888},{"CBSA_Code":"29020","CBSA_Title":"Kokomo, IN","POP2010":82752,"lon":-86.1135,"lat":40.4853},{"CBSA_Code":"29100","CBSA_Title":"La Crosse-Onalaska, WI-MN","POP2010":133665,"lon":-91.32,"lat":43.7797},{"CBSA_Code":"29180","CBSA_Title":"Lafayette, LA","POP2010":466750,"lon":-92.0602,"lat":30.021},{"CBSA_Code":"29200","CBSA_Title":"Lafayette-West Lafayette, IN","POP2010":201789,"lon":-86.9275,"lat":40.5151},{"CBSA_Code":"29340","CBSA_Title":"Lake Charles, LA","POP2010":199607,"lon":-93.2577,"lat":30.0169},{"CBSA_Code":"29420","CBSA_Title":"Lake Havasu City-Kingman, AZ","POP2010":200186,"lon":-113.7596,"lat":35.7057},{"CBSA_Code":"29540","CBSA_Title":"Lancaster, PA","POP2010":519445,"lon":-76.2445,"lat":40.0401},{"CBSA_Code":"29620","CBSA_Title":"Lansing-East Lansing, MI","POP2010":464036,"lon":-84.6075,"lat":42.7137},{"CBSA_Code":"29700","CBSA_Title":"Laredo, TX","POP2010":250304,"lon":-99.3331,"lat":27.7619},{"CBSA_Code":"29740","CBSA_Title":"Las Cruces, NM","POP2010":209233,"lon":-106.8324,"lat":32.3518},{"CBSA_Code":"29940","CBSA_Title":"Lawrence, KS","POP2010":110826,"lon":-95.2907,"lat":38.8822},{"CBSA_Code":"30020","CBSA_Title":"Lawton, OK","POP2010":130291,"lon":-98.4339,"lat":34.5253},{"CBSA_Code":"30140","CBSA_Title":"Lebanon, PA","POP2010":133568,"lon":-76.4565,"lat":40.3668},{"CBSA_Code":"30300","CBSA_Title":"Lewiston, ID-WA","POP2010":60888,"lon":-116.9405,"lat":46.267},{"CBSA_Code":"30340","CBSA_Title":"Lewiston-Auburn, ME","POP2010":107702,"lon":-70.2029,"lat":44.1664},{"CBSA_Code":"30460","CBSA_Title":"Lexington-Fayette, KY","POP2010":472099,"lon":-84.4314,"lat":38.0925},{"CBSA_Code":"30620","CBSA_Title":"Lima, OH","POP2010":106331,"lon":-84.1124,"lat":40.7696},{"CBSA_Code":"30700","CBSA_Title":"Lincoln, NE","POP2010":302157,"lon":-96.8708,"lat":40.8199},{"CBSA_Code":"30860","CBSA_Title":"Logan, UT-ID","POP2010":125442,"lon":-111.7689,"lat":41.8869},{"CBSA_Code":"30980","CBSA_Title":"Longview, TX","POP2010":214369,"lon":-94.829,"lat":32.3731},{"CBSA_Code":"31020","CBSA_Title":"Longview, WA","POP2010":102410,"lon":-122.6795,"lat":46.193},{"CBSA_Code":"31180","CBSA_Title":"Lubbock, TX","POP2010":290805,"lon":-101.6448,"lat":33.4683},{"CBSA_Code":"31340","CBSA_Title":"Lynchburg, VA","POP2010":246412,"lon":-79.2213,"lat":37.3664},{"CBSA_Code":"31420","CBSA_Title":"Macon, GA","POP2010":232293,"lon":-83.7131,"lat":32.8605},{"CBSA_Code":"31460","CBSA_Title":"Madera, CA","POP2010":150865,"lon":-119.7598,"lat":37.2176},{"CBSA_Code":"31700","CBSA_Title":"Manchester-Nashua, NH","POP2010":400721,"lon":-71.7209,"lat":42.9174},{"CBSA_Code":"31740","CBSA_Title":"Manhattan, KS","POP2010":92719,"lon":-96.5088,"lat":39.341},{"CBSA_Code":"31860","CBSA_Title":"Mankato-North Mankato, MN","POP2010":96740,"lon":-94.1354,"lat":44.1542},{"CBSA_Code":"31900","CBSA_Title":"Mansfield, OH","POP2010":124475,"lon":-82.5425,"lat":40.7731},{"CBSA_Code":"32780","CBSA_Title":"Medford, OR","POP2010":203206,"lon":-122.7291,"lat":42.4314},{"CBSA_Code":"32900","CBSA_Title":"Merced, CA","POP2010":255793,"lon":-120.7137,"lat":37.1929},{"CBSA_Code":"33140","CBSA_Title":"Michigan City-La Porte, IN","POP2010":111467,"lon":-86.7376,"lat":41.5471},{"CBSA_Code":"33220","CBSA_Title":"Midland, MI","POP2010":83629,"lon":-84.388,"lat":43.6433},{"CBSA_Code":"33260","CBSA_Title":"Midland, TX","POP2010":141671,"lon":-101.9911,"lat":32.0897},{"CBSA_Code":"33540","CBSA_Title":"Missoula, MT","POP2010":109299,"lon":-113.9216,"lat":47.0375},{"CBSA_Code":"33660","CBSA_Title":"Mobile, AL","POP2010":412992,"lon":-88.2071,"lat":30.7944},{"CBSA_Code":"33700","CBSA_Title":"Modesto, CA","POP2010":514453,"lon":-120.9952,"lat":37.5581},{"CBSA_Code":"33740","CBSA_Title":"Monroe, LA","POP2010":176441,"lon":-92.2879,"lat":32.6831},{"CBSA_Code":"33780","CBSA_Title":"Monroe, MI","POP2010":152021,"lon":-83.5374,"lat":41.9285},{"CBSA_Code":"33860","CBSA_Title":"Montgomery, AL","POP2010":374536,"lon":-86.4015,"lat":32.3632},{"CBSA_Code":"34060","CBSA_Title":"Morgantown, WV","POP2010":129709,"lon":-79.8035,"lat":39.5264},{"CBSA_Code":"34100","CBSA_Title":"Morristown, TN","POP2010":113951,"lon":-83.3837,"lat":36.1079},{"CBSA_Code":"34580","CBSA_Title":"Mount Vernon-Anacortes, WA","POP2010":116901,"lon":-121.7224,"lat":48.4782},{"CBSA_Code":"34620","CBSA_Title":"Muncie, IN","POP2010":117671,"lon":-85.3973,"lat":40.2279},{"CBSA_Code":"34740","CBSA_Title":"Muskegon, MI","POP2010":172188,"lon":-86.152,"lat":43.2914},{"CBSA_Code":"34820","CBSA_Title":"Myrtle Beach-Conway-North Myrtle Beach, SC-NC","POP2010":376722,"lon":-78.6622,"lat":33.9876},{"CBSA_Code":"34900","CBSA_Title":"Napa, CA","POP2010":136484,"lon":-122.3324,"lat":38.5107},{"CBSA_Code":"34940","CBSA_Title":"Naples-Immokalee-Marco Island, FL","POP2010":321520,"lon":-81.3445,"lat":26.1169},{"CBSA_Code":"35100","CBSA_Title":"New Bern, NC","POP2010":126802,"lon":-77.0782,"lat":35.0938},{"CBSA_Code":"35660","CBSA_Title":"Niles-Benton Harbor, MI","POP2010":156813,"lon":-86.4125,"lat":41.9547},{"CBSA_Code":"35980","CBSA_Title":"Norwich-New London, CT","POP2010":274055,"lon":-72.1029,"lat":41.4876},{"CBSA_Code":"36100","CBSA_Title":"Ocala, FL","POP2010":331298,"lon":-82.0583,"lat":29.2076},{"CBSA_Code":"36140","CBSA_Title":"Ocean City, NJ","POP2010":97265,"lon":-74.8002,"lat":39.1482},{"CBSA_Code":"36220","CBSA_Title":"Odessa, TX","POP2010":137130,"lon":-102.5429,"lat":31.869},{"CBSA_Code":"36500","CBSA_Title":"Olympia-Tumwater, WA","POP2010":252264,"lon":-122.8298,"lat":46.9287},{"CBSA_Code":"36780","CBSA_Title":"Oshkosh-Neenah, WI","POP2010":166994,"lon":-88.6448,"lat":44.0689},{"CBSA_Code":"36980","CBSA_Title":"Owensboro, KY","POP2010":114752,"lon":-87.059,"lat":37.6992},{"CBSA_Code":"37460","CBSA_Title":"Panama City, FL","POP2010":184715,"lon":-85.4665,"lat":30.1439},{"CBSA_Code":"37620","CBSA_Title":"Parkersburg-Vienna, WV","POP2010":92673,"lon":-81.4635,"lat":39.1449},{"CBSA_Code":"37860","CBSA_Title":"Pensacola-Ferry Pass-Brent, FL","POP2010":448991,"lon":-87.1566,"lat":30.6879},{"CBSA_Code":"37900","CBSA_Title":"Peoria, IL","POP2010":379186,"lon":-89.5159,"lat":40.7889},{"CBSA_Code":"38220","CBSA_Title":"Pine Bluff, AR","POP2010":100258,"lon":-91.9476,"lat":34.0778},{"CBSA_Code":"38340","CBSA_Title":"Pittsfield, MA","POP2010":131219,"lon":-73.2062,"lat":42.3711},{"CBSA_Code":"38540","CBSA_Title":"Pocatello, ID","POP2010":82839,"lon":-112.226,"lat":42.6691},{"CBSA_Code":"38860","CBSA_Title":"Portland-South Portland, ME","POP2010":514098,"lon":-70.4695,"lat":43.694},{"CBSA_Code":"38940","CBSA_Title":"Port St. Lucie, FL","POP2010":424107,"lon":-80.4498,"lat":27.2198},{"CBSA_Code":"39140","CBSA_Title":"Prescott, AZ","POP2010":211033,"lon":-112.5548,"lat":34.5995},{"CBSA_Code":"39380","CBSA_Title":"Pueblo, CO","POP2010":159063,"lon":-104.5127,"lat":38.1736},{"CBSA_Code":"39460","CBSA_Title":"Punta Gorda, FL","POP2010":159978,"lon":-81.9139,"lat":26.9051},{"CBSA_Code":"39540","CBSA_Title":"Racine, WI","POP2010":195408,"lon":-88.0611,"lat":42.7473},{"CBSA_Code":"39660","CBSA_Title":"Rapid City, SD","POP2010":134598,"lon":-102.8997,"lat":44.1917},{"CBSA_Code":"39740","CBSA_Title":"Reading, PA","POP2010":411442,"lon":-75.9268,"lat":40.4142},{"CBSA_Code":"39820","CBSA_Title":"Redding, CA","POP2010":177223,"lon":-122.0423,"lat":40.7637},{"CBSA_Code":"39900","CBSA_Title":"Reno, NV","POP2010":425417,"lon":-119.6575,"lat":40.6182},{"CBSA_Code":"40220","CBSA_Title":"Roanoke, VA","POP2010":308707,"lon":-79.9461,"lat":37.2903},{"CBSA_Code":"40340","CBSA_Title":"Rochester, MN","POP2010":206877,"lon":-92.3378,"lat":43.9561},{"CBSA_Code":"40420","CBSA_Title":"Rockford, IL","POP2010":349431,"lon":-89.0413,"lat":42.3334},{"CBSA_Code":"40580","CBSA_Title":"Rocky Mount, NC","POP2010":152392,"lon":-77.7956,"lat":35.9407},{"CBSA_Code":"40660","CBSA_Title":"Rome, GA","POP2010":96317,"lon":-85.2122,"lat":34.2747},{"CBSA_Code":"40980","CBSA_Title":"Saginaw, MI","POP2010":200169,"lon":-84.0528,"lat":43.3303},{"CBSA_Code":"41060","CBSA_Title":"St. Cloud, MN","POP2010":189093,"lon":-94.4732,"lat":45.5863},{"CBSA_Code":"41100","CBSA_Title":"St. George, UT","POP2010":138115,"lon":-113.5064,"lat":37.2813},{"CBSA_Code":"41140","CBSA_Title":"St. Joseph, MO-KS","POP2010":127329,"lon":-94.7857,"lat":39.8348},{"CBSA_Code":"41420","CBSA_Title":"Salem, OR","POP2010":390738,"lon":-122.8964,"lat":44.9034},{"CBSA_Code":"41500","CBSA_Title":"Salinas, CA","POP2010":415057,"lon":-121.2399,"lat":36.2178},{"CBSA_Code":"41540","CBSA_Title":"Salisbury, MD-DE","POP2010":373802,"lon":-75.4681,"lat":38.4177},{"CBSA_Code":"41660","CBSA_Title":"San Angelo, TX","POP2010":111823,"lon":-100.6719,"lat":31.3627},{"CBSA_Code":"42020","CBSA_Title":"San Luis Obispo-Paso Robles-Arroyo Grande, CA","POP2010":269637,"lon":-120.4039,"lat":35.3876},{"CBSA_Code":"42100","CBSA_Title":"Santa Cruz-Watsonville, CA","POP2010":262382,"lon":-122.0099,"lat":37.0576},{"CBSA_Code":"42140","CBSA_Title":"Santa Fe, NM","POP2010":144170,"lon":-105.976,"lat":35.5073},{"CBSA_Code":"42200","CBSA_Title":"Santa Maria-Santa Barbara, CA","POP2010":423895,"lon":-120.0219,"lat":34.7247},{"CBSA_Code":"42220","CBSA_Title":"Santa Rosa, CA","POP2010":483878,"lon":-122.8896,"lat":38.5298},{"CBSA_Code":"42340","CBSA_Title":"Savannah, GA","POP2010":347611,"lon":-81.3016,"lat":32.1312},{"CBSA_Code":"42680","CBSA_Title":"Sebastian-Vero Beach, FL","POP2010":138028,"lon":-80.6067,"lat":27.6934},{"CBSA_Code":"42700","CBSA_Title":"Sebring, FL","POP2010":98786,"lon":-81.344,"lat":27.3437},{"CBSA_Code":"43100","CBSA_Title":"Sheboygan, WI","POP2010":115507,"lon":-87.9457,"lat":43.7211},{"CBSA_Code":"43300","CBSA_Title":"Sherman-Denison, TX","POP2010":120877,"lon":-96.6773,"lat":33.627},{"CBSA_Code":"43340","CBSA_Title":"Shreveport-Bossier City, LA","POP2010":439811,"lon":-93.6692,"lat":32.4889},{"CBSA_Code":"43420","CBSA_Title":"Sierra Vista-Douglas, AZ","POP2010":131346,"lon":-109.7519,"lat":31.8791},{"CBSA_Code":"43580","CBSA_Title":"Sioux City, IA-NE-SD","POP2010":168563,"lon":-96.373,"lat":42.5792},{"CBSA_Code":"43620","CBSA_Title":"Sioux Falls, SD","POP2010":228261,"lon":-96.9893,"lat":43.4994},{"CBSA_Code":"43780","CBSA_Title":"South Bend-Mishawaka, IN-MI","POP2010":319224,"lon":-86.1315,"lat":41.775},{"CBSA_Code":"43900","CBSA_Title":"Spartanburg, SC","POP2010":313268,"lon":-81.8488,"lat":34.8381},{"CBSA_Code":"44100","CBSA_Title":"Springfield, IL","POP2010":210170,"lon":-89.698,"lat":39.8287},{"CBSA_Code":"44180","CBSA_Title":"Springfield, MO","POP2010":436712,"lon":-93.1754,"lat":37.3641},{"CBSA_Code":"44220","CBSA_Title":"Springfield, OH","POP2010":138333,"lon":-83.7844,"lat":39.9189},{"CBSA_Code":"44300","CBSA_Title":"State College, PA","POP2010":153990,"lon":-77.8185,"lat":40.919},{"CBSA_Code":"44420","CBSA_Title":"Staunton-Waynesboro, VA","POP2010":118502,"lon":-79.1275,"lat":38.165},{"CBSA_Code":"44940","CBSA_Title":"Sumter, SC","POP2010":107456,"lon":-80.38,"lat":33.9154},{"CBSA_Code":"45220","CBSA_Title":"Tallahassee, FL","POP2010":367413,"lon":-84.2887,"lat":30.4055},{"CBSA_Code":"45460","CBSA_Title":"Terre Haute, IN","POP2010":172425,"lon":-87.3438,"lat":39.3962},{"CBSA_Code":"45500","CBSA_Title":"Texarkana, TX-AR","POP2010":149198,"lon":-94.2092,"lat":33.4706},{"CBSA_Code":"45540","CBSA_Title":"The Villages, FL","POP2010":93420,"lon":-82.0795,"lat":28.7047},{"CBSA_Code":"45820","CBSA_Title":"Topeka, KS","POP2010":233870,"lon":-95.8021,"lat":39.0438},{"CBSA_Code":"45940","CBSA_Title":"Trenton, NJ","POP2010":366513,"lon":-74.6996,"lat":40.2823},{"CBSA_Code":"46220","CBSA_Title":"Tuscaloosa, AL","POP2010":230162,"lon":-87.7205,"lat":33.1659},{"CBSA_Code":"46340","CBSA_Title":"Tyler, TX","POP2010":209714,"lon":-95.2691,"lat":32.3742},{"CBSA_Code":"46540","CBSA_Title":"Utica-Rome, NY","POP2010":299397,"lon":-75.1761,"lat":43.3356},{"CBSA_Code":"46660","CBSA_Title":"Valdosta, GA","POP2010":139588,"lon":-83.2365,"lat":30.8286},{"CBSA_Code":"46700","CBSA_Title":"Vallejo-Fairfield, CA","POP2010":413344,"lon":-121.9384,"lat":38.2695},{"CBSA_Code":"47020","CBSA_Title":"Victoria, TX","POP2010":94003,"lon":-97.1974,"lat":28.7271},{"CBSA_Code":"47220","CBSA_Title":"Vineland-Bridgeton, NJ","POP2010":156898,"lon":-75.1098,"lat":39.3724},{"CBSA_Code":"47300","CBSA_Title":"Visalia-Porterville, CA","POP2010":442179,"lon":-118.7993,"lat":36.2206},{"CBSA_Code":"47380","CBSA_Title":"Waco, TX","POP2010":252772,"lon":-97.0901,"lat":31.4265},{"CBSA_Code":"47460","CBSA_Title":"Walla Walla, WA","POP2010":62859,"lon":-118.252,"lat":46.2575},{"CBSA_Code":"47580","CBSA_Title":"Warner Robins, GA","POP2010":179605,"lon":-83.64,"lat":32.4093},{"CBSA_Code":"47940","CBSA_Title":"Waterloo-Cedar Falls, IA","POP2010":167819,"lon":-92.4685,"lat":42.5363},{"CBSA_Code":"48060","CBSA_Title":"Watertown-Fort Drum, NY","POP2010":116229,"lon":-75.9206,"lat":44.053},{"CBSA_Code":"48140","CBSA_Title":"Wausau, WI","POP2010":134063,"lon":-89.7586,"lat":44.8979},{"CBSA_Code":"48260","CBSA_Title":"Weirton-Steubenville, WV-OH","POP2010":124454,"lon":-80.7031,"lat":40.388},{"CBSA_Code":"48300","CBSA_Title":"Wenatchee, WA","POP2010":110884,"lon":-120.2636,"lat":47.8181},{"CBSA_Code":"48540","CBSA_Title":"Wheeling, WV-OH","POP2010":147950,"lon":-80.842,"lat":39.976},{"CBSA_Code":"48660","CBSA_Title":"Wichita Falls, TX","POP2010":151306,"lon":-98.4906,"lat":33.775},{"CBSA_Code":"48700","CBSA_Title":"Williamsport, PA","POP2010":116111,"lon":-77.0663,"lat":41.3431},{"CBSA_Code":"48900","CBSA_Title":"Wilmington, NC","POP2010":254884,"lon":-77.9007,"lat":34.4688},{"CBSA_Code":"49020","CBSA_Title":"Winchester, VA-WV","POP2010":128472,"lon":-78.4658,"lat":39.2699},{"CBSA_Code":"49420","CBSA_Title":"Yakima, WA","POP2010":243231,"lon":-120.7401,"lat":46.4594},{"CBSA_Code":"49620","CBSA_Title":"York-Hanover, PA","POP2010":434972,"lon":-76.7307,"lat":39.9232},{"CBSA_Code":"49700","CBSA_Title":"Yuba City, CA","POP2010":166892,"lon":-121.5223,"lat":39.1526},{"CBSA_Code":"49740","CBSA_Title":"Yuma, AZ","POP2010":195751,"lon":-113.9063,"lat":32.769}]};
+
+		var opts = arguments.length > 0 && !!include_small ? metros.large.concat(metros.small) : metros.large; 
+
+		sel.options(opts.map(function(d,i){return {value: d.CBSA_Code, text:d.CBSA_Title} }) );
+
+		return sel;
+	};	
+
+	return sel;
+}
+
 function palette(){
 
     var p = {};
@@ -277,69 +436,6 @@ function palette(){
     };
 
     return p;
-}
-
-function oic_menu(button, options, callback){
-    var pn =  button.node().parentNode;  
-
-    var opt = [];
-    for(var o in options){
-        if(options.hasOwnProperty(o)){
-            opt.push(options[o]);
-        }
-    }
-
-    var opanel = d3.select(pn).append("div")
-        .style("position","fixed")
-        .style("margin","0px")
-        .style("width","100vw")
-        .style("height","100vh")
-        .style("background-color", "rgba(240,240,240,0.95)")
-        .style("display","none")
-        .style("opacity","0")
-        .style("z-index","1000")
-        .style("left","0px")
-        .style("top","0px")
-        .style("overflow","auto");
-
-    var opanel_map = opanel.append("div")
-        .style();
-
-    var opanel_buttons = opanel.append("div")
-        .style("max-width","1400px")
-        .style("margin","5% auto")
-        .style("padding","1rem")
-        .classed("c-fix",true)
-        .style("display","none");
-
-    opanel_buttons.append("p").style("text-align","right").text("- close -")
-        .style("margin","1rem 2rem").style("cursor","pointer");
-
-    //show panel
-    button.on("click", function(){
-        d3.event.stopPropagation();
-        opanel.interrupt().style("display","block")
-            .transition().style("opacity","1")
-            .on("end", function(){
-                d3.select("body").classed("disable-scroll",true);
-            });
-        
-    });
-
-    //hide panel
-    d3.select(pn.parentNode).on("click", function(){
-        d3.select("body").classed("disable-scroll",false);
-        opanel.interrupt().transition().duration(400).style("opacity","0")
-            .on("end", function(){
-                opanel.style("display","none");
-            });
-    });
-
-    
-
-
-
- 
 }
 
 function oic_profile(store){
@@ -355,27 +451,64 @@ function oic_profile(store){
     ///////////////
     var opt = {};
     opt.wrap = d3.select("#dashboard-menu");
-    opt.button = opt.wrap.append("div").classed("dashboard-options-button", true);
-    opt.button.append("p").text("Select an OIC");
-    oic_menu(opt.button, store.id, update);
+    opt.select_menu = opt.wrap.append("div").style("float","right"); 
+
+    var opt_data = [];
+    for(var o in store.id){
+        if(store.id.hasOwnProperty(o)){
+            opt_data.push(store.id[o]);
+        }
+    }
+
+    var states = [{"STATE":"01","STUSAB":"AL","STATE_NAME":"Alabama","STATENS":"01779775"},{"STATE":"02","STUSAB":"AK","STATE_NAME":"Alaska","STATENS":"01785533"},{"STATE":"04","STUSAB":"AZ","STATE_NAME":"Arizona","STATENS":"01779777"},{"STATE":"05","STUSAB":"AR","STATE_NAME":"Arkansas","STATENS":"00068085"},{"STATE":"06","STUSAB":"CA","STATE_NAME":"California","STATENS":"01779778"},{"STATE":"08","STUSAB":"CO","STATE_NAME":"Colorado","STATENS":"01779779"},{"STATE":"09","STUSAB":"CT","STATE_NAME":"Connecticut","STATENS":"01779780"},{"STATE":"10","STUSAB":"DE","STATE_NAME":"Delaware","STATENS":"01779781"},{"STATE":"11","STUSAB":"DC","STATE_NAME":"District of Columbia","STATENS":"01702382"},{"STATE":"12","STUSAB":"FL","STATE_NAME":"Florida","STATENS":"00294478"},{"STATE":"13","STUSAB":"GA","STATE_NAME":"Georgia","STATENS":"01705317"},{"STATE":"15","STUSAB":"HI","STATE_NAME":"Hawaii","STATENS":"01779782"},{"STATE":"16","STUSAB":"ID","STATE_NAME":"Idaho","STATENS":"01779783"},{"STATE":"17","STUSAB":"IL","STATE_NAME":"Illinois","STATENS":"01779784"},{"STATE":"18","STUSAB":"IN","STATE_NAME":"Indiana","STATENS":"00448508"},{"STATE":"19","STUSAB":"IA","STATE_NAME":"Iowa","STATENS":"01779785"},{"STATE":"20","STUSAB":"KS","STATE_NAME":"Kansas","STATENS":"00481813"},{"STATE":"21","STUSAB":"KY","STATE_NAME":"Kentucky","STATENS":"01779786"},{"STATE":"22","STUSAB":"LA","STATE_NAME":"Louisiana","STATENS":"01629543"},{"STATE":"23","STUSAB":"ME","STATE_NAME":"Maine","STATENS":"01779787"},{"STATE":"24","STUSAB":"MD","STATE_NAME":"Maryland","STATENS":"01714934"},{"STATE":"25","STUSAB":"MA","STATE_NAME":"Massachusetts","STATENS":"00606926"},{"STATE":"26","STUSAB":"MI","STATE_NAME":"Michigan","STATENS":"01779789"},{"STATE":"27","STUSAB":"MN","STATE_NAME":"Minnesota","STATENS":"00662849"},{"STATE":"28","STUSAB":"MS","STATE_NAME":"Mississippi","STATENS":"01779790"},{"STATE":"29","STUSAB":"MO","STATE_NAME":"Missouri","STATENS":"01779791"},{"STATE":"30","STUSAB":"MT","STATE_NAME":"Montana","STATENS":"00767982"},{"STATE":"31","STUSAB":"NE","STATE_NAME":"Nebraska","STATENS":"01779792"},{"STATE":"32","STUSAB":"NV","STATE_NAME":"Nevada","STATENS":"01779793"},{"STATE":"33","STUSAB":"NH","STATE_NAME":"New Hampshire","STATENS":"01779794"},{"STATE":"34","STUSAB":"NJ","STATE_NAME":"New Jersey","STATENS":"01779795"},{"STATE":"35","STUSAB":"NM","STATE_NAME":"New Mexico","STATENS":"00897535"},{"STATE":"36","STUSAB":"NY","STATE_NAME":"New York","STATENS":"01779796"},{"STATE":"37","STUSAB":"NC","STATE_NAME":"North Carolina","STATENS":"01027616"},{"STATE":"38","STUSAB":"ND","STATE_NAME":"North Dakota","STATENS":"01779797"},{"STATE":"39","STUSAB":"OH","STATE_NAME":"Ohio","STATENS":"01085497"},{"STATE":"40","STUSAB":"OK","STATE_NAME":"Oklahoma","STATENS":"01102857"},{"STATE":"41","STUSAB":"OR","STATE_NAME":"Oregon","STATENS":"01155107"},{"STATE":"42","STUSAB":"PA","STATE_NAME":"Pennsylvania","STATENS":"01779798"},{"STATE":"44","STUSAB":"RI","STATE_NAME":"Rhode Island","STATENS":"01219835"},{"STATE":"45","STUSAB":"SC","STATE_NAME":"South Carolina","STATENS":"01779799"},{"STATE":"46","STUSAB":"SD","STATE_NAME":"South Dakota","STATENS":"01785534"},{"STATE":"47","STUSAB":"TN","STATE_NAME":"Tennessee","STATENS":"01325873"},{"STATE":"48","STUSAB":"TX","STATE_NAME":"Texas","STATENS":"01779801"},{"STATE":"49","STUSAB":"UT","STATE_NAME":"Utah","STATENS":"01455989"},{"STATE":"50","STUSAB":"VT","STATE_NAME":"Vermont","STATENS":"01779802"},{"STATE":"51","STUSAB":"VA","STATE_NAME":"Virginia","STATENS":"01779803"},{"STATE":"53","STUSAB":"WA","STATE_NAME":"Washington","STATENS":"01779804"},{"STATE":"54","STUSAB":"WV","STATE_NAME":"West Virginia","STATENS":"01779805"},{"STATE":"55","STUSAB":"WI","STATE_NAME":"Wisconsin","STATENS":"01779806"},{"STATE":"56","STUSAB":"WY","STATE_NAME":"Wyoming","STATENS":"01779807"},{"STATE":"60","STUSAB":"AS","STATE_NAME":"American Samoa","STATENS":"01802701"},{"STATE":"66","STUSAB":"GU","STATE_NAME":"Guam","STATENS":"01802705"},{"STATE":"69","STUSAB":"MP","STATE_NAME":"Northern Mariana Islands","STATENS":"01779809"},{"STATE":"72","STUSAB":"PR","STATE_NAME":"Puerto Rico","STATENS":"01779808"},{"STATE":"74","STUSAB":"UM","STATE_NAME":"U.S. Minor Outlying Islands","STATENS":"01878752"},{"STATE":"78","STUSAB":"VI","STATE_NAME":"U.S. Virgin Islands","STATENS":"01802710"}];
+    var st2state = {};
+    states.forEach(function(s){
+        st2state[s.STUSAB] = s.STATE_NAME;
+    });
+
+    var optnest = d3.nest().key(function(d){return st2state[d.stabbr]})
+                           .sortKeys(d3.ascending)
+                           .rollup(function(a){
+                                var m = a.map(function(d){return {value:d.stcofips, text:d.city}});
+                                m.sort(function(a,b){return a.text < b.text ? -1 : (a.text == b.text ? 0 : 1)});
+                                return m;
+                           })
+                           .entries(opt_data);
+
+    var select = select_menu(opt.select_menu.node()).optgroups(optnest).style("background","#ffffff")
+        .style("border","1px solid #ffffff");
+
+    select.on("change", function(){
+        update(this.value);
+    });
+
+    //oic_menu(opt.button, store.id, update);
 
 
     ///////////////
     //  PANEL 1  //
     ///////////////
     var p1 = {};
-    p1.wrap = d3.select("#dash-panel-1");
-    p1.header = p1.wrap.append("div")//.style("padding","10px 0px 0px 10px").style("border","1px solid #aaaaaa")
-                                    //.style("border-width","1px 0px 0px 1px")
-                        .append("div").classed("dashboard-panel-image dashboard-panel-title", true);
+    p1.wrap = d3.select("#dash-panel-1").style("padding-left","0px");
+    p1.header = p1.wrap.append("div").append("div")
+        .classed("dashboard-panel-image dashboard-panel-title", true)
+        .style("position","relative");
+    
+    p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
     p1.header.style("background-image", 'url("https://source.unsplash.com/ukvgqriuOgo")');
     
-    p1.wrap.append("p").html('<span class="oic-name">___</span> is a(n) strong | xyz OIC');
-    p1.wrap.append("img").attr("src","./assets/typology.png").style("display","block").style("width","100%").style("max-width","400px");
+    var continuum = p1.header.append("div").style("width","100%").style("position","absolute")
+        .style("bottom","0px").style("left","0px").style("background","rgba(255,255,255,0.5)")
+        .style("min-height","30px");
 
+    //continuum.append("p").html('<span class="oic-name">___</span> is a(n) strong | xyz OIC')
+    continuum.append("img").attr("src","./assets/typology.svg").style("display","block").style("width","100%").style("max-width","600px");
+    
+    p1.content = p1.wrap.append("div").style("padding-left","1rem");
 
-    p1.wrap.append("p").html('What makes <span class="oic-name">___</span> an OIC?').style("font-weight","bold");
-    p1.wrap.append("img").attr("src","./assets/basics.png").style("display","block").style("width","80%").style("max-width","400px");
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> an OIC? (TO BE STYLED!)').style("font-weight","bold");
+   
+    var criteria = p1.content.append("div");
 
 
     //p1.header.append("div").append("div").append("p").html('What makes <span class="oic-name">___</span> an OIC?');
@@ -409,35 +542,35 @@ function oic_profile(store){
 
     function get_ind(ind, dict){
         var r = {title:"Title", value:null, format:"N/A", sig:1};
-        
+
         if(ind == "job"){
-            r.title = "Change in jobs, 2000–16";
+            r.title = "Percent change in jobs";
             r.value = (dict.RET_2016/dict.RET_2000)-1;
             r.format = format.pct1(r.value);
         }
         else if(ind == "gmp"){
-            r.title = "Change in real gross metropolitan product (GMP), <span>2000–16</span>";
+            r.title = "Percent change in real gross metropolitan product (GMP)";
             r.value = (dict.rgdp_2016/dict.rgdp_2000)-1;
             r.format = format.pct1(r.value);
         }
         else if(ind == "pro"){
-            r.title = "Change in real GMP per job, <span>2000–16</span>";
+            r.title = "Percent change in real GMP per job";
             r.value = ((dict.rgdp_2016/dict.RET_2016)/(dict.rgdp_2000/dict.RET_2000))-1;
             r.format = format.pct1(r.value);
         }
         else if(ind == "pci"){
-            r.title = "Change in (real?) per capita income, <span>2000–16</span>";
-            r.value = (dict.incpercap16/dict.incpercap00)-1;
+            r.title = "Percent change in real per capita income";
+            r.value = (dict.incpercap_ch0016/dict.incpercap_00);
             r.format = format.pct1(r.value);
         }
         else if(ind == "med"){
-            r.title = "Change in (real?) median household income, <span>2000–16</span>";
-            r.value = dict.medinc_ch_0016;
+            r.title = "Percent change in real median household income";
+            r.value = dict.medinc_ch_0016/dict.medinc00;
             r.sig = dict.medinc_sigch_0016;
             r.format = format.pct1(r.value);
         }
         else if(ind == "ert"){
-            r.title = "Change in the employment rate for 25–64 year-olds (CHECK VAR NAME), <span>2000–16</span>";
+            r.title = "Change in the employment-to-population ratio (25–64 year-olds)";
             r.value = dict.epop_ch_0016;
             r.sig = dict.epop_sigch_0016;
             r.format = format.shch1(r.value);
@@ -448,19 +581,19 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "aij"){
-            r.title = "Number of jobs in advanced industries, 2016";
-            r.value = dict.ai_jobs_2016;
-            r.format = format.num0(r.value);
+            r.title = "Percent change in advanced industries jobs, <span>2010–16</span> (YEARS?)";
+            r.value = (dict.ai_jobs_2016 / dict.ai_jobs_2010) - 1;
+            r.format = format.pct1(r.value);
         }
         else if(ind == "clu"){
-            r.title = "Share of jobs in urban clusters, 2015";
+            r.title = "Share of jobs in dense clusters, 2015";
             r.value = dict.hub_share_15;
             r.format = format.sh1(r.value);
         }
         else if(ind == "pmt"){
-            r.title = "Number of housing units permitted in 2016";
-            r.value = dict.units_16;
-            r.format = format.num0(r.value);
+            r.title = "Percent change in housing units permitted, <span>2010–16</span>";
+            r.value = (dict.units_16 / dict.units_10) - 1;
+            r.format = format.pct1(r.value);
         }
         else if(ind == "for"){
             r.title = "Change in share foreign born, <span>2010–16</span>";
@@ -469,7 +602,7 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "edu"){
-            r.title = "Difference b/n white and non-white BA+ attainment rate, 2016 (ADD SIG)";
+            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016 (SIG?)";
             r.value = dict.nhw_baplus - dict.nonwhite_baplus;
             r.sig = 0;
             r.format = format.pct1(r.value);
@@ -481,30 +614,40 @@ function oic_profile(store){
     function bar_chart(el, type, oic, ind, sigvar){
         var wrap = d3.select(el);
         var dim = dimensions(el);
-        var pad = [10, 10, 30, 10];
+        var pad = [20, 
+                   type != "bar" ? 16 : 10, 
+                   20, 
+                   type != "bar" ? 16 : 10];
 
         var bar_height = 12;
         var bar_pad = 5;
 
         //chart (svg) dimensions
-        var width = (dim.width < 200 ? 200 : dim.width) - 20; //account for tile padding
+        var width = (dim.width < 200 ? 200 : dim.width) - 20; //account for tile padding, not available for plotting
         var height = pad[0] + pad[2] + (bar_height*4) + (bar_pad*3);
 
         var dat = {};
         //oic, oic avg, all urban industrial, all urban -- need to get latter 3 data points
-        var oic = store.data[oic];
-        var val = get_ind(ind, oic);
+        var oic_individual = store.data[oic];
+        var oic_avg = store.data["00003"];
+        var urban_industrial = store.data["00002"];
+        var urban_all = store.data["00001"];
+
+        var val = get_ind(ind, oic_individual);
+        var val1 = get_ind(ind, oic_avg);
+        var val2 = get_ind(ind, urban_industrial);
+        var val3 = get_ind(ind, urban_all);
         
         dat.points = [val.value, 
-                      val.value + (val.value*Math.random()),
-                      val.value + (val.value*Math.random()),
-                      val.value + (val.value*Math.random())];
+                      val1.value,
+                      val2.value,
+                      val3.value];
 
         var extent = d3.extent(dat.points);
         if(extent[0] > 0){extent[0] = 0;} //if min greater than 0
         if(extent[1] < 0){extent[1] = 0;} //if max less than 0
 
-        var xscale = d3.scaleLinear().domain(extent).range([0,width-40]);
+        var xscale = d3.scaleLinear().domain(extent).range([pad[3], width-pad[1]]);
 
         //to do replace var with a variable label or title
         var title = wrap.selectAll("div.tile-header").data([val.title]);
@@ -523,14 +666,14 @@ function oic_profile(store){
 
         var bars = barse.merge(barsu);
 
-        bars.attr("transform", function(d,i){return "translate(0," + (i*(bar_height+bar_pad)) + ")"});
+        bars.attr("transform", function(d,i){return "translate(0," + (i*(bar_height+bar_pad) + pad[0]) + ")"});
 
         function filler(d,i){
             var cols = pal.categories;
             return i==0 ? cols.oic :
                           i==1 ? cols.alloic :
-                                i==2 ? cols.urban :
-                                    cols.urbani;
+                                i==2 ? cols.urbani :
+                                    cols.urban;
         }
 
         bars.select("circle").attr("cy", "8px").attr("r","6")
@@ -579,9 +722,9 @@ function oic_profile(store){
 
         //panel 2
         var p2sections = p2.wrap.selectAll("div.dashboard-panel-section")
-            .data([{ind:["job","gmp"], title:"Growth"}, 
-                   {ind:["pro", "pci"], title:"Prosperity"}, 
-                   {ind:["med","ert"], title:"Inclusion"}]);
+            .data([{ind:["job","gmp"], title:"Growth, 2000–16"}, 
+                   {ind:["pro", "pci"], title:"Prosperity, 2000–16"}, 
+                   {ind:["med","ert"], title:"Inclusion, 2000–16"}]);
         p2sections.exit().remove();
         
         var p2sectionse = p2sections.enter().append("div").classed("dashboard-panel-section c-fix",true);
@@ -633,9 +776,47 @@ function oic_profile(store){
         });
         var hhh = (hh+15)+"px";
         tile_headers.style("height", hhh).style("line-height", hhh);
+
+
+        //what makes xxx an OIC
+        var oic_data = store.data[code];
+
+        var criteria_boxes = criteria.selectAll("div.criterion").data([
+            {
+                title: "<span>1</span> Major urban center",
+                subtitle: "Largest city population in county",
+                value: format.num0(oic_data.largest_city_pop),
+                caption: ""
+            },
+            {
+                title: "<span>2</span> Manufacturing heritage",
+                subtitle: "Share of jobs in manufacturing, 1970",
+                value: format.sh1(oic_data.mf_jobs_1970),
+                caption: "By 2016 this had fallen to " + format.pct1(oic_data.mf_jobs_2016)
+            },
+            {
+                title: "<span>3</span> Slow job growth",
+                subtitle: "",
+                value: format.pct1(oic_data.percent_job_deficit*-1),
+                caption: "fewer jobs in 2016 than expected based on 1970 industrial structure"
+            }
+        ]);
+
+        criteria_boxes.exit().remove();
+
+        var criteria_text = criteria_boxes.enter().append("div").classed("criterion", true).merge(criteria_boxes)
+            .selectAll("p").data(function(d){return [d.title, d.subtitle, d.value, d.caption]});
+
+        criteria_text.exit().remove();
+        criteria_text.enter().append("p").merge(criteria_text).html(function(d){return d})
+            .classed("criteria-title", function(d,i){return i==0})
+            .classed("criteria-value", function(d,i){return i==2})
+            ;
+
     }
 
     update("01073");
+    select.node().value = "01073";
 
     window.addEventListener("resize", function(){update();});
 
@@ -676,795 +857,6 @@ function oic_profile(store){
 // 5) Validate data bind and handling of dupes and missings. missing should always be null, never undefined
 //    Special cases: update features after binding data, update data after drawing features once
 
-function map(container, map_proj){
-    
-    // ================================= dom structure ===================================== //
-    
-    //throw an error if no map container is specified
-    if(arguments.length==0){
-        throw new Error("You must specify a dom node as map container");
-    }
-
-    var dom = {};
-    dom.root = container;
-
-    //DO NOT set dimensions on outer_wrap. poll it for available map dimensions 
-    dom.outer_wrap = d3.select(dom.root).append("div").style("width","100%").style("min-height","150px")
-                                        .style("min-width","280px").style("padding","0px").style("margin","0px")
-                                        .style("border","none").style("position","relative");
-
-    //container of canvas, svg, and tooltip. DO set the dimensions on wrap programatically
-    dom.wrap = dom.outer_wrap.append("div").style("width","100%").style("height","100%")
-                                    .style("min-height","150px").style("padding","0px").style("margin","0px")
-                                    .style("position","relative").style("overflow","hidden")
-                                    .style("z-index","2");
-
-    //canvas and svg are set to 100% width of parent, dom.wrap
-    dom.canvas = dom.wrap.append("canvas").style("width","100%").style("height","100%").style("position","absolute").style("z-index","2").style("top","0px").style("left","0px");
-    dom.svg = dom.wrap.append("svg").attr("width","100%").attr("height","100%").style("position","relative").style("z-index","3");
-      dom.gmain = dom.svg.append("g"); //umbrella grouping, used for panning
-        dom.g0 = dom.gmain.append("g"); //used for any background features
-        dom.g = dom.gmain.append("g"); //main feature group
-        dom.g2 = dom.gmain.append("g"); //annotation group, used for highlighting
-    
-    //tooltip is a sibling to dom.wrap that contains the svg/canvas
-    dom.tooltip = {};
-    dom.tooltip.wrap = dom.outer_wrap.append("div").style("position","absolute").style("visibility","hidden")
-                                 .style("opacity","0").style("pointer-events","none").style("z-index","4")
-                                 .style("min-height","5em");
-    dom.tooltip.pad = 20;
-    dom.tooltip.content = dom.tooltip.wrap.append("div").style("margin","0px "+dom.tooltip.pad+"px")
-                                    .style("background-color","#ffffff").style("padding","10px 15px")
-                                    .style("position","relative").style("border","1px solid #333333")
-                                    .style("border-radius","5px").style("min-height","50px")
-                                    .style("box-shadow", "4px 4px 10px 0px rgba(0,0,0,0.25)")
-                                    ;  
-
-    //tooltip test area used to calculate width of tooltip content
-    dom.tooltip.test = dom.outer_wrap.append("div").style("width","100%").style("height","100%")
-                                 .style("position","absolute").style("z-index","0")
-                                 .style("visibility","hidden").append("div").style("display","inline-block");
-
-    //arrow indicators pointing to geo
-    dom.tooltip.arrowleft = dom.tooltip.wrap.append("svg").attr("width",(dom.tooltip.pad+2)+"px").attr("height","100%")
-                       .style("position","absolute").style("left","0px").style("top","15px").style("z-index",20);
-                       
-    dom.tooltip.arrowleft.append("path").attr("d", "M"+dom.tooltip.pad+",0 l-15,10 l15,10 z").attr("fill","#ffffff")
-                       .attr("stroke","#333333").style("pointer-events","none");
-    dom.tooltip.arrowleft.append("path").attr("d", "M"+(dom.tooltip.pad+2)+",0 l-15,10 l15,10 z").attr("fill","#ffffff")
-                       .attr("stroke","none").style("pointer-events","none");           
-
-    dom.tooltip.arrowright = dom.tooltip.wrap.append("svg").attr("width",(dom.tooltip.pad+2)+"px").attr("height","100%")
-                       .style("position","absolute").style("right","0px").style("top","15px").style("z-index",20);
-    dom.tooltip.arrowright.append("path").attr("d", "M2,0 l15,10 l-15,10 z").attr("fill","#ffffff")
-                       .attr("stroke","#333333").style("pointer-events","none");
-    dom.tooltip.arrowright.append("path").attr("d", "M0,0 l15,10 l-15,10 z").attr("fill","#ffffff")
-                       .attr("stroke","none").style("pointer-events","none");
-
-    //zoom button
-    dom.zoom = {};
-    dom.zoom.button = dom.outer_wrap.append("div").style("position","absolute").style("top","60%").style("right","10px")
-                                    .style("width","60px").style("height","40px").style("z-index","10")
-                                    .style("cursor","pointer").style("padding","5px 7px").style("border","0px solid #dddddd")
-                                    .style("border-radius","15px").style("z-index","10");
-
-    dom.zoom.svg = dom.zoom.button.append("svg").attr("width","40px").attr("height","30px").attr("viewBox","0 0 40 30");
-    
-    dom.zoom.in = dom.zoom.svg.append("g").attr("transform","translate(0,-1050)").attr("stroke","#444444")
-                                        .attr("stroke-linecap","round").attr("fill","none");   
-
-    dom.zoom.in.append("path").attr("stroke-width","4").attr("d", "m23.282 1070.1 7.3299 7.3299m-6.0819-15.665c-0.000012 4.979-4.0363 9.0152-9.0152 9.0152-4.979 0-9.0152-4.0362-9.0152-9.0152 0.0000119-4.979 4.0363-9.0152 9.0152-9.0152 4.979 0 9.0152 4.0362 9.0152 9.0152z");
-    dom.zoom.in.append("path").attr("stroke-width","2").attr("d", "m10.856 1061.7h9.0873m-4.5437-4.5436v9.0873");
-
-    dom.zoom.out = dom.zoom.svg.append("g").attr("transform","translate(0,-1050)").attr("stroke","#444444")
-                                        .attr("stroke-linecap","round").attr("fill","none").style("visibility","hidden");   
-
-    dom.zoom.out.append("path").attr("stroke-width","4").attr("d", "m23.282 1070.1 7.3299 7.3299m-6.0819-15.665c-0.000012 4.979-4.0363 9.0152-9.0152 9.0152-4.979 0-9.0152-4.0362-9.0152-9.0152 0.0000119-4.979 4.0363-9.0152 9.0152-9.0152 4.979 0 9.0152 4.0362 9.0152 9.0152z");
-    dom.zoom.out.append("path").attr("stroke-width","2").attr("d", "m10.856 1061.7h9.0873");
-
-    // ================================= end dom structure ================================= //
-    
-
-    var map = {}; //map object returned to user
-
-    //initial map bounding box: [[min lon, min lat], [max lon, max lat]] covers entire earth
-    var map_bbox = [[-180, -90], [180, 90]];
-
-    //map parameters
-    var par = {
-        proj: arguments.length > 1 ? map_proj : d3.geoAlbersUsa(), 
-        aspect:0.66, 
-        scalar:1, 
-        responsive: true,
-        zoomlevels: 1
-    };
-
-    //a composite geo with all features concatenated into a feature collection
-    var composite_geo = null;
-
-    // ===================== map layers ==================================================== //
-
-    //stack of layer objects in the layers array
-    var layers = [];
-
-    function find_layer(name){
-        var l = null;
-        var i = -1;
-        while(++i < layers.length){
-            if(layers[i].name() == name){
-                l = layers[i];
-                break;
-            }
-        }
-        return l;
-    }
-
-    //return bounding box of a single layer's features as 
-    //bbox structure described here: https://github.com/d3/d3-geo#geoBounds
-    //[[min lon, min lat], [max lon, max lat]]
-    function get_layer_bbox(layer){
-
-        var features = layer.features();
-
-        try{
-            if(features==null){
-                throw new Error("BBox is undefined without features");
-            }
-            //embed features in a feature collection
-            var asFC = {
-                "type": "FeatureCollection",
-                "features": features
-            };
-            var bbox = d3.geoBounds(asFC);
-        }
-        catch(e){
-            var bbox = map_bbox;
-        }
-        finally{
-            return bbox;
-        }
-    }
-
-    //calculate and set bbox of map, incorporating all layers
-    function set_map_bbox(){
-        try{
-            if(layers.length > 0){
-                var min_lon = [];
-                var min_lat = [];
-                var max_lon = [];
-                var max_lat = [];
-                layers.forEach(function(l, i){
-                    var l_bbox = l.bbox();
-                    min_lon.push(l_bbox[0][0]);
-                    min_lat.push(l_bbox[0][1]);
-                    max_lon.push(l_bbox[1][0]);
-                    max_lat.push(l_bbox[1][1]);
-
-                    //console.log("LAYER " + i +  " BBOX")
-                    //console.log(JSON.stringify(l_bbox));
-                });
-
-                var mins = [d3.min(min_lon), d3.min(min_lat)];
-                var maxs = [d3.max(max_lon), d3.max(max_lat)];
-
-                var bbox = [mins, maxs];
-            }
-            else{
-                throw new Error("No layers available to compute map bbox");
-            }           
-        }
-        catch(e){
-            //console.log(e);
-            //if error or no data, revert back to full globe bounding box
-            var bbox = [[-180, -90], [180, 90]];
-        }
-        finally{
-            //console.log("COMPOSITE MAP BBOX")
-            //console.log(JSON.stringify(bbox));
-            map_bbox = bbox;
-        }
-    }
-
-    //concatenate all features into a single geojson feature collection
-    function set_composite_geojson(){
-        var all_features = [];
-        layers.forEach(function(l){
-            var f = l.features();
-            if(f != null){
-                f.forEach(function(feature){
-                    all_features.push(feature);
-                });
-            }
-        });
-
-        if(all_features.length > 0){
-            var comp =  {
-                "type": "FeatureCollection",
-                "features": all_features
-            };
-        }
-        else{
-            comp = null;
-        }
-
-        composite_geo = comp;
-    }
-
-    //getters for composite geojson and map bbox
-    map.composite = function(){
-        return composite_geo;
-    };
-
-    map.bbox = function(){
-        return map_bbox;
-    };
-
-
-
-    //add in the map.layer method that adds new layers
-    //returns a layer object with various methods described below
-    //if a layer with name already exists in map, return the layer object
-    map.layer = function(name){
-        if(arguments.length > 0 && find_layer(name) !== null){
-            //return existing layer
-            return find_layer(name);
-        }
-        else{
-            //create new layer
-            var g = dom.g.append("g");
-            var selection;
-            var features; //as in "features" array of FeatureCollection: each feature object type is any geo type accepted by D3
-            var points; //x-y data passed into layer.points
-            var layer_bbox = map_bbox; //default is existing map bbox
-            var layer_data = null; //data store for layer
-            var onePath = false; //draw features individually, not as one path
-            var geokey = null;
-            var layer_name = arguments.length > 0 ? name : null; //fallback name is null
-            var layer = {};
-
-            //push layer on to layers stack
-            layers.push(layer);
-
-            g.attr("data-name", layer_name);
-            
-            //layer methods
-            //get selection -- importantly, selection isn't available until a draw is done
-            //redraw map upon each layer added? -- need to specify projection to layer?
-            layer.selection = function(){
-                return selection;
-            };
-
-            //getter for layer name
-            layer.name = function(){
-                return layer_name;  
-            };
-
-            //getter for layer bbox
-            layer.bbox = function(){
-                return layer_bbox;
-            };            
-
-            //need to specify a geo key function (geokey) that will used to (1) retrieve data from a lookup table
-            //and (2) be used as a key function when regenerating a layer's selection
-            //make sure to check for duplicates in layer features based on the key function
-            layer.features = function(f, key, asOnePath){
-                if(arguments.length==0){
-                    return features;
-                }
-                else if(f.hasOwnProperty("type") && f.type=="FeatureCollection" && f.features.length > 0){
-                    features = f.features;
-                }
-                else if(f instanceof Array && f.length > 0){
-                    features = f;
-                }
-                else{
-                    throw new Error("Argument must be a FeatureCollection or an array of D3-supported geojson feature objects");
-                }
-            
-                layer_bbox = get_layer_bbox(this);
-                
-                //set composite map bbox and geojson object -- do before any drawing
-                set_map_bbox();
-                set_composite_geojson();
-
-                //set geo key function prior to drawing in map.resize()
-                if(typeof key == "function"){
-                    geokey = key;
-                }
-                else if(typeof key == "string"){
-                    geokey = function(feature){
-                        return feature.properties[key];
-                    };
-                }
-                else{
-                    geokey = null;
-                }
-
-                if(!!asOnePath){
-                    onePath = true;
-                }
-
-                //redraw all layers "d", "cx", and "cy" attributes to accommodate any resizing introduced by this layer
-                //and to populate the selection for immediate styling after registering features -- avoids having to call
-                //map.draw() directly when implementing a map
-                map.resize();
-
-                //duplicate geo features?
-                if(geokey != null){
-                    var counts = d3.nest().key(geokey).rollup(function(d){
-                        return d.length;
-                    }).entries(features);
-
-                    counts.forEach(function(d){
-                        if(d.value > 1){
-                            console.warn("Duplicate feature warning: " + d.value + " features with id value of " + d.key);
-                        }
-                    });
-                }
-
-                return this;
-            };
-
-            //create geojson features from an array of lon-lat data data objects: [{lon:x, lat:y, other:z, ...}, ...]
-            //also need geo key function here. user should have the option to include all data in p
-            layer.points = function(p, key, lonlat_accessor){
-                if(arguments.length==0){
-                    return points;
-                }
-                else if(p instanceof Array){
-
-                    points = p; //set globally
-
-                    var ll = (typeof lonlat_accessor == "function") ? lonlat_accessor : function(d){return [d.lon, d.lat]};
-
-                    var f = p.map(function(d,i){
-                        return {
-                                "type": "Feature",
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": ll(d)
-                                },
-                                "properties": d
-                        }   
-                    });
-
-                    //now that data is standardized, pass off to layer.features()
-                    this.features(f, key);
-                }
-                else{
-                    throw new Error("Argument must be an array");
-                }
-
-                return this;
-            };
-
-            layer.remove = function(){
-                //remove this layer from map layers array
-                var index = layers.indexOf(this);
-                if(index > -1){
-                    layers.splice(index, 1);
-                }
-
-                //remove the main grouping from DOM and set variables back to null
-                g.remove();
-                selection = null;
-                features = null;
-                geokey = null;
-                layer_data = null;
-                points = null;
-
-                //set composite map bbox and geojson object -- do before any drawing
-                set_map_bbox();
-                set_composite_geojson();
-
-                //redraw "d", "cx", and "cy" attributes of all map layers
-                map.resize();
-
-                return this;
-            };
-
-            var layer_attrs = {};
-            var layer_styles = {};
-
-            //register attributes/styles
-            //value can be a string, a number, or a function
-            //if value is a function, it behaves as you'd expect with D3, being passed feature data, and index as first two args
-            //here, it also receives a third arg which corresponds to the bound data value (by layer.data()), if applicable (otherwise null)
-            layer.attr = function(attr, value){
-                if(arguments.length==1){
-                    return layer_attrs[attr];
-                }
-                else if(typeof value == "string" || typeof value == "number" || value === null){
-                    layer_attrs[attr] = value;
-
-                    if(selection != null){selection.attr(attr, value);} //null removes the attr
-                }
-                else if(typeof value == "function"){
-                    
-                    //function which is actually called on selection (e.g. selection.attr(attr, attr_fn))
-                    //it wraps the value fn, passing a third parameter for a bound data object (bound by layer.data() -- null if not bound)
-                    var attr_fn = function(feature, index){
-                        var that = this; //feature node
-                        var obs = null;
-
-                        if(typeof geokey == "function" && layer_data != null){
-                            obs = layer_data.lookup(geokey(feature)); //lookup returns null if nothing found
-                        }
-
-                        //while index may not be that useful, it is valuable to maintain similarity to the D3 API
-                        return value.call(that, feature, index, obs);
-                    };
-
-                    layer_attrs[attr] = attr_fn;
-
-                    if(selection == null){
-                        console.warn("You're setting an attribute before features have been added. Make sure to call map.draw()");
-                    }
-                    else{
-                        selection.attr(attr, attr_fn);
-                    }
-                }
-                else{
-                    //no-op
-                }
-
-                return this;
-            };
-
-            layer.style = function(style, value){
-
-
-
-                    //make sure to include this warning
-                    //if(selection == null){
-                     //   console.warn("You're setting a style before features have been added. Make sure to call map.draw()")
-                    //}
-                    //else{
-                     //   selection.style(attr, style_fn);
-                    //}
-
-
-                return this;
-            };
-
-            //fn arg analagous to value as function arg in layer.attr -- important to note that this does not return
-            //a new map layer (should it?). it returns the underlying (filtered) selection
-            layer.filter = function(fn){
-                if(selection != null){
-                    var filter_fn = function(feature, index){
-                        var that = this; //feature node
-                        var obs = null;
-
-                        if(typeof geokey == "function" && layer_data != null){
-                            obs = layer_data.lookup(geokey(feature)); //lookup returns null if nothing found
-                        }
-                        return fn.call(that, feature, index, obs);
-                    };
-                    return selection.filter(filter_fn);
-                }
-                else{
-                    return null;
-                }
-            };
-
-                //use case -- 
-                layer.scales = {};
-
-                layer.scales.radius = function(variable, max_radius){
-                    //look at distriubtion, build scale
-
-                    //generate sensible ticks for legend
-
-                    //register with layer.attr()?
-                    //should the scale update automatically with new data bind -- not in v1. 
-                    //same issue with auto projections -- keep it simple for now
-
-                    //what to return? something like:
-                    return {
-                        // scale: value to radius
-                        // ticks: [array of values/labels for legend]
-                        // methods to mutate scale (e.g. reverse, max/min)
-                    }
-                };
-
-                layer.scales.gradient = function(variable, start, end){
-                    //start could be a pre-defined
-
-                };
-
-                layer.scales.quantile = function(variable, cols){
-
-                };
-
-                layer.scales.categorical = function(variable, cols){
-                    //have one default set
-
-                };
-
-            //register data in the form: [{idvar: "id", val:1, ...}, {}, {}, ... {}]
-            //must include key function that uniquely identifies each geo -- used to merge using geokey above
-            //note that dupes are removed.
-            //this doesn't actually bind data as we should strive to keep geojson data bound and not mutate it.
-            //also, not binding allows missing data values without removing those features from map
-            layer.data = function(data, key){
-                if(arguments.length==0){
-                    return layer_data;
-                }
-                else if(data===null){
-                    layer_data = null;
-                }
-                else if(arguments.length < 2){
-                    throw new Error("You must specify a key function to merge data");
-                }
-                else if(data instanceof Array){
-                    layer_data = build_layer_data(data, key);
-                }
-                else{
-                    throw new Error("Data must be an array of objects or null")
-                }
-
-                return this;
-            };
-
-            //layer_data is either null or equal to the result of below
-            function build_layer_data(data, key){
-                //de-duped array of data
-                var de_duped = [];
-
-                var lookup = {};
-
-                //keep track of dupes
-                var dupes = []; 
-
-                //de-duped data -- keep only first obs encountered for a geo
-                data.forEach(function(d,i){
-
-                    var id = key(d);
-
-                    if(lookup.hasOwnProperty(id)){
-                        //lookup already has data for geography -- observation is a duplicate
-                        dupes.push(d);
-                    }
-                    else{
-                        lookup[id] = d;
-                        de_duped.push(d);
-                    }
-                });
-
-                if(dupes.length > 0){
-                    console.warn(dupes.length + " duplicate records found in data.");
-                }
-
-                return {
-                    lookup: function(idvalue){return lookup.hasOwnProperty(idvalue) ? lookup[idvalue] : null},
-                    data: de_duped,
-                    dupes: dupes
-                }
-            }
-
-            //known issue: this may fail with mixed feature arrays, especially if points come before polygons in array
-            //to do: support mixed feature type layers -- would need to evaluate on feature-by-feature basis
-            //consider filtering into arrays of feature by type?
-            layer.draw = function(resizeOnly){
-                if(features != null){
-
-                    //check feature type, then render circle or paths accordingly
-                    var isPoint = features[0].geometry.type == "Point";
-                    var mark = isPoint ? "circle" : "path";
-                    var update; //update selection
-
-                    //if drawing one polygon, embed features in a single FeatureCollection
-                    var f = onePath ? [{"type":"FeatureCollection", "features":features}] : features;
-
-                    if(geokey == null || onePath){
-                        update = g.selectAll(mark+".feature").data(f); //no key function in these cases
-                    }
-                    else{
-                        update = g.selectAll(mark+".feature").data(f, geokey);
-                    }
-
-                    //finalize current selection
-                    update.exit().remove();
-                    selection = update.enter().append(mark).classed("feature", true).merge(update);
-
-                    //always update cx and cy OR d
-                    if(isPoint){
-                        selection.attr("cx", function(d){
-                                    try{
-                                        var x = par.proj(d.geometry.coordinates)[0];
-                                    }
-                                    catch(e){
-                                        console.warn("Point cannot be projected");
-                                        var x = 0;
-                                    }
-                                    return x;
-                                })
-                                .attr("cy", function(d){
-                                    try{
-                                        var y = par.proj(d.geometry.coordinates)[1];
-                                    }
-                                    catch(e){
-                                        console.warn("Point cannot be projected");
-                                        var y = 0;
-                                    }
-                                    return y;
-                                });
-                    }
-                    else{
-                        var path = d3.geoPath(par.proj);
-
-                        selection.attr("d", path);                        
-                    }
-
-                    //update aesthetics and styles if not resizeOnly
-                    if(resizeOnly==null || !resizeOnly){
-                        for(var attr in layer_attrs){
-                            if(layer_attrs.hasOwnProperty(attr)){
-                                selection.attr(attr, layer_attrs[attr]);
-                            }
-                        }
-
-                        for(var style in layer_styles){
-                            if(layer_styles.hasOwnProperty(style)){
-                                selection.style(style, layer_styles[style]);
-                            }
-                        }                        
-                    }     
-                }
-                else{
-                    //console.log("NO FEATURES");
-                }
-
-                return this;
-            };
-
-            return layer;
-        }
-    }; //end map.layer()
-
-    map.layers = function(){
-        return layers;
-    };
-
-    // ================= end map layers ==================================================== //
-
-
-    // ========================== core map functions and methods =========================== //
-    
-
-    map.get_aspect = function(){
-        return par.aspect;
-    };
-
-    //update projection/size of map and size of map container. accounts for zoom scalar
-    //projection scale and translate are updated to fit all map features in the map container
-    //if there aren't any features on the map yet, this is a no-op.
-    //the map projection, stored in par.proj is updated in two places: 
-    //(1) in arg to map initialization, and (2) using the map.projection() method
-    function map_projection(){
-
-        //mutate par.proj via local proj variable
-        var proj = par.proj;
-
-        //if any geo features are available, scale and translate the projection
-        if(composite_geo != null){
-            //width of container
-            var cbox = dom.outer_wrap.node().getBoundingClientRect();
-            var cwidth = cbox.right - cbox.left;
-
-            //adjust projection scale and translate to fit a square defined by container width
-            proj.fitExtent([[0,0], [cwidth, cwidth]], composite_geo);
-
-            //create a geo path generator
-            var path = d3.geoPath(proj); 
-
-            //construct a planar bounding box around composite geo
-            var bounds = path.bounds(composite_geo);
-
-            //derive aspect ratio from the bounding box
-            par.aspect = Math.abs(bounds[1][1]-bounds[0][1]) / (bounds[1][0]-bounds[0][0]);
-
-            //width of map
-            var mwidth = cwidth*par.scalar;
-            var mheight = mwidth*par.aspect;
-
-            //set width of wrap to match container (will clip map when scalar > 1)
-            dom.wrap.style("width",cwidth+"px").style("height",(cwidth*par.aspect)+"px");
-
-            //final adjustment to proj to fit final dimensions of scaled map
-            //to do: points/circles at edge of composite geo will get cut off because bounds above will go through
-            //center of circles 
-            proj.fitExtent([[0,0], [mwidth, mheight]], composite_geo); 
-            //to do--consider padding by size of largest radius
-        }
-        else{
-            //null composite, no-op
-        }
-    }
-
-    map.draw = function(){
-
-        //update existing projection
-        map_projection();
-
-        layers.forEach(function(d){
-            d.draw();
-        });
-
-        return this;
-    };
-
-    //layer resizing merely redraw "d", "cx", and "cy" attributes
-    map.resize = function(){
-        
-        //update existing projection
-        map_projection();
-
-        layers.forEach(function(d){
-            d.draw(true); //true implies resize only
-        });
-
-        return this;
-    };
-
-    //public projection method gets/sets the map projection. when setting a new
-    //projection, the map is redrawn using map.resize();
-    // review this
-    map.projection = function(proj){
-        if(arguments.length==0 || proj == null){
-            return par.proj;
-        }
-        else{
-            //set new projection directly -- avoid calling duplicate map_projection 
-            //because it is called by resize() immediately after
-            par.proj = proj;
-            //resize all layers with updated projection  
-            this.resize();
-
-            return this;
-        }
-    };
-
-    map.albers = function(){
-        //create and apply localized albers projection
-        var bbox = map_bbox;
-
-        var top = bbox[1][1];
-        var bottom = bbox[0][1];
-        var left = bbox[0][0];
-        var right = bbox[1][0];
-
-        var lat_delta = top - bottom; //max lat - min lat
-
-        var parallel1 = top - (lat_delta/4); //higher (1/4 lower than top)
-        var parallel0 = bottom + (lat_delta/4); //lower
-
-        var rotateX = left + ((right - left)/2);
-        var centerY = bottom + (lat_delta/2);
-
-        var albers = d3.geoAlbers().rotate([-rotateX,0]).center([0,centerY]).parallels([parallel0, parallel1]);        
-
-        this.projection(albers);
-
-        return this;
-    };
-
-    //resize
-    var window_resize_timer;
-    window.addEventListener("resize", function(){
-        clearTimeout(window_resize_timer);
-        if(par.responsive){
-            window_resize_timer = setTimeout(function(){
-                map.resize();
-            }, 150);
-        }
-    });
-
-
-    //private bar chart component to be used by layer objects above
-    return map;
-}
-
 //main function
 function main(){
 
@@ -1497,6 +889,7 @@ function main(){
 
     //MAP
     //geodata -- move to separate module with updated data
+    /*
     var topo = {}; //hold topojson
     var geo = {}; //hold geojson
 
@@ -1510,15 +903,15 @@ function main(){
     
 
     var m = map(document.getElementById("metro-map"), d3.geoEquirectangular());
-
+*/
     
     //m.draw(d3.geoEquirectangular());
 
 
     //d3.geoConicConformal()
     //var nofeature_layer = m.layer();
-    var composite = m.layer("composite");
-    var countries = m.layer("countries").features(geo.countries).attr("fill","none").attr("stroke","blue");
+    //var composite = m.layer("composite");
+    //var countries = m.layer("countries").features(geo.countries).attr("fill","none").attr("stroke","blue");
 
     /*var states
     var lakes;
@@ -1571,7 +964,7 @@ function main(){
 
 
     //test merging features
-    var M = map(document.getElementById("merge-test"));
+    /*var M = map(document.getElementById("merge-test"));
 
     var st1 = M.layer("states").features(geo.states, "geo_name2").attr("stroke","#ffffff").attr("fill","orange").attr("fill-opacity",0.5)
         .data([{id:"AK"}, {id:"MN"}, {id:"TX"}, {id:"TX", note:"Duplicate!"}], function(d){return d.id}).attr("stroke", function(d, i, v){
@@ -1601,8 +994,7 @@ function main(){
                 {id:"TX", c:"#555555"},
                 {id:"TX", c:"#000000", note:"Duplicate!"}], function(d){return d.id}).attr("fill", function(d, i, v){
                   return v==null ? "#999999" : v.c;
-                });
-
+                })
 
       //var TX = geo.states.features.filter(function(d){return d.properties.geo_name2=="MN"});
 
@@ -1621,8 +1013,10 @@ function main(){
         else{
           return stabbr;
         }
-      });*/
+      });
     },4000);
+
+    */
 
   }
 
