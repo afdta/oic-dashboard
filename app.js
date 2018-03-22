@@ -790,9 +790,9 @@ function oic_profile(store){
             },
             {
                 title: "<span>2</span> Manufacturing heritage",
-                subtitle: "Share of jobs in manufacturing, 1970",
-                value: format.sh1(oic_data.mf_jobs_1970),
-                caption: "By 2016 this had fallen to " + format.pct1(oic_data.mf_jobs_2016)
+                subtitle: "Share of jobs in manufacturing, 1970 (mf_jobs_yyyy / RET_yyyy ?)",
+                value: format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970),
+                caption: "By 2016 this had fallen to " + format.pct1(oic_data.mf_jobs_2016/oic_data.RET_2016)
             },
             {
                 title: "<span>3</span> Slow job growth",
