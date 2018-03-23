@@ -56,20 +56,21 @@
 }
 
 .metro-interactive .dashboard-menu{
-  padding:25px 1rem 10px 1rem; 
+  padding:10px 1rem 10px 1rem; 
   position:relative;
   border-bottom:1px solid #ffffff;
-  margin-bottom:2rem;
+  margin-bottom:0rem;
   background-color:#333333;
-
-background: -webkit-linear-gradient(to left, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
-background: linear-gradient(to left, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-
+  background: -webkit-linear-gradient(to left, #243B55, #141E30);
+  background: linear-gradient(to left, #243B55, #141E30); 
 }
 .metro-interactive .dashboard-menu > * {margin:5px 0px 0px 0px; float:left;}
 .metro-interactive .dashboard-menu > div > p {padding: 4px 0px; color:#ffffff;}
 
+.metro-interactive #dashboard-typology{
+  margin-bottom:1.5rem;
+  background-color:#dddddd;
+}
 
 .metro-interactive .dashboard-wrap .dashboard-options-button{float:right;}
 
@@ -150,10 +151,11 @@ background: linear-gradient(to left, #243B55, #141E30); /* W3C, IE 10+/ Edge, Fi
   height:280px;
   filter: grayscale(50%);
   background-size:cover;
+  background-color:#1d2b3a;
   border-radius:0px;
   border:none;
   position:relative;
-  border-radius: 0px 15px 15px 0px;
+  border-radius: 0px 16px 16px 0px;
 }
 
 .metro-interactive .dashboard-panel-image p:first-child {
@@ -230,38 +232,46 @@ background: linear-gradient(to left, #243B55, #141E30); /* W3C, IE 10+/ Edge, Fi
 
 .metro-interactive .criterion{
   margin:1rem 0rem 2rem 0rem;
-  max-width:400px;
 }
 
 .metro-interactive .criterion p{
-  margin:0.5rem 0rem 0.5rem 1.9rem;
+  margin:0.5em 10% 0em 2em;
+  font-size:15px;
+  line-height: 1.4em;
+  font-style:italic;
 }
 
 .metro-interactive .criterion p.criteria-title{
   font-weight:bold;
-  line-height:1.5rem;
+  line-height:1.6em;
   background-color:#dddddd;
-  border-radius:0.8rem;
+  border-radius:0.8em;
   margin-left:0rem;
+  margin-right:5%;
+  font-style:normal;
+  max-width:none;
 }
 
 .metro-interactive .criterion p.criteria-title span{
   display:inline-block;
   background-color:#333333;
   color:#ffffff;
-  border-radius:0.8rem;
-  height:1.6rem;
-  line-height:1rem;
-  padding:0.3rem;
-  width:1.6rem;
+  border-radius:0.8em;
+  height:1.6em;
+  line-height:1em;
+  padding:0.3em;
+  width:1.6em;
   text-align:center;
-  margin:0px;
+  margin:0px 0.4em 0px 0px;
   box-sizing: border-box;
 }
 
-.metro-interactive .criterion p.criteria-value{
+.metro-interactive .criterion p.criteria-value span{
   font-weight:bold;
-  font-size:1.5rem;
+  font-size:2em;
+  display:inline-block;
+  margin:6px 0px 0px 0px;
+  font-style:normal;
 }
 
 

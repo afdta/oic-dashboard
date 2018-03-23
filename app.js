@@ -466,7 +466,7 @@ function oic_profile(store){
         st2state[s.STUSAB] = s.STATE_NAME;
     });
 
-    var optnest = d3.nest().key(function(d){return st2state[d.stabbr]})
+    var optnest = d3.nest().key(function(d){return st2state[d.state]})
                            .sortKeys(d3.ascending)
                            .rollup(function(a){
                                 var m = a.map(function(d){return {value:d.stcofips, text:d.city}});
@@ -492,21 +492,42 @@ function oic_profile(store){
     p1.wrap = d3.select("#dash-panel-1").style("padding-left","0px");
     p1.header = p1.wrap.append("div").append("div")
         .classed("dashboard-panel-image dashboard-panel-title", true)
-        .style("position","relative");
+        .style("position","relative").style("overflow","hidden");
+        
     
-    p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
-    p1.header.style("background-image", 'url("https://source.unsplash.com/ukvgqriuOgo")');
+    //p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
     
-    var continuum = p1.header.append("div").style("width","100%").style("position","absolute")
-        .style("bottom","0px").style("left","0px").style("background","rgba(255,255,255,0.5)")
-        .style("min-height","30px");
+    //breaks: [min, kalamazoo), [kalamazoo, springfield ma), [springfield, quincy), [quincy, max] 
+    //scores
+    var scores = [];
+    for(var stco in store.data){
+        if(store.data.hasOwnProperty(stco)){
+            scores.push({stcofips:store.data[stco].stcofips, 
+                         score:store.data[stco].score_0016});
+        }
+    }
+    var col_continuum = {"Vulnerable":"red", "Stabilizing":"orange", "Emerging":"green", "Strong":"blue"};
+    var continuum_threshold = d3.scaleThreshold().domain([-0.905, -0.528, 0]).range(["Vulnerable","Stabilizing","Emerging","Strong"]);
+    var continuum_linear = d3.scaleLinear().domain([-1.5603, 2.1612]).range([0,100]);
+    var continuum = d3.select("#dashboard-typology");
+        continuum.select("p").style("float","left").style("min-width","250px")
+            .style("margin-left","1rem").style("font-size","15px");
+
+    var hashes = continuum.append("svg").attr("width","70%").attr("height","25px").style("float","left")
+                .selectAll("line").data(scores).enter().append("line").attr("y1",30).attr("y2",10).attr("stroke-width","1")
+                .attr("stroke", function(d){return d.score==-null ? "#cccccc" : col_continuum[continuum_threshold(d.score)]})
+                .attr("x1", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"})
+                .attr("x2", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"});
+
+        
+
 
     //continuum.append("p").html('<span class="oic-name">___</span> is a(n) strong | xyz OIC')
-    continuum.append("img").attr("src","./assets/typology.svg").style("display","block").style("width","100%").style("max-width","600px");
-    
+
     p1.content = p1.wrap.append("div").style("padding-left","1rem");
 
-    p1.content.append("p").html('What makes <span class="oic-name">___</span> an OIC? (TO BE STYLED!)').style("font-weight","bold");
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> an OIC?')
+        .style("font-weight","bold").style("font-size","1.25rem").style("margin","1.5rem 0px");
    
     var criteria = p1.content.append("div");
 
@@ -520,7 +541,7 @@ function oic_profile(store){
     p2.wrap = d3.select("#dash-panel-2");
     p2.header = p2.wrap.append("div").classed("dashboard-panel-title", true);
     //p2.header.append("div").append("div").append("p").html('Economic performance indicators for <span class="oic-name">___</span>');
-    p2.header.append("p").html('Economic performance indicators for <span class="oic-name">___</span>');
+    p2.header.append("p").html('Economic performance indicators'); // for <span class="oic-name">___</span>');
 
     p2.header.append("img").attr("src","./assets/legend.png").style("display","block").style("width","80%").style("max-width","300px")
         .style("margin-bottom","10px");
@@ -534,7 +555,7 @@ function oic_profile(store){
     p3.wrap = d3.select("#dash-panel-3");
     p3.header = p3.wrap.append("div").classed("dashboard-panel-title", true);
     //p3.header.append("div").append("div").append("p").html('Assets and challenges for <span class="oic-name">___</span>');
-    p3.header.append("p").html('Assets and challenges for <span class="oic-name">___</span>');
+    p3.header.append("p").html('Assets and challenges'); // for <span class="oic-name">___</span>');
 
     p3.header.append("img").attr("src","./assets/legend.png").style("display","block").style("width","80%").style("max-width","300px")
         .style("margin-bottom","10px");
@@ -619,7 +640,7 @@ function oic_profile(store){
                    20, 
                    type != "bar" ? 16 : 10];
 
-        var bar_height = 12;
+        var bar_height = 10;
         var bar_pad = 5;
 
         //chart (svg) dimensions
@@ -678,18 +699,25 @@ function oic_profile(store){
 
         bars.select("circle").attr("cy", "8px").attr("r","6")
             .style("visibility", type!="bar" ? "visible" : "hidden")
+            .attr("fill", filler)
+            .transition()
+            .duration(700)
             .attr("cx", function(d){return xscale(d)})
-            .attr("fill", filler);
+            ;
 
-        bars.select("rect").attr("x", function(d){
-                                return d >= 0 ? xscale(0) : xscale(d);
-                           })
-                           .attr("width", function(d){
-                                return d >= 0 ? xscale(d) - xscale(0) : xscale(0) - xscale(d);
-                           })
+        bars.select("rect")
             .style("height", type!="bar" ? "2px" : bar_height+"px")
             .attr("y", type != "bar" ? "7px" : "0px")
-            .attr("fill", filler);
+            .attr("fill", filler)
+            .transition()
+            .duration(700)
+            .attr("x", function(d){
+                return d >= 0 ? xscale(0) : xscale(d);
+            })
+            .attr("width", function(d){
+                return d >= 0 ? xscale(d) - xscale(0) : xscale(0) - xscale(d);
+            })
+            ;
 
     }
     
@@ -708,7 +736,9 @@ function oic_profile(store){
         }
 
         dash_wrap.selectAll(".oic-name").text(store.id[code].city);
-        dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].stabbr);
+        dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].state);
+
+        p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
 
         //panel 1
         /*var p1sections = p1.wrap.selectAll("div.dashboard-panel-section").data([["aa","aa","aa"]]);
@@ -774,7 +804,7 @@ function oic_profile(store){
                 hh = h;
             }
         });
-        var hhh = (hh+15)+"px";
+        var hhh = (hh+5)+"px";
         tile_headers.style("height", hhh).style("line-height", hhh);
 
 
@@ -783,22 +813,22 @@ function oic_profile(store){
 
         var criteria_boxes = criteria.selectAll("div.criterion").data([
             {
-                title: "<span>1</span> Major urban center",
+                title: "<span>1</span>Major urban center",
                 subtitle: "Largest city population in county",
-                value: format.num0(oic_data.largest_city_pop),
+                value: "<span>" + format.num0(oic_data.largest_city_pop) + "</span>",
                 caption: ""
             },
             {
-                title: "<span>2</span> Manufacturing heritage",
-                subtitle: "Share of jobs in manufacturing, 1970 (mf_jobs_yyyy / RET_yyyy ?)",
-                value: format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970),
-                caption: "By 2016 this had fallen to " + format.pct1(oic_data.mf_jobs_2016/oic_data.RET_2016)
+                title: "<span>2</span>Manufacturing heritage",
+                subtitle: "Share of jobs in manufacturing, 1970",
+                value: "<span>" + format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970) + "</span>",
+                caption: "By 2016 this had fallen to " + format.sh1(oic_data.mf_jobs_2016/oic_data.RET_2016)
             },
             {
-                title: "<span>3</span> Slow job growth",
+                title: "<span>3</span>Slow job growth",
                 subtitle: "",
-                value: format.pct1(oic_data.percent_job_deficit*-1),
-                caption: "fewer jobs in 2016 than expected based on 1970 industrial structure"
+                value: "<span>" + format.sh1(oic_data.percent_job_deficit*-1) + "</span>",
+                caption: "fewer jobs in 2016 than expected, based on 1970 industrial structure"
             }
         ]);
 
@@ -864,12 +894,13 @@ function main(){
   //local
   dir.local("./");
   dir.add("assets", "assets");
+  dir.add("img", "assets/city_photos");
   //dir.add("dirAlias", "path/to/dir");
 
 
   //production data
   //dir.add("assets", "oi-cities/assets");
-  //dir.add("dirAlias", "rackspace-slug/path/to/dir");
+  //dir.add("img", "oi-cities/assets/city_photos");
   var compat = degradation(document.getElementById("metro-interactive"));
 
 

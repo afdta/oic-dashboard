@@ -13,12 +13,13 @@ function main(){
   //local
   dir.local("./");
   dir.add("assets", "assets");
+  dir.add("img", "assets/city_photos");
   //dir.add("dirAlias", "path/to/dir");
 
 
   //production data
   //dir.add("assets", "oi-cities/assets");
-  //dir.add("dirAlias", "rackspace-slug/path/to/dir");
+  //dir.add("img", "oi-cities/assets/city_photos");
   var compat = degradation(document.getElementById("metro-interactive"));
 
 
