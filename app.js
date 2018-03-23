@@ -630,7 +630,7 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita ($ths)";
+            r.title = "NSF/NIH funding per capita ($ths) [DUMMY DATA]";
             r.value = Math.random()*1000;
             r.format = format.num1(r.value);
         }
