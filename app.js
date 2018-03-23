@@ -488,6 +488,9 @@ function oic_profile(store){
         update(this.value);
     });
 
+    d3.select("#geography-note").classed("oic-help",true).attr("data-help","geography")
+        .append("span").classed("oic-help-icon",true).text("?");
+
     //oic_menu(opt.button, store.id, update);
 
 
@@ -512,9 +515,12 @@ function oic_profile(store){
                 .style("padding","5px 1rem")
                 .style("border-radius","0px")
                 ;
-    opt.type.append("p").style("margin","0px").style("font-size","15px")
+    opt.typep = opt.type.append("p").style("margin","0px").style("font-size","15px")
             .style("line-height","1em").style("font-weight","bold")
             .style("text-align","right");
+
+    opt.typep.append("span").classed("oic-type oic-help",true).attr("data-help","typology");
+    opt.typep.append("span").classed("oic-help-icon",true).text("?");
 
     p1.content = p1.content1.append("div").style("padding-left","1rem")
                             .style("background-color","#eeeeee")
@@ -571,13 +577,10 @@ function oic_profile(store){
     var p2 = {};
     p2.wrap = d3.select("#dash-panel-2");
     p2.header = p2.wrap.append("div").classed("dashboard-panel-title", true);
-    //p2.header.append("div").append("div").append("p").html('Economic performance indicators for <span class="oic-name">___</span>');
-    p2.header.append("p").html('Economic performance indicators'); // for <span class="oic-name">___</span>');
+    p2.header.append("p").html('Economic performance indicators').classed("oic-help",true).attr("data-help","performance")
+                .append("span").classed("oic-help-icon",true).style("font-size","1rem").text("?");
 
-    p2.header.append("img").attr("src","./assets/legend.png").style("display","block").style("width","80%").style("max-width","300px")
-        .style("margin-bottom","10px");
-
-
+    p2.legend = p2.header.append("div");
     
     ///////////////
     //  PANEL 3  //
@@ -585,11 +588,10 @@ function oic_profile(store){
     var p3 = {};
     p3.wrap = d3.select("#dash-panel-3");
     p3.header = p3.wrap.append("div").classed("dashboard-panel-title", true);
-    //p3.header.append("div").append("div").append("p").html('Assets and challenges for <span class="oic-name">___</span>');
-    p3.header.append("p").html('Assets and challenges'); // for <span class="oic-name">___</span>');
+    p3.header.append("p").html('Assets and challenges').classed("oic-help",true).attr("data-help","assets")
+                .append("span").classed("oic-help-icon",true).style("font-size","1rem").text("?");
 
-    p3.header.append("img").attr("src","./assets/legend.png").style("display","block").style("width","80%").style("max-width","300px")
-        .style("margin-bottom","10px");
+    p3.legend = p3.header.append("div");
 
 
     function get_ind(ind, dict){
@@ -628,9 +630,9 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita";
+            r.title = "NSF/NIH funding per capita ($ths)";
             r.value = Math.random()*1000;
-            r.format = format.shch1(r.value);
+            r.format = format.num1(r.value);
         }
         else if(ind == "aij"){
             r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
@@ -655,27 +657,53 @@ function oic_profile(store){
         }
         else if(ind == "edu"){
             r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016";
-            r.value = dict.nhw_baplus - dict.nonwhite_baplus;
+            r.value = dict.nhw_baplus_rate - dict.nonwhite_baplus_rate;
             r.sig = 0;
-            r.format = format.pct1(r.value);
+            r.format = format.shch1(r.value);
         }
 
         return r;
+    }
+
+    function legend(oic, d3container){
+        var cols = pal.categories;
+        var dat = [
+            {label: store.id[oic].city, col:cols.oic },
+            {label: "All OICs", col:cols.alloic },
+            {label: "Urban industrial counties", col:cols.urbani },
+            {label: "Urban counties", col:cols.urban }
+        ];
+        
+        var u = d3container.classed("c-fix",true).style("margin","0rem 0rem 1rem 0rem")
+                        .selectAll("div.legend-entry").data(dat);
+        u.exit().remove();
+
+        var e = u.enter().append("div").classed("legend-entry", true)
+                .style("float","left").style("margin","8px 12px 0px 0px").style("line-height","1em");
+        e.append("div").style("width","10px").style("height","10px").style("display","inline-block")
+            .style("vertical-align","middle").style("margin-right","4px");
+        e.append("p").style("margin","0px").style("line-height","1em").style("font-size","15px")
+            .style("vertical-align","middle").style("display","inline-block");
+
+        var a = e.merge(u);
+
+        a.select("div").style("background-color", function(d){return d.col});   
+        a.select("p").text(function(d){return d.label});             
     }
 
     function bar_chart(el, type, oic, ind, sigvar){
         var wrap = d3.select(el);
         var dim = dimensions(el);
         var pad = [20, 
-                   type != "bar" ? 16 : 10, 
+                   type != "bar" ? 21 : 15, 
                    20, 
-                   type != "bar" ? 16 : 10];
+                   type != "bar" ? 21 : 15];
 
-        var bar_height = 10;
+        var bar_height = 12;
         var bar_pad = 5;
 
         //chart (svg) dimensions
-        var width = (dim.width < 200 ? 200 : dim.width) - 20; //account for tile padding, not available for plotting
+        var width = (dim.width < 120 ? 120 : dim.width) - 20; //account for tile padding, not available for plotting
         var height = pad[0] + pad[2] + (bar_height*4) + (bar_pad*3);
 
         var dat = {};
@@ -690,14 +718,18 @@ function oic_profile(store){
         var val2 = get_ind(ind, urban_industrial);
         var val3 = get_ind(ind, urban_all);
         
-        dat.points = [val.value, 
-                      val1.value,
-                      val2.value,
-                      val3.value];
+        dat.points = [val, 
+                      val1,
+                      val2,
+                      val3];
 
-        var extent = d3.extent(dat.points);
+        var extent = d3.extent(dat.points, function(d){return d.value});
         if(extent[0] > 0){extent[0] = 0;} //if min greater than 0
         if(extent[1] < 0){extent[1] = 0;} //if max less than 0
+
+        //if needed add x pads here
+        if(extent[0] < 0){pad[3] = pad[3]+40;} 
+        if(extent[1] > 0){pad[1] = pad[1]+40;}       
 
         var xscale = d3.scaleLinear().domain(extent).range([pad[3], width-pad[1]]);
 
@@ -715,6 +747,7 @@ function oic_profile(store){
         var barse = barsu.enter().append("g");
             barse.append("rect");
             barse.append("circle");
+            barse.append("text").style("font-size","12px").style("fill","#555555");
 
         var bars = barse.merge(barsu);
 
@@ -733,7 +766,7 @@ function oic_profile(store){
             .attr("fill", filler)
             .transition()
             .duration(700)
-            .attr("cx", function(d){return xscale(d)})
+            .attr("cx", function(d){return xscale(d.value)})
             ;
 
         bars.select("rect")
@@ -743,14 +776,30 @@ function oic_profile(store){
             .transition()
             .duration(700)
             .attr("x", function(d){
-                return d >= 0 ? xscale(0) : xscale(d);
+                return d.value >= 0 ? xscale(0) : xscale(d.value);
             })
             .attr("width", function(d){
-                return d >= 0 ? xscale(d) - xscale(0) : xscale(0) - xscale(d);
+                return d.value >= 0 ? xscale(d.value) - xscale(0) : xscale(0) - xscale(d.value);
             })
             ;
 
+        bars.select("text")
+           .style("opacity","0")
+           .attr("y", type != "bar" ? "12" : "9")
+           .text(function(d){return d.format})
+           .attr("text-anchor", function(d){return d.value >= 0 ? "start" : "end"})
+           .transition()
+           .duration(700)
+           .attr("x", function(d){return type != "bar" ? 
+                                    (d.value >= 0 ? xscale(d.value) + 8 : xscale(d.value) - 8) : 
+                                    (d.value >= 0 ? xscale(d.value) + 6 : xscale(d.value) - 6) })
+           .on("end", function(){
+            d3.select(this).style("opacity","1");
+           })
+           ;
+
     }
+
     
     var current_oic = null;
 
@@ -775,10 +824,13 @@ function oic_profile(store){
         var oictypecol = continuum_color[oictype];
 
         opt.type.style("background-color", oictypecol);
-        opt.type.select("p")
+        opt.type.select("span.oic-type")
                 .text("OIC type: " + oictype)
                 .style("color",oictype=="Stabilizing" ? "#333333" : "#ffffff")
                 ;
+
+        legend(code, p2.legend);
+        legend(code, p3.legend);
 
         //panel 1
         /*var p1sections = p1.wrap.selectAll("div.dashboard-panel-section").data([["aa","aa","aa"]]);

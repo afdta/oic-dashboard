@@ -31,13 +31,14 @@
 <body>
 <div class="metro-interactive" style="max-width:780px;margin:2rem auto;">
   <h1>Draft of OIC dashboard</h1>
-  <p>Status update:</p>
+  <p>Remaining to dos:</p>
   <ul>
-    <li>Please only look at this on a widescreen desktop for now so that the three panels appear side-by-side. Once I finalize all the graphics, I'll make this responsive to various device widths.</li>
-    <li>I will add data labels to the charts</li>
-    <li>The left panel needs to be styled properly. In particular, the typology graphic needs to be done properly.</li>
-
-    <li>A couple remaining data items: (1) Stat sig. calcs are for absolute change, should we use those? (2) Need range of z-scores for typology. (3) See notes in dashboard (ALL CAPS)</li>
+    <li>Fix layout on narrower screens</li>
+    <li>Add in statistical significance indicator (asterisk on data values)</li>
+    <li>Add in the help/information functionality (clicking on the "?" icon will bring up more information)</li>
+    <li>Fill in remaining data from Cecile</li>
+    <li>If replacing images, I'd target these: Albany, Rockford, Muncie, Quincy, Canton, Lorain, Springfield (OH), Providence, Beaumont, Janesville</li>
+    <li>Data checks</li>
   </ul>
 
   <div id="metro-map"></div>
@@ -62,7 +63,7 @@
         </div>
           
         <div style="background:#d0d0d0;padding:5px 1rem">
-          <p style="font-size:15px;margin:0px;line-height:1.25em;">The data presented here are for <span class="county-name"> the county</span></p>
+          <p id="geography-note" style="font-size:15px;margin:0px;line-height:1.25em;">The data presented here are for <span class="county-name"> the county</span></p>
         </div>
       </div>
 

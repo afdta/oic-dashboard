@@ -97,7 +97,23 @@
   box-shadow: 2px 2px 8px rgba(50,50,50,.38);
 }
 
-
+.metro-interactive .dashboard-wrap .oic-help-icon{
+  font-size:15px;
+  display:inline-block;
+  margin:0px 8px;
+  background: #999999;
+  color:#ffffff;
+  height:1.2em;
+  width:1.2em;
+  box-sizing: border-box;
+  padding:0.1em;
+  line-height:1em;
+  border-radius:0.6em;
+  text-align:center;
+  vertical-align:top;
+  font-weight:bold;
+  cursor:pointer;
+}
 
 
 /*the dashboard is made up of three panels
@@ -136,10 +152,10 @@
   font-weight:bold;
   font-style:normal;
   font-size:1.5rem;
-  margin:7px 0rem;
+  margin:7px 0rem 0px 0px;
 }
 
-.metro-interactive .dashboard-panel-title > div{
+/*.metro-interactive .dashboard-panel-title > div{
   width: 100%;
   display:table;
   min-height:3rem;
@@ -152,7 +168,7 @@
   vertical-align:bottom;
   display:table-cell;
   font-weight:bold;
-}
+}*/
 
 .metro-interactive .box-shadowed{
   box-shadow: 2px 3px 6px rgba(50,50,50,.35);
@@ -252,7 +268,7 @@
 }
 
 .metro-interactive .criterion p{
-  margin:0.5em 10% 0em 2em;
+  margin:0.35em 10% 0em 2em;
   font-size:15px;
   line-height: 1.4em;
   font-style:italic;
@@ -286,9 +302,9 @@
 
 .metro-interactive .criterion p.criteria-value span{
   font-weight:bold;
-  font-size:2em;
+  font-size:1.5em;
   display:inline-block;
-  margin:6px 0px 0px 0px;
+  margin:0px 0px 0px 0px;
   font-style:normal;
 }
 
