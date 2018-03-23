@@ -274,7 +274,7 @@ function select_menu(container){
 	var callback = null;
 
 	var wrap = d3.select(container);
-	var prompt = wrap.append("p").classed("select-prompt", true);
+	var prompt = wrap.append("p").classed("select-prompt", true).style("display","none");
 
 	var select = wrap.append("select").style("font-family","Arial, Helvetica, sans").style("width","100%");
 
@@ -306,7 +306,7 @@ function select_menu(container){
 	};
 
 	sel.prompt = function(text){
-		prompt.text(text);
+		prompt.text(text).style("display","block");
 		return sel;
 	};
 
@@ -451,7 +451,13 @@ function oic_profile(store){
     ///////////////
     var opt = {};
     opt.wrap = d3.select("#dashboard-menu");
-    opt.select_menu = opt.wrap.append("div").style("float","right"); 
+    opt.select_menu = d3.select("#oic-select")
+                        .style("float","right")
+                        .style("margin","0rem 0rem")
+                        .style("display","inline-block")
+                        .style("vertical-align","bottom")
+                        .style("line-height","2.5rem"); 
+
 
     var opt_data = [];
     for(var o in store.id){
@@ -489,27 +495,51 @@ function oic_profile(store){
     //  PANEL 1  //
     ///////////////
     var p1 = {};
-    p1.wrap = d3.select("#dash-panel-1").style("padding-left","0px");
-    p1.header = p1.wrap.append("div").append("div")
+    p1.wrap = d3.select("#dash-panel-1")
+                .style("padding-left","0px");
+
+    p1.content1 = p1.wrap.append("div").style("padding","0px")
+                .style("border-radius","0px 15px 0px 0px")
+                .style("overflow","hidden")
+                .style("position","relative");
+
+    p1.header = p1.content1.append("div").append("div")
         .classed("dashboard-panel-image dashboard-panel-title", true)
         .style("position","relative").style("overflow","hidden");
         
+
+    opt.type = p1.content1.append("div")
+                .style("padding","5px 1rem")
+                .style("border-radius","0px")
+                ;
+    opt.type.append("p").style("margin","0px").style("font-size","15px")
+            .style("line-height","1em").style("font-weight","bold")
+            .style("text-align","right");
+
+    p1.content = p1.content1.append("div").style("padding-left","1rem")
+                            .style("background-color","#eeeeee")
+                            .style("border","1px solid #d0d0d0")
+                            .style("padding-top","1px")
+                            .style("border-width","0px 1px 1px 0px")
+                            .style("border-radius","0px 0px 15px 0px");
     
     //p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
     
     //breaks: [min, kalamazoo), [kalamazoo, springfield ma), [springfield, quincy), [quincy, max] 
     //scores
-    var scores = [];
-    for(var stco in store.data){
-        if(store.data.hasOwnProperty(stco)){
-            scores.push({stcofips:store.data[stco].stcofips, 
-                         score:store.data[stco].score_0016});
-        }
-    }
-    var col_continuum = {"Vulnerable":"red", "Stabilizing":"orange", "Emerging":"green", "Strong":"blue"};
+    //var scores = [];
+    //for(var stco in store.data){
+    //    if(store.data.hasOwnProperty(stco)){
+    //        scores.push({stcofips:store.data[stco].stcofips, 
+    //                     score:store.data[stco].score_0016});
+    //    }
+    //}
+
+    var continuum_color = {"Vulnerable":"#CD3D4B", "Stabilizing":"#FFCF00", "Emerging":"#324661", "Strong":"#578F82"};
     var continuum_threshold = d3.scaleThreshold().domain([-0.905, -0.528, 0]).range(["Vulnerable","Stabilizing","Emerging","Strong"]);
-    var continuum_linear = d3.scaleLinear().domain([-1.5603, 2.1612]).range([0,100]);
-    var continuum = d3.select("#dashboard-typology");
+    //var continuum_linear = d3.scaleLinear().domain([-1.5603, 2.1612]).range([0,100]);
+    
+    /*var continuum = d3.select("#dashboard-typology");
         continuum.select("p").style("float","left").style("min-width","250px")
             .style("margin-left","1rem").style("font-size","15px");
 
@@ -517,17 +547,18 @@ function oic_profile(store){
                 .selectAll("line").data(scores).enter().append("line").attr("y1",30).attr("y2",10).attr("stroke-width","1")
                 .attr("stroke", function(d){return d.score==-null ? "#cccccc" : col_continuum[continuum_threshold(d.score)]})
                 .attr("x1", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"})
-                .attr("x2", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"});
+                .attr("x2", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"})
+                ;
+    */
 
         
 
 
     //continuum.append("p").html('<span class="oic-name">___</span> is a(n) strong | xyz OIC')
 
-    p1.content = p1.wrap.append("div").style("padding-left","1rem");
-
     p1.content.append("p").html('What makes <span class="oic-name">___</span> an OIC?')
-        .style("font-weight","bold").style("font-size","1.25rem").style("margin","1.5rem 0px");
+        .style("font-weight","bold").style("font-size","1rem")
+        .style("margin-top","1.25rem").style("font-style","italic");
    
     var criteria = p1.content.append("div");
 
@@ -597,12 +628,12 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita (NEED TO GET FROM CECILE)";
+            r.title = "NSF/NIH funding per capita";
             r.value = Math.random()*1000;
             r.format = format.shch1(r.value);
         }
         else if(ind == "aij"){
-            r.title = "Percent change in advanced industries jobs, <span>2010–16</span> (YEARS?)";
+            r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
             r.value = (dict.ai_jobs_2016 / dict.ai_jobs_2010) - 1;
             r.format = format.pct1(r.value);
         }
@@ -623,7 +654,7 @@ function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "edu"){
-            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016 (SIG?)";
+            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016";
             r.value = dict.nhw_baplus - dict.nonwhite_baplus;
             r.sig = 0;
             r.format = format.pct1(r.value);
@@ -739,6 +770,15 @@ function oic_profile(store){
         dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].state);
 
         p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
+
+        var oictype = continuum_threshold(store.data[code].score_0016);
+        var oictypecol = continuum_color[oictype];
+
+        opt.type.style("background-color", oictypecol);
+        opt.type.select("p")
+                .text("OIC type: " + oictype)
+                .style("color",oictype=="Stabilizing" ? "#333333" : "#ffffff")
+                ;
 
         //panel 1
         /*var p1sections = p1.wrap.selectAll("div.dashboard-panel-section").data([["aa","aa","aa"]]);

@@ -28,9 +28,8 @@
   font-size:0.9rem;
   color:#555555;
   padding:0.25em 1rem 0.25rem 0.5rem;
-
   background-color:#ffffff;
-  border:1px solid #ffffff;
+  border:0px solid #ffffff;
   border-radius:7px;
   -moz-appearance:none;
 }
@@ -56,16 +55,19 @@
 }
 
 .metro-interactive .dashboard-menu{
-  padding:10px 1rem 10px 1rem; 
   position:relative;
-  border-bottom:1px solid #ffffff;
-  margin-bottom:0rem;
-  background-color:#333333;
-  background: -webkit-linear-gradient(to left, #243B55, #141E30);
-  background: linear-gradient(to left, #243B55, #141E30); 
+  margin-bottom:1.5rem;
+  margin-right:0.5rem;
+  border-radius:0px 15px 15px 0px;
+  overflow:hidden;
 }
-.metro-interactive .dashboard-menu > * {margin:5px 0px 0px 0px; float:left;}
-.metro-interactive .dashboard-menu > div > p {padding: 4px 0px; color:#ffffff;}
+
+.metro-interactive .dashboard-menu > div{
+  padding:15px 1rem 5px 1rem; 
+  background: #333333;
+  background: -webkit-linear-gradient(to left, #324661, #141E30);
+  background: linear-gradient(to left, #324661, #141E30); 
+}
 
 .metro-interactive #dashboard-typology{
   margin-bottom:1.5rem;
@@ -105,7 +107,7 @@
 .metro-interactive .dashboard-panel{
   float:left;
   padding:0rem 1rem 0rem 1rem;
-  margin:0rem 0px 1rem 0px;
+  margin:0.5rem 0px 1rem 0px;
 }
 
 .metro-interactive .dashboard-panel > div{
@@ -114,11 +116,17 @@
 
 .metro-interactive .dashboard-panel-title{
   margin:0rem 0rem 10px 0rem;
-  padding:5px 15px 0px 20px; 
+  padding:0px 15px 0px 20px; 
   /*border:1px solid #1d2b3a;
   background-color:#1d2b3a;*/
   border-radius:0px 15px 0px 0px; 
   border:0px solid #aaaaaa;
+}
+
+.metro-interactive .top-cap{
+  border:1px solid #aaaaaa;
+  border-width:1px 1px 0px 0px;
+  border-radius:0px 15px 0px 0px;
 }
 
 .metro-interactive .dashboard-panel-title > p{
@@ -127,8 +135,8 @@
 .metro-interactive .dashboard-panel-title > p:first-child{
   font-weight:bold;
   font-style:normal;
-  font-size:1.25rem;
-  margin:5px 0rem;
+  font-size:1.5rem;
+  margin:7px 0rem;
 }
 
 .metro-interactive .dashboard-panel-title > div{
@@ -146,21 +154,30 @@
   font-weight:bold;
 }
 
+.metro-interactive .box-shadowed{
+  box-shadow: 2px 3px 6px rgba(50,50,50,.35);
+}
+
 .metro-interactive .dashboard-panel-image{
   max-width:600px;
+  margin:0rem 0rem 0rem 0rem;
   height:280px;
-  filter: grayscale(50%);
+  filter: grayscale(0%);
   background-size:cover;
   background-color:#1d2b3a;
   border-radius:0px;
   border:none;
   position:relative;
-  border-radius: 0px 16px 16px 0px;
+  padding:0px !important;
 }
 
 .metro-interactive .dashboard-panel-image p:first-child {
-  color:#ffffff;
-  text-shadow: 3px 3px 8px rgba(255,255,255,0.2);
+  /*text-shadow: 0px 0px 3px rgba(255,255,255,1);
+  background-color:rgba(255,255,255,0.25);
+  padding:7px 1rem 2px 1rem;
+  margin:0px;
+  line-height:1.5em;
+  font-size:1rem;*/
 }
 
 
@@ -231,7 +248,7 @@
 }
 
 .metro-interactive .criterion{
-  margin:1rem 0rem 2rem 0rem;
+  margin:1rem 0rem 1.25rem 0rem;
 }
 
 .metro-interactive .criterion p{
@@ -247,6 +264,7 @@
   background-color:#dddddd;
   border-radius:0.8em;
   margin-left:0rem;
+  margin-bottom:0.75rem;
   margin-right:5%;
   font-style:normal;
   max-width:none;
@@ -290,7 +308,7 @@
 @media (min-width:480px){
   .metro-interactive{padding:15px 0px;}
   .metro-interactive .dashboard-tile{}
-  .metro-interactive .dashboard-panel-title{padding:5px 15px 0px 20px; }
+  .metro-interactive .dashboard-panel-title{padding:0px 15px 0px 20px; }
   .metro-interactive .dashboard-panel-section{padding:5px 10px 0rem 10px;}
   .metro-interactive .dashboard-panel-section .section-title{}
 }

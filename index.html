@@ -46,20 +46,27 @@
 
 
 <div class="metro-interactive">
-    <div class="dashboard-wrap c-fix" id="oic-dashboard" style="background-color:#f0f0f0;">
-        
+    <div class="dashboard-wrap c-fix" id="oic-dashboard" style="">
+      <div class="dashboard-menu">
+        <div class="dashboard-menu-inner c-fix box-shadowed" id="dashboard-menu" style="">
+          <div class="c-fix">
+            <p class="dashboard-title c-fix" style="font-size:2.5rem;font-weight:bold;margin-bottom:0px;float:left;">
+              <span class="oic-name" style="margin-right:0.5rem;color:#ffffff">OIC Dashboard</span>
+              <span class="county-name" style="color:#cccccc;font-size:1.25rem;text-transform:uppercase;white-space: nowrap;">_</span>
+            </p>
 
-        <div class="dashboard-menu c-fix" id="dashboard-menu" style="">
-            <div>
-              <p class="dashboard-title" style="font-size:2.5rem;font-weight:bold;margin-bottom:0px;">
-                <span class="oic-name" style="margin-right:0.5rem;">OIC Dashboard</span>
-                <span class="county-name" style="color:#999999;font-size:1.25rem;text-transform:uppercase">_</span>
-              </p>
+            <div id="oic-select">
+              <!--select oic here-->
             </div>
+          </div>
         </div>
-        <div id="dashboard-typology" class="c-fix">
-          <p>Combined performance on growth, prosperity, and inclusion</p>
+          
+        <div style="background:#d0d0d0;padding:5px 1rem">
+          <p style="font-size:15px;margin:0px;line-height:1.25em;">The data presented here are for <span class="county-name"> the county</span></p>
         </div>
+      </div>
+
+
 
         <div class="c-fix">
             <div class="dashboard-panel" id="dash-panel-1"></div>
