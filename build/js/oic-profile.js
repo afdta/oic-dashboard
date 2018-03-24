@@ -1,8 +1,12 @@
+//to do: validate OIC and other var names (code) are used in proper scope
+//to do: wrap update() in try catch. if error display warning, prompt to reload
+
 import degradation from "../../../js-modules/degradation.js";
 import dimensions from "../../../js-modules/dimensions.js";
 import format from "../../../js-modules/formats.js";
 import select_menu from "../../../js-modules/select-menu.js";
 import dir from "../../../js-modules/rackspace.js";
+import history from "../../../js-modules/history.js";
 
 import palette from "./palette.js";
 import oic_menu from "./oic-menu.js";
@@ -50,12 +54,6 @@ export default function oic_profile(store){
                            })
                            .entries(opt_data);
 
-    var select = select_menu(opt.select_menu.node()).optgroups(optnest).style("background","#ffffff")
-        .style("border","1px solid #ffffff");
-
-    select.on("change", function(){
-        update(this.value);
-    });
 
     d3.select("#geography-note").classed("oic-help",true).attr("data-help","geography")
         .append("span").classed("oic-help-icon",true).text("?");
@@ -340,7 +338,7 @@ export default function oic_profile(store){
             ;
 
         bars.select("rect")
-            .style("height", type!="bar" ? "2px" : bar_height+"px")
+            .attr("height", type!="bar" ? "2px" : bar_height+"px")
             .attr("y", type != "bar" ? "7px" : "0px")
             .attr("fill", filler)
             .transition()
@@ -370,11 +368,10 @@ export default function oic_profile(store){
 
     }
 
-    
     var current_oic = null;
 
     function update(code){
-        
+        //console.log("UPDATE " + code);
         if(arguments.length==0 && current_oic===null){
             return null;
         }
@@ -507,9 +504,71 @@ export default function oic_profile(store){
 
     }
 
-    update("01073");
-    select.node().value = "01073";
+    var hist = history(); //wrapper of browser history api
+ 
+    //initialization and user selection of an OIC -- push these onto browser history
+    var select = select_menu(opt.select_menu.node()).optgroups(optnest);
 
+    select.on("change", function(){
+        var code = this.value;
+        if(store.id.hasOwnProperty(code)){
+            update(code);
+            hist.push({code:code}, "#"+code);
+        }
+        else{
+            //update with existing oic -- should never occur
+            update();
+        }
+    });   
+
+    //what to initialize with? a valid hash or Birmingham
+    var onloadhash = hist.get_hash(); //initial location hash
+    var validhash;
+
+    if(store.id.hasOwnProperty(onloadhash)){
+        validhash = onloadhash;
+        
+        //scroll to dashboard, this scroll pos should get recorded prior to replaceState() below
+        //so user back navigation will keep dashboard at top
+        try{
+            //to do: figure out how to reliably scroll to dashboard in this case
+            window.location.hash = "oic-dashboard";
+            //dash_wrap.node().scrollIntoView({ behavior: 'instant' , block: 'start', inline: 'nearest'});
+        }
+        catch(e){
+            console.log(e);
+            //no-op, user will have to scroll
+        }
+
+    }
+    else{
+        validhash = "01073";
+    }
+
+    update(validhash);
+    select.node().value = validhash; //update select menu
+    hist.push({code:validhash}, "#"+validhash, true); //push this onto history, overwriting current page in history         
+
+
+   //when changing between states of history see if valid oic is requested, if so, update profile
+    //do not push this onto history. also updare selecr menu
+    hist.pop(function(event_state){
+        //console.log(this);
+        console.log(event_state);
+        try{
+            if(event_state == null){throw new Error("null popstate");}
+            var code = event_state.code;
+            if(store.id.hasOwnProperty(code)){
+                update(code);
+                select.node().value = code;
+            }
+        }
+        catch(e){
+            console.log(e);
+            update(); //update with existing OIC
+        }
+    });
+
+    //on resize, update with current OIC
     window.addEventListener("resize", function(){update();})
-
 }

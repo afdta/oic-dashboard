@@ -424,6 +424,48 @@ function select_menu(container){
 	return sel;
 }
 
+//v1.0 developed for congressional district poverty
+//enable browser history
+
+function history(){
+	var H = {};
+	if(window.history && window.history.pushState){
+		H.push = function(d, u, overwrite){
+			var url = !!u ? u : null; 
+			if(!!overwrite){
+				window.history.replaceState(d, null, url);
+			}
+			else{
+				window.history.pushState(d, null, url);
+			}
+		};
+
+		H.pop = function(callback){
+			var fn = function(event){
+				callback.call(event, event.state);
+			};
+			window.addEventListener("popstate", fn);
+		};
+	}
+	else{
+		H.push = function(){};
+		H.pop = function(){};
+	}
+
+	H.get_hash = function(){
+		var hash;
+		try{
+			hash = window.location.hash.slice(1) + "";
+		}
+		catch(e){
+			hash = "";
+		}
+		return hash;
+	};
+
+	return H;
+}
+
 function palette(){
 
     var p = {};
@@ -437,6 +479,9 @@ function palette(){
 
     return p;
 }
+
+//to do: validate OIC and other var names (code) are used in proper scope
+//to do: wrap update() in try catch. if error display warning, prompt to reload
 
 function oic_profile(store){
     //console.log(store)
@@ -481,12 +526,6 @@ function oic_profile(store){
                            })
                            .entries(opt_data);
 
-    var select = select_menu(opt.select_menu.node()).optgroups(optnest).style("background","#ffffff")
-        .style("border","1px solid #ffffff");
-
-    select.on("change", function(){
-        update(this.value);
-    });
 
     d3.select("#geography-note").classed("oic-help",true).attr("data-help","geography")
         .append("span").classed("oic-help-icon",true).text("?");
@@ -770,7 +809,7 @@ function oic_profile(store){
             ;
 
         bars.select("rect")
-            .style("height", type!="bar" ? "2px" : bar_height+"px")
+            .attr("height", type!="bar" ? "2px" : bar_height+"px")
             .attr("y", type != "bar" ? "7px" : "0px")
             .attr("fill", filler)
             .transition()
@@ -800,11 +839,10 @@ function oic_profile(store){
 
     }
 
-    
     var current_oic = null;
 
     function update(code){
-        
+        //console.log("UPDATE " + code);
         if(arguments.length==0 && current_oic===null){
             return null;
         }
@@ -937,11 +975,73 @@ function oic_profile(store){
 
     }
 
-    update("01073");
-    select.node().value = "01073";
+    var hist = history(); //wrapper of browser history api
+ 
+    //initialization and user selection of an OIC -- push these onto browser history
+    var select = select_menu(opt.select_menu.node()).optgroups(optnest);
 
+    select.on("change", function(){
+        var code = this.value;
+        if(store.id.hasOwnProperty(code)){
+            update(code);
+            hist.push({code:code}, "#"+code);
+        }
+        else{
+            //update with existing oic -- should never occur
+            update();
+        }
+    });   
+
+    //what to initialize with? a valid hash or Birmingham
+    var onloadhash = hist.get_hash(); //initial location hash
+    var validhash;
+
+    if(store.id.hasOwnProperty(onloadhash)){
+        validhash = onloadhash;
+        
+        //scroll to dashboard, this scroll pos should get recorded prior to replaceState() below
+        //so user back navigation will keep dashboard at top
+        try{
+            //to do: figure out how to reliably scroll to dashboard in this case
+            window.location.hash = "oic-dashboard";
+            //dash_wrap.node().scrollIntoView({ behavior: 'instant' , block: 'start', inline: 'nearest'});
+        }
+        catch(e){
+            console.log(e);
+            //no-op, user will have to scroll
+        }
+
+    }
+    else{
+        validhash = "01073";
+    }
+
+    update(validhash);
+    select.node().value = validhash; //update select menu
+    hist.push({code:validhash}, "#"+validhash, true); //push this onto history, overwriting current page in history         
+
+
+   //when changing between states of history see if valid oic is requested, if so, update profile
+    //do not push this onto history. also updare selecr menu
+    hist.pop(function(event_state){
+        //console.log(this);
+        console.log(event_state);
+        try{
+            if(event_state == null){throw new Error("null popstate");}
+            var code = event_state.code;
+            if(store.id.hasOwnProperty(code)){
+                update(code);
+                select.node().value = code;
+            }
+        }
+        catch(e){
+            console.log(e);
+            update(); //update with existing OIC
+        }
+    });
+
+    //on resize, update with current OIC
     window.addEventListener("resize", function(){update();});
-
 }
 
 //to do
