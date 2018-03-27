@@ -907,6 +907,7 @@ function oic_profile(store){
         var barsu = svg.select("g.bar-groups").selectAll("g").data(dat.points);
 
         var barse = barsu.enter().append("g");
+            barse.append("title");
             barse.append("rect");
             barse.append("circle");
             barse.append("text").style("font-size","12px").style("fill","#555555");
@@ -959,6 +960,9 @@ function oic_profile(store){
             d3.select(this).style("opacity","1");
            })
            ;
+
+        var bar_titles = [store.id[oic].city, "All OICs", "Urban industrial counties", "Urban counties"];
+        bars.select("title").text(function(d, i){return bar_titles[i]});        
 
         //gridlines
         var gridu = svg.select("g.grid-lines").selectAll("g").data(xscale.ticks(5));
