@@ -490,7 +490,7 @@ export default function oic_profile(store){
         });
 
         p3.tiles.each(function(d){
-            bar_chart(this, "dot", code, d)
+            bar_chart(this, "bar", code, d)
         });
 
         //set tile header heights
