@@ -752,8 +752,8 @@ function oic_profile(store){
     p3.legend = p3.header.append("div");
 
 
-    function get_ind(ind, dict){
-        var r = {title:"Title", value:null, format:"N/A", sig:1};
+    function get_ind(ind, dict, geo_title){
+        var r = {title:"Title", value:null, format:"N/A", sig:1, geo:geo_title};
 
         if(ind == "job"){
             r.title = "Percent change in jobs";
@@ -871,10 +871,10 @@ function oic_profile(store){
         var urban_industrial = store.data["00002"];
         var urban_all = store.data["00001"];
 
-        var val = get_ind(ind, oic_individual);
-        var val1 = get_ind(ind, oic_avg);
-        var val2 = get_ind(ind, urban_industrial);
-        var val3 = get_ind(ind, urban_all);
+        var val = get_ind(ind, oic_individual, store.id[oic].city);
+        var val1 = get_ind(ind, oic_avg, "All OICs");
+        var val2 = get_ind(ind, urban_industrial, "Urban industrial counties");
+        var val3 = get_ind(ind, urban_all, "Urban counties");
         
         dat.points = [val, 
                       val1,
@@ -910,7 +910,7 @@ function oic_profile(store){
             barse.append("title");
             barse.append("rect");
             barse.append("circle");
-            barse.append("text").style("font-size","12px").style("fill","#555555");
+            barse.append("text").classed("text-value",true).style("font-size","12px").style("fill","#555555");
 
         var bars = barse.merge(barsu);
 
@@ -961,8 +961,7 @@ function oic_profile(store){
            })
            ;
 
-        var bar_titles = [store.id[oic].city, "All OICs", "Urban industrial counties", "Urban counties"];
-        bars.select("title").text(function(d, i){return bar_titles[i]});        
+        bars.select("title").text(function(d, i){return d.geo});        
 
         //gridlines
         var gridu = svg.select("g.grid-lines").selectAll("g").data(xscale.ticks(5));
