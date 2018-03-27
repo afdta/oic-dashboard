@@ -385,6 +385,7 @@ export default function oic_profile(store){
 
         //gridlines
         var gridu = svg.select("g.grid-lines").selectAll("g").data(xscale.ticks(5));
+            gridu.exit().remove();
         var gride = gridu.enter().append("g");
             gride.append("line");
             gride.append("text");
