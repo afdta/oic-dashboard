@@ -9,7 +9,7 @@ import dir from "../../../js-modules/rackspace.js";
 import history from "../../../js-modules/history.js";
 
 import palette from "./palette.js";
-import oic_menu from "./oic-menu.js";
+import oic_help from "./oic-help.js";
 
 export default function oic_profile(store){
     //console.log(store)
@@ -55,7 +55,31 @@ export default function oic_profile(store){
                            .entries(opt_data);
 
 
-    d3.select("#geography-note").classed("oic-help",true).attr("data-help","geography")
+    opt.type = d3.select("#oic-type")
+                .style("padding","0px 0rem")
+                .style("border-radius","0px")
+                .classed("oic-help", true)
+                .attr("data-help", "typology")
+                ;
+
+    opt.typedefault = "#aaaaaa";
+
+    opt.type.append("p").text("OIC type").append("span").classed("oic-help-icon",true).text("?").style("margin","0px 3px");
+    opt.typep = opt.type.selectAll("p.oic-type").data(["Vulnerable", "Stabilizing", "Emerging", "Strong"])
+                .enter().append("p").text(function(d){return d})
+                .style("background-color",opt.typedefault).style("color","#ffffff")
+                .style("border-radius","7px 0px")
+                ;
+
+    opt.type.selectAll("p").style("display","inline-block")
+                .style("margin","5px 5px 5px 0rem")
+                .style("padding", function(d,i){return i==0 ? "5px 0px" : "5px 8px"})
+                .style("line-height","1em")
+                ;
+
+    d3.select("#geography-note").append("p").classed("oic-help",true).attr("data-help","geography")
+        .style("margin","5px 0px 5px 0px").style("padding","5px 0px").style("line-height","1em")
+        .html('The data presented here are for <span class="county-name"> the county</span>')
         .append("span").classed("oic-help-icon",true).text("?");
 
     //oic_menu(opt.button, store.id, update);
@@ -69,32 +93,21 @@ export default function oic_profile(store){
                 .style("padding-left","0px")
 
     p1.content1 = p1.wrap.append("div").style("padding","0px")
-                .style("border-radius","0px 15px 0px 0px")
+                .style("border-radius","0px 0px 0px 0px")
                 .style("overflow","hidden")
-                .style("position","relative");
+                .style("position","relative")
+                .classed("c-fix",true);
 
-    p1.header = p1.content1.append("div").append("div")
+    p1.header = p1.content1
+        .append("div")
+        //.classed("panel1-split", true)
+        .append("div")
         .classed("dashboard-panel-image dashboard-panel-title", true)
         .style("position","relative").style("overflow","hidden");
         ;
 
-    opt.type = p1.content1.append("div")
-                .style("padding","5px 1rem")
-                .style("border-radius","0px")
-                ;
-    opt.typep = opt.type.append("p").style("margin","0px").style("font-size","15px")
-            .style("line-height","1em").style("font-weight","bold")
-            .style("text-align","right")
-
-    opt.typep.append("span").classed("oic-type oic-help",true).attr("data-help","typology");
-    opt.typep.append("span").classed("oic-help-icon",true).text("?");
-
     p1.content = p1.content1.append("div").style("padding-left","1rem")
-                            .style("background-color","#eeeeee")
-                            .style("border","1px solid #d0d0d0")
-                            .style("padding-top","1px")
-                            .style("border-width","0px 1px 1px 0px")
-                            .style("border-radius","0px 0px 15px 0px")
+                            .classed("panel1-content c-fix", true);
     
     //p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
     
@@ -390,11 +403,12 @@ export default function oic_profile(store){
         var oictype = continuum_threshold(store.data[code].score_0016);
         var oictypecol = continuum_color[oictype];
 
-        opt.type.style("background-color", oictypecol)
-        opt.type.select("span.oic-type")
-                .text("OIC type: " + oictype)
-                .style("color",oictype=="Stabilizing" ? "#333333" : "#ffffff")
-                ;
+        opt.typep.style("background-color", function(d){
+            return d==oictype ? oictypecol : opt.typedefault;
+        })
+        .style("color", function(d){
+            return d == "Stabilizing" && oictype == d ? "#333333" : "#ffffff";
+        });
 
         legend(code, p2.legend);
         legend(code, p3.legend);
@@ -525,6 +539,13 @@ export default function oic_profile(store){
     var onloadhash = hist.get_hash(); //initial location hash
     var validhash;
 
+    var scrollIntoView = function(smooth){
+        var behavior = arguments.length > 0 && !!smooth ? "smooth" : "instant";
+        setTimeout(function(){
+            dash_wrap.node().scrollIntoView({ behavior: behavior , block: 'start', inline: 'nearest'});
+        }, 0);
+    }
+
     if(store.id.hasOwnProperty(onloadhash)){
         validhash = onloadhash;
         
@@ -532,11 +553,18 @@ export default function oic_profile(store){
         //so user back navigation will keep dashboard at top
         try{
             //to do: figure out how to reliably scroll to dashboard in this case
-            window.location.hash = "oic-dashboard";
-            //dash_wrap.node().scrollIntoView({ behavior: 'instant' , block: 'start', inline: 'nearest'});
+            //window.location.hash = "oic-dashboard";
+            
+            if(document.readyState == "complete"){
+                scrollIntoView();
+            }
+            else{
+                document.addEventListener("readystatechange", function(event){
+                    scrollIntoView(true);
+                });                
+            }
         }
         catch(e){
-            console.log(e);
             //no-op, user will have to scroll
         }
 
@@ -550,7 +578,7 @@ export default function oic_profile(store){
     hist.push({code:validhash}, "#"+validhash, true); //push this onto history, overwriting current page in history         
 
 
-   //when changing between states of history see if valid oic is requested, if so, update profile
+    //when changing between states of history see if valid oic is requested, if so, update profile
     //do not push this onto history. also updare selecr menu
     hist.pop(function(event_state){
         //console.log(this);
@@ -568,6 +596,8 @@ export default function oic_profile(store){
             update(); //update with existing OIC
         }
     });
+
+    oic_help(dash_wrap.node());
 
     //on resize, update with current OIC
     window.addEventListener("resize", function(){update();})

@@ -30,18 +30,20 @@
 
 <body>
 
-<img src="https://source.unsplash.com/jJgs-v-3cPU" style="display:block;width:100%;max-width:900px;margin:0px auto;" />
+<div style="max-width:800px;margin:0px auto">
+  <h2>Section</h2>
+  <img src="https://source.unsplash.com/jJgs-v-3cPU" style="display:block;width:100%;max-width:900px;margin:0px auto;" />
+  <p style="text-align:center">...</p>
+</div>
 
 <div class="metro-interactive" style="max-width:780px;margin:2rem auto;">
-  <h1>Draft of OIC dashboard</h1>
+  <h2>Draft of OIC dashboard</h2>
   <p>Remaining to dos:</p>
   <ul>
-    <li>Fix layout on narrower screens</li>
     <li>Add in statistical significance indicator (asterisk on data values)</li>
-    <li>Add in the help/information functionality (clicking on the "?" icon will bring up more information)</li>
-    <li>Fill in remaining data from Cecile</li>
+    <li>Add in the help/information text</li>
+    <li>Fill in remaining data from Cecile (NSF/NIH)</li>
     <li>Add grid lines to charts</li>
-    <li>Make linkable</li>
     <li>If replacing images, I'd target these: Albany, Rockford, Muncie, Quincy, Canton, Lorain, Springfield (OH), Providence, Beaumont, Janesville</li>
     <li>Alan/Cecile to review language</li>
     <li>Data checks</li>
@@ -68,12 +70,18 @@
           </div>
         </div>
           
-        <div style="background:#d0d0d0;padding:5px 1rem">
-          <p id="geography-note" style="font-size:15px;margin:0px;line-height:1.25em;">The data presented here are for <span class="county-name"> the county</span></p>
+        <div style="background:#d0d0d0;padding:0px 1rem" class="c-fix">
+
+          <div id="oic-type" style="float:left;font-size:15px;">
+            <!--oic typeology-->
+          </div>
+
+          <div id="geography-note" style="float:right;font-size:15px;">
+            <!--oic typeology-->
+          </div>
+
         </div>
       </div>
-
-
 
         <div class="c-fix">
             <div class="dashboard-panel" id="dash-panel-1"></div>

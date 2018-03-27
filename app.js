@@ -480,6 +480,112 @@ function palette(){
     return p;
 }
 
+//pn: parent node
+
+function oic_help(pn){
+    
+    var wrap = d3.select(pn); 
+
+    var opanel = d3.select(pn).append("div")
+        .style("position","fixed")
+        .style("margin","0px")
+        .style("width","100vw")
+        .style("height","100vh")
+        .style("background-color", "rgba(240,240,240,1)")
+        .style("display","none")
+        .style("opacity","0")
+        .style("z-index","1000")
+        .style("left","0px")
+        .style("top","0px")
+        .style("overflow","auto");
+
+    var opanel_buttons = opanel.append("div")
+        .style("max-width","900px")
+        .style("margin","5% auto 0px auto")
+        .style("padding","1rem")
+        .classed("c-fix",true);
+
+    var opanel_content = opanel.append("div")
+        .style("max-width","900px")
+        .style("margin","0% auto")
+        .style("padding","0rem 1rem")
+        .classed("c-fix",true);  
+
+    opanel_buttons.append("p").style("text-align","right").text("- close -")
+        .style("margin","0rem 0rem").style("cursor","pointer");
+
+    //show panel
+    wrap.selectAll(".oic-help").on("click", function(){
+        d3.event.stopPropagation();
+        opanel.interrupt().style("display","block")
+            .transition().style("opacity","1")
+            .on("end", function(){
+                d3.select("body").classed("disable-scroll",true);
+            });
+        try{
+            fill_help(this.dataset.help);
+        }
+        catch(e){
+
+        }
+            
+    });
+
+    //hide panel
+    wrap.on("click", function(){
+        d3.select("body").classed("disable-scroll",false);
+        opanel.interrupt().transition().duration(400).style("opacity","0")
+            .on("end", function(){
+                opanel.style("display","none");
+            });
+    });
+
+    var info = {
+        typology: {
+            title: "A typology for Older Industrial Cities",
+            text: []
+        },
+        geography: {
+            title: "Notes on data and geography",
+            text: []
+        },
+        performance: {
+            title: "Performance indicators",
+            text: []
+        },
+        assets: {
+            title: "Assets and challenges",
+            text: []
+        }
+    };
+
+    var dummy_text = [
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam non nunc eget sapien suscipit scelerisque quis non ante. Phasellus vitae lectus ac ipsum gravida tincidunt. Vivamus iaculis eleifend risus quis molestie. Etiam euismod et urna id luctus. Pellentesque libero risus, sagittis eu neque ac, elementum varius turpis. Suspendisse convallis sapien ac fermentum dapibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aliquam erat volutpat. Nam blandit nisi vitae faucibus tempus.",
+    "Donec fringilla ut nibh ac pulvinar. Aenean efficitur malesuada magna, quis pulvinar ex mollis faucibus. In nec tincidunt turpis, ut tempus eros. Sed consequat mi eu pulvinar consectetur. Proin quis purus lacus. Nulla aliquet sem id risus lacinia, laoreet faucibus leo elementum. Nam pulvinar, justo sed mattis pellentesque, velit est interdum nibh, quis vehicula risus felis sit amet nibh. Integer malesuada risus sed dignissim efficitur.",
+    "Sed laoreet ex in velit rutrum, et aliquam eros cursus. Duis eleifend ex a est bibendum egestas. Integer et aliquam nunc, vel aliquam urna. Aenean nunc leo, iaculis in velit id, commodo porttitor erat. Pellentesque ac lacus ac diam sodales ullamcorper. Suspendisse dictum ipsum et facilisis placerat. Maecenas eget urna nec dolor aliquam hendrerit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam id interdum est. Vestibulum maximus turpis eget elit hendrerit, id convallis quam interdum. Praesent eu dui eget tellus consequat convallis sit amet eget lorem. Curabitur pharetra mi dictum leo lacinia, quis iaculis massa ultrices."
+    ];
+
+    function fill_help(attr){
+        
+        var title = opanel_content.selectAll("p.help-title").data([attr]);
+        title.enter().append("p").classed("help-title",true).merge(title)
+            .text(function(d){return info[attr].title})
+            .style("font-size","1.25rem").style("font-weight","bold")
+            .style("margin","0rem 0rem 1rem 0rem")
+            ;
+
+        var text = opanel_content.selectAll("p.help-content").data(dummy_text);
+        text.enter().append("p").classed("help-content",true).merge(text)
+            .text(function(d){return d})
+            .style("font-style","italic").style("margin","0rem 0rem 1rem 0rem")
+            ;
+    }
+
+
+
+ 
+}
+
 //to do: validate OIC and other var names (code) are used in proper scope
 //to do: wrap update() in try catch. if error display warning, prompt to reload
 
@@ -527,7 +633,31 @@ function oic_profile(store){
                            .entries(opt_data);
 
 
-    d3.select("#geography-note").classed("oic-help",true).attr("data-help","geography")
+    opt.type = d3.select("#oic-type")
+                .style("padding","0px 0rem")
+                .style("border-radius","0px")
+                .classed("oic-help", true)
+                .attr("data-help", "typology")
+                ;
+
+    opt.typedefault = "#aaaaaa";
+
+    opt.type.append("p").text("OIC type").append("span").classed("oic-help-icon",true).text("?").style("margin","0px 3px");
+    opt.typep = opt.type.selectAll("p.oic-type").data(["Vulnerable", "Stabilizing", "Emerging", "Strong"])
+                .enter().append("p").text(function(d){return d})
+                .style("background-color",opt.typedefault).style("color","#ffffff")
+                .style("border-radius","7px 0px")
+                ;
+
+    opt.type.selectAll("p").style("display","inline-block")
+                .style("margin","5px 5px 5px 0rem")
+                .style("padding", function(d,i){return i==0 ? "5px 0px" : "5px 8px"})
+                .style("line-height","1em")
+                ;
+
+    d3.select("#geography-note").append("p").classed("oic-help",true).attr("data-help","geography")
+        .style("margin","5px 0px 5px 0px").style("padding","5px 0px").style("line-height","1em")
+        .html('The data presented here are for <span class="county-name"> the county</span>')
         .append("span").classed("oic-help-icon",true).text("?");
 
     //oic_menu(opt.button, store.id, update);
@@ -541,32 +671,21 @@ function oic_profile(store){
                 .style("padding-left","0px");
 
     p1.content1 = p1.wrap.append("div").style("padding","0px")
-                .style("border-radius","0px 15px 0px 0px")
+                .style("border-radius","0px 0px 0px 0px")
                 .style("overflow","hidden")
-                .style("position","relative");
+                .style("position","relative")
+                .classed("c-fix",true);
 
-    p1.header = p1.content1.append("div").append("div")
+    p1.header = p1.content1
+        .append("div")
+        //.classed("panel1-split", true)
+        .append("div")
         .classed("dashboard-panel-image dashboard-panel-title", true)
         .style("position","relative").style("overflow","hidden");
         
 
-    opt.type = p1.content1.append("div")
-                .style("padding","5px 1rem")
-                .style("border-radius","0px")
-                ;
-    opt.typep = opt.type.append("p").style("margin","0px").style("font-size","15px")
-            .style("line-height","1em").style("font-weight","bold")
-            .style("text-align","right");
-
-    opt.typep.append("span").classed("oic-type oic-help",true).attr("data-help","typology");
-    opt.typep.append("span").classed("oic-help-icon",true).text("?");
-
     p1.content = p1.content1.append("div").style("padding-left","1rem")
-                            .style("background-color","#eeeeee")
-                            .style("border","1px solid #d0d0d0")
-                            .style("padding-top","1px")
-                            .style("border-width","0px 1px 1px 0px")
-                            .style("border-radius","0px 0px 15px 0px");
+                            .classed("panel1-content c-fix", true);
     
     //p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
     
@@ -861,11 +980,12 @@ function oic_profile(store){
         var oictype = continuum_threshold(store.data[code].score_0016);
         var oictypecol = continuum_color[oictype];
 
-        opt.type.style("background-color", oictypecol);
-        opt.type.select("span.oic-type")
-                .text("OIC type: " + oictype)
-                .style("color",oictype=="Stabilizing" ? "#333333" : "#ffffff")
-                ;
+        opt.typep.style("background-color", function(d){
+            return d==oictype ? oictypecol : opt.typedefault;
+        })
+        .style("color", function(d){
+            return d == "Stabilizing" && oictype == d ? "#333333" : "#ffffff";
+        });
 
         legend(code, p2.legend);
         legend(code, p3.legend);
@@ -996,6 +1116,13 @@ function oic_profile(store){
     var onloadhash = hist.get_hash(); //initial location hash
     var validhash;
 
+    var scrollIntoView = function(smooth){
+        var behavior = arguments.length > 0 && !!smooth ? "smooth" : "instant";
+        setTimeout(function(){
+            dash_wrap.node().scrollIntoView({ behavior: behavior , block: 'start', inline: 'nearest'});
+        }, 0);
+    };
+
     if(store.id.hasOwnProperty(onloadhash)){
         validhash = onloadhash;
         
@@ -1003,11 +1130,18 @@ function oic_profile(store){
         //so user back navigation will keep dashboard at top
         try{
             //to do: figure out how to reliably scroll to dashboard in this case
-            window.location.hash = "oic-dashboard";
-            //dash_wrap.node().scrollIntoView({ behavior: 'instant' , block: 'start', inline: 'nearest'});
+            //window.location.hash = "oic-dashboard";
+            
+            if(document.readyState == "complete"){
+                scrollIntoView();
+            }
+            else{
+                document.addEventListener("readystatechange", function(event){
+                    scrollIntoView(true);
+                });                
+            }
         }
         catch(e){
-            console.log(e);
             //no-op, user will have to scroll
         }
 
@@ -1021,7 +1155,7 @@ function oic_profile(store){
     hist.push({code:validhash}, "#"+validhash, true); //push this onto history, overwriting current page in history         
 
 
-   //when changing between states of history see if valid oic is requested, if so, update profile
+    //when changing between states of history see if valid oic is requested, if so, update profile
     //do not push this onto history. also updare selecr menu
     hist.pop(function(event_state){
         //console.log(this);
@@ -1039,6 +1173,8 @@ function oic_profile(store){
             update(); //update with existing OIC
         }
     });
+
+    oic_help(dash_wrap.node());
 
     //on resize, update with current OIC
     window.addEventListener("resize", function(){update();});
@@ -1242,7 +1378,6 @@ function main(){
     */
 
   }
-
 } //close main()
 
 

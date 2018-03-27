@@ -168,8 +168,7 @@ function main(){
 
     */
 
-  };
-
+  }
 } //close main()
 
 
