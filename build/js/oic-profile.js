@@ -320,10 +320,14 @@ export default function oic_profile(store){
             title_e.append("p");
         var title = title_e.merge(title).select("p").html(function(d){return d}).lower();
 
-        var svg = wrap.selectAll("svg").data([0]);
+        var svgu = wrap.selectAll("svg").data([0]);
+        var svge = svgu.enter().append("svg");
+            svge.append("g").classed("grid-lines", true);
+            svge.append("g").classed("bar-groups", true);
+
+        var svg = svge.merge(svgu).attr("height",height+"px").attr("width","100%").style("overflow","visible");
         
-        var barsu = svg.enter().append("svg").merge(svg).attr("height",height+"px").attr("width","100%").style("overflow","visible")
-                        .selectAll("g").data(dat.points);
+        var barsu = svg.select("g.bar-groups").selectAll("g").data(dat.points);
 
         var barse = barsu.enter().append("g");
             barse.append("rect");
@@ -378,6 +382,24 @@ export default function oic_profile(store){
             d3.select(this).style("opacity","1");
            })
            ;
+
+        //gridlines
+        var gridu = svg.select("g.grid-lines").selectAll("g").data(xscale.ticks(5));
+        var gride = gridu.enter().append("g");
+            gride.append("line");
+            gride.append("text");
+        var grid = gride.merge(gridu);
+
+        grid.select("line").attr("x1", function(d){return xscale(d)})
+                        .attr("x2", function(d){return xscale(d)})
+                        .attr("y1", 10)
+                        .attr("y2", height - 10)
+                        .attr("stroke","#aaaaaa")
+                        .attr("stroke-dasharray",function(d){
+                            return d==0 ? null : "2,2"; 
+                        })
+                        .style("shape-rendering","crispEdges")
+                        ;
 
     }
 
