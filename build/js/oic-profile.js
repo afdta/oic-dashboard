@@ -169,7 +169,7 @@ export default function oic_profile(store){
         else if(ind == "nsf"){
             r.title = "NSF/NIH funding per capita ($ths) [DUMMY DATA]";
             r.value = Math.random()*1000;
-            r.format = format.num1(r.value);
+            r.format = format.doll1(r.value);
         }
         else if(ind == "aij"){
             r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
@@ -343,6 +343,20 @@ export default function oic_profile(store){
             .attr("text-anchor", function(d){return d.value < 0 ? "end" : "start"})
             .attr("y", "-4")
             .style("visibility", is_mobile ? "visible" : "hidden")
+            .each(function(d,i){
+                try{
+                    var bbox = this.getBBox();
+                    if(bbox.x < 0){
+                        d3.select(this).attr("x","5").attr("text-anchor","start");
+                    }
+                    else if((bbox.x + bbox.width) > width){
+                        d3.select(this).attr("x",width-5).attr("text-anchor","end");
+                    }
+                }
+                catch(e){
+
+                }
+            })
             ;
 
         bars.select("title").text(function(d, i){return d.geo});        
@@ -361,7 +375,9 @@ export default function oic_profile(store){
                         .attr("x2", function(d){return xscale(d)})
                         .attr("y1", 10)
                         .attr("y2", height - 10)
-                        .attr("stroke","#aaaaaa")
+                        .attr("stroke",function(d){
+                            return d==0 ? "#cccccc" : "#dddddd";
+                        })
                         .attr("stroke-dasharray",function(d){
                             return d==0 ? null : "2,2"; 
                         })
