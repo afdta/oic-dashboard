@@ -34,7 +34,7 @@
 
 <div style="max-width:800px;margin:0px auto">
   <h2>Section</h2>
-  <img src="https://source.unsplash.com/jJgs-v-3cPU" style="display:block;width:100%;max-width:900px;margin:0px auto;" />
+  <img src="https://source.unsplash.com/jJgs-v-3cPU" style="display:block;width:100%;max-width:900px;margin:0px auto;" />"
   <p style="text-align:center">...</p>
 </div>
 
@@ -60,24 +60,23 @@
 <div class="metro-interactive">
     <div class="dashboard-wrap c-fix" id="oic-dashboard" style="">
       <div class="dashboard-menu">
-        <div class="dashboard-menu-inner c-fix box-shadowed" id="dashboard-menu" style="">
-          <div class="c-fix">
-            <p class="dashboard-title c-fix" style="font-size:2.5rem;font-weight:bold;margin-bottom:0px;float:left;">
-              <span class="oic-name" style="margin-right:0.5rem;color:#ffffff">OIC Dashboard</span>
-              <span class="county-name" style="color:#cccccc;font-size:1.25rem;text-transform:uppercase;white-space: nowrap;">_</span>
-            </p>
+        <div class="c-fix">
+          <p class="dashboard-title c-fix">
+            <span class="oic-name">OIC Dashboard</span>,
+            <span class="state-abbr">State</span>
+          </p>
 
-            <div id="oic-select">
-              <!--select oic here-->
+          <div id="oic-type" class="c-fix">
+            <div>
+              <p>OIC Type: </p>
             </div>
           </div>
         </div>
-          
-        <div style="background:#d0d0d0;padding:0px 1rem" class="c-fix">
 
-          <div id="oic-type" style="float:left;font-size:15px;">
-            <!--oic typeology-->
-          </div>
+        <div style="background:#d0d0d0;padding:0px 1rem 0px 0.75rem" class="c-fix">
+            <div id="oic-select">
+              <!--select oic here-->
+            </div>
 
           <div id="geography-note" style="float:right;font-size:15px;">
             <!--oic typeology-->
@@ -88,6 +87,7 @@
 
         <div class="c-fix">
             <div class="dashboard-panel" id="dash-panel-1"></div>
+            <div class="dashboard-panel" id="dash-legend"></div>
             <div class="dashboard-panel" id="dash-panel-2"></div>
             <div class="dashboard-panel" id="dash-panel-3"></div>
         </div>

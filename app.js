@@ -470,12 +470,27 @@ function palette(){
 
     var p = {};
 
+    
     p.categories = {
         oic:"#CD3D4B",
         alloic:"#FFCF00",
         urban:"#324661",
         urbani:"#578F82"
     };
+
+    p.categories = {
+        oic:"#CD3D4B",
+        alloic:"#FFCF00",
+        urban:"#324661",
+        urbani:"#578F82"
+    };
+    
+    /*p.categories = {
+        oic:"#CD3D4B",
+        alloic:"#7AABED", 
+        urban:"#324661",
+        urbani:"#597DAD"
+    }*/
 
     return p;
 }
@@ -595,19 +610,19 @@ function oic_profile(store){
     var dash_wrap = d3.select("#oic-dashboard");
     //d3.select(dash_wrap.node().parentNode).style("background-color","#162231");
 
+    var is_mobile = false;
+
     var pal = palette();
 
-    ///////////////
-    // OPT PANEL //
-    ///////////////
+    ////////////////
+    // MENU PANEL //
+    ////////////////
     var opt = {};
-    opt.wrap = d3.select("#dashboard-menu");
     opt.select_menu = d3.select("#oic-select")
-                        .style("float","right")
-                        .style("margin","0rem 0rem")
-                        .style("display","inline-block")
-                        .style("vertical-align","bottom")
-                        .style("line-height","2.5rem"); 
+                        .style("height","1.5rem")
+                        .style("float","left")
+                        .style("margin","6px 0px")
+                        ;
 
 
     var opt_data = [];
@@ -634,31 +649,24 @@ function oic_profile(store){
 
 
     opt.type = d3.select("#oic-type")
-                .style("padding","0px 0rem")
-                .style("border-radius","0px")
-                .classed("oic-help", true)
+                .classed("c-fix", true)
+                .select("div").classed("oic-help c-fix",true)
                 .attr("data-help", "typology")
                 ;
 
-    opt.typedefault = "#aaaaaa";
-
-    opt.type.append("p").text("OIC type").append("span").classed("oic-help-icon",true).text("?").style("margin","0px 3px");
-    opt.typep = opt.type.selectAll("p.oic-type").data(["Vulnerable", "Stabilizing", "Emerging", "Strong"])
-                .enter().append("p").text(function(d){return d})
-                .style("background-color",opt.typedefault).style("color","#ffffff")
-                .style("border-radius","7px 0px")
-                ;
-
-    opt.type.selectAll("p").style("display","inline-block")
-                .style("margin","5px 5px 5px 0rem")
-                .style("padding", function(d,i){return i==0 ? "5px 0px" : "5px 8px"})
-                .style("line-height","1em")
-                ;
+    //opt.type.append("p").text("OIC type").append("span")
+    //.classed("oic-help-icon",true).text("?").style("margin","0px 3px");
+   
+    opt.typep = opt.type.selectAll("p.oic-type")
+                .data(["Vulnerable", "Stabilizing", "Emerging", "Strong"])
+                .enter().append("p").style("white-space","nowrap")
+                .html(function(d){
+                    return d;
+                });
 
     d3.select("#geography-note").append("p").classed("oic-help",true).attr("data-help","geography")
-        .style("margin","5px 0px 5px 0px").style("padding","5px 0px").style("line-height","1em")
         .html('The data presented here are for <span class="county-name"> the county</span>')
-        .append("span").classed("oic-help-icon",true).text("?");
+        ;
 
     //oic_menu(opt.button, store.id, update);
 
@@ -667,78 +675,37 @@ function oic_profile(store){
     //  PANEL 1  //
     ///////////////
     var p1 = {};
-    p1.wrap = d3.select("#dash-panel-1")
-                .style("padding-left","0px");
+    p1.wrap = d3.select("#dash-panel-1").classed("c-fix",true);
 
-    p1.content1 = p1.wrap.append("div").style("padding","0px")
-                .style("border-radius","0px 0px 0px 0px")
-                .style("overflow","hidden")
-                .style("position","relative")
-                .classed("c-fix",true);
-
-    p1.header = p1.content1
-        .append("div")
-        //.classed("panel1-split", true)
-        .append("div")
-        .classed("dashboard-panel-image dashboard-panel-title", true)
-        .style("position","relative").style("overflow","hidden");
-        
-
-    p1.content = p1.content1.append("div").style("padding-left","1rem")
-                            .classed("panel1-content c-fix", true);
-    
-    //p1.header.append("p").html('Title for <span class="oic-name">___</span> here?');
-    
-    //breaks: [min, kalamazoo), [kalamazoo, springfield ma), [springfield, quincy), [quincy, max] 
-    //scores
-    //var scores = [];
-    //for(var stco in store.data){
-    //    if(store.data.hasOwnProperty(stco)){
-    //        scores.push({stcofips:store.data[stco].stcofips, 
-    //                     score:store.data[stco].score_0016});
-    //    }
-    //}
+    p1.header = p1.wrap.append("div").classed("dashboard-panel-image",true);
+    p1.content = p1.wrap.append("div").classed("panel1-content c-fix",true);
 
     var continuum_color = {"Vulnerable":"#CD3D4B", "Stabilizing":"#FFCF00", "Emerging":"#324661", "Strong":"#578F82"};
     var continuum_threshold = d3.scaleThreshold().domain([-0.905, -0.528, 0]).range(["Vulnerable","Stabilizing","Emerging","Strong"]);
-    //var continuum_linear = d3.scaleLinear().domain([-1.5603, 2.1612]).range([0,100]);
-    
-    /*var continuum = d3.select("#dashboard-typology");
-        continuum.select("p").style("float","left").style("min-width","250px")
-            .style("margin-left","1rem").style("font-size","15px");
 
-    var hashes = continuum.append("svg").attr("width","70%").attr("height","25px").style("float","left")
-                .selectAll("line").data(scores).enter().append("line").attr("y1",30).attr("y2",10).attr("stroke-width","1")
-                .attr("stroke", function(d){return d.score==-null ? "#cccccc" : col_continuum[continuum_threshold(d.score)]})
-                .attr("x1", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"})
-                .attr("x2", function(d){return d.score==-null ? "0%" : continuum_linear(d.score)+"%"})
-                ;
-    */
-
-        
-
-
-    //continuum.append("p").html('<span class="oic-name">___</span> is a(n) strong | xyz OIC')
-
-    p1.content.append("p").html('What makes <span class="oic-name">___</span> an OIC?')
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> an Older Industrial City (OIC)?')
         .style("font-weight","bold").style("font-size","1rem")
-        .style("margin-top","1.25rem").style("font-style","italic");
+        .style("margin","1.25rem 1rem 0rem 1rem").style("font-style","italic");
    
-    var criteria = p1.content.append("div");
+    p1.criteria = p1.content.append("div");
 
+    ///////////////
+    // LEGEND    //
+    ///////////////
 
-    //p1.header.append("div").append("div").append("p").html('What makes <span class="oic-name">___</span> an OIC?');
-    
+    var legend_wrap = d3.select("#dash-legend").classed("c-fix",true)
+                        .append("div").append("div");
+
     ///////////////
     //  PANEL 2  //
     ///////////////
     var p2 = {};
     p2.wrap = d3.select("#dash-panel-2");
     p2.header = p2.wrap.append("div").classed("dashboard-panel-title", true);
-    p2.header.append("p").html('Economic performance indicators').classed("oic-help",true).attr("data-help","performance")
-                .append("span").classed("oic-help-icon",true).style("font-size","1rem").text("?");
+    p2.header.append("p").html('Economic performance indicators').classed("oic-help icon-top",true)
+        .attr("data-help","performance");
 
-    p2.legend = p2.header.append("div");
+    //p2.legend = p2.header.append("div");
     
     ///////////////
     //  PANEL 3  //
@@ -746,10 +713,10 @@ function oic_profile(store){
     var p3 = {};
     p3.wrap = d3.select("#dash-panel-3");
     p3.header = p3.wrap.append("div").classed("dashboard-panel-title", true);
-    p3.header.append("p").html('Assets and challenges').classed("oic-help",true).attr("data-help","assets")
-                .append("span").classed("oic-help-icon",true).style("font-size","1rem").text("?");
+    p3.header.append("p").html('Assets and challenges').classed("oic-help icon-top",true)
+        .attr("data-help","assets");
 
-    p3.legend = p3.header.append("div");
+    //p3.legend = p3.header.append("div");
 
 
     function get_ind(ind, dict, geo_title){
@@ -827,42 +794,41 @@ function oic_profile(store){
         var cols = pal.categories;
         var dat = [
             {label: store.id[oic].city, col:cols.oic },
-            {label: "All OICs", col:cols.alloic },
+            {label: "All Older Industrial Cities", col:cols.alloic },
             {label: "Urban industrial counties", col:cols.urbani },
             {label: "Urban counties", col:cols.urban }
         ];
         
-        var u = d3container.classed("c-fix",true).style("margin","0rem 0rem 1rem 0rem")
-                        .selectAll("div.legend-entry").data(dat);
+        var u = d3container.classed("c-fix",true).selectAll("div.legend-entry").data(dat);
         u.exit().remove();
 
-        var e = u.enter().append("div").classed("legend-entry", true)
-                .style("float","left").style("margin","8px 12px 0px 0px").style("line-height","1em");
-        e.append("div").style("width","10px").style("height","10px").style("display","inline-block")
+        var e = u.enter().append("div").classed("legend-entry", true);
+        e.append("div").style("width","1.25rem").style("height","0.75rem").style("display","inline-block")
             .style("vertical-align","middle").style("margin-right","4px");
         e.append("p").style("margin","0px").style("line-height","1em").style("font-size","15px")
+            .style("font-weight","bold")
             .style("vertical-align","middle").style("display","inline-block");
 
         var a = e.merge(u);
 
         a.select("div").style("background-color", function(d){return d.col});   
-        a.select("p").text(function(d){return d.label});             
+        a.select("p").text(function(d){return d.label});  
+
+        //don't show legend if mobile
+        //d3container.style("display", is_mobile ? "none" : "block");           
     }
 
     function bar_chart(el, type, oic, ind, sigvar){
         var wrap = d3.select(el);
         var dim = dimensions(el);
-        var pad = [20, 
-                   type != "bar" ? 21 : 15, 
-                   20, 
-                   type != "bar" ? 21 : 15];
+        var pad = [(is_mobile ? 10 : 20), (type != "bar" ? 21 : 15), 20, (type != "bar" ? 21 : 15)];
 
         var bar_height = 12;
-        var bar_pad = 5;
+        var bar_pad = is_mobile ? 19 : 5;
 
         //chart (svg) dimensions
         var width = (dim.width < 120 ? 120 : dim.width) - 20; //account for tile padding, not available for plotting
-        var height = pad[0] + pad[2] + (bar_height*4) + (bar_pad*3);
+        var height = pad[0] + pad[2] + (bar_height*4) + (is_mobile ? bar_pad*4 : bar_pad*3);
 
         var dat = {};
         //oic, oic avg, all urban industrial, all urban -- need to get latter 3 data points
@@ -876,10 +842,7 @@ function oic_profile(store){
         var val2 = get_ind(ind, urban_industrial, "Urban industrial counties");
         var val3 = get_ind(ind, urban_all, "Urban counties");
         
-        dat.points = [val, 
-                      val1,
-                      val2,
-                      val3];
+        dat.points = [val, val1, val2, val3];
 
         var extent = d3.extent(dat.points, function(d){return d.value});
         if(extent[0] > 0){extent[0] = 0;} //if min greater than 0
@@ -911,10 +874,13 @@ function oic_profile(store){
             barse.append("rect");
             barse.append("circle");
             barse.append("text").classed("text-value",true).style("font-size","12px").style("fill","#555555");
+            barse.append("text").classed("text-label",true).style("font-size","12px").style("fill","#555555");
 
         var bars = barse.merge(barsu);
 
-        bars.attr("transform", function(d,i){return "translate(0," + (i*(bar_height+bar_pad) + pad[0]) + ")"});
+        bars.attr("transform", function(d,i){
+            return "translate(0," + ((is_mobile ? bar_pad : 0) + (i*(bar_height+bar_pad)) + pad[0]) + ")"
+        });
 
         function filler(d,i){
             var cols = pal.categories;
@@ -946,8 +912,7 @@ function oic_profile(store){
             })
             ;
 
-        bars.select("text")
-           .style("opacity","0")
+        bars.select("text.text-value")
            .attr("y", type != "bar" ? "12" : "9")
            .text(function(d){return d.format})
            .attr("text-anchor", function(d){return d.value >= 0 ? "start" : "end"})
@@ -955,23 +920,32 @@ function oic_profile(store){
            .duration(700)
            .attr("x", function(d){return type != "bar" ? 
                                     (d.value >= 0 ? xscale(d.value) + 8 : xscale(d.value) - 8) : 
-                                    (d.value >= 0 ? xscale(d.value) + 6 : xscale(d.value) - 6) })
-           .on("end", function(){
-            d3.select(this).style("opacity","1");
-           })
+                                    (d.value >= 0 ? xscale(d.value) + 2 : xscale(d.value) - 2) })
            ;
+
+        //bar labels
+        bars.select("text.text-label")
+            .text(function(d){return d.geo})
+            .attr("x", xscale(0))
+            .attr("dx", function(d){return d.value < 0 ? "-2" : "2"})
+            .attr("text-anchor", function(d){return d.value < 0 ? "end" : "start"})
+            .attr("y", "-4")
+            .style("visibility", is_mobile ? "visible" : "hidden")
+            ;
 
         bars.select("title").text(function(d, i){return d.geo});        
 
         //gridlines
-        var gridu = svg.select("g.grid-lines").selectAll("g").data(xscale.ticks(5));
+        var grid_group = svg.select("g.grid-lines");
+        
+        var gridu = grid_group.selectAll("g").data(xscale.ticks(5));
             gridu.exit().remove();
         var gride = gridu.enter().append("g");
             gride.append("line");
             gride.append("text");
-        var grid = gride.merge(gridu);
+        var grids = gride.merge(gridu);
 
-        grid.select("line").attr("x1", function(d){return xscale(d)})
+        grids.select("line").attr("x1", function(d){return xscale(d)})
                         .attr("x2", function(d){return xscale(d)})
                         .attr("y1", 10)
                         .attr("y2", height - 10)
@@ -981,7 +955,6 @@ function oic_profile(store){
                         })
                         .style("shape-rendering","crispEdges")
                         ;
-
     }
 
     var current_oic = null;
@@ -998,39 +971,37 @@ function oic_profile(store){
             current_oic = code;
         }
 
+        //set "mobile" (non-widescreen) status
+        try{
+            is_mobile = !window.matchMedia("(min-width: 1180px)").matches;
+        }
+        catch(e){
+            is_mobile = false;
+        }          
+
+        //draw legends
+        //legend(code, p2.legend);
+        //legend(code, p3.legend);
+        legend(code, legend_wrap);
+
         dash_wrap.selectAll(".oic-name").text(store.id[code].city);
         dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].state);
+        dash_wrap.selectAll(".state-abbr").text(store.id[code].state);
 
         p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
 
         var oictype = continuum_threshold(store.data[code].score_0016);
-        var oictypecol = continuum_color[oictype];
 
         opt.typep.style("background-color", function(d){
-            return d==oictype ? oictypecol : opt.typedefault;
+            return d==oictype ? continuum_color.Vulnerable : "transparent";
         })
-        .style("color", function(d){
-            return d == "Stabilizing" && oictype == d ? "#333333" : "#ffffff";
-        });
-
-        legend(code, p2.legend);
-        legend(code, p3.legend);
-
-        //panel 1
-        /*var p1sections = p1.wrap.selectAll("div.dashboard-panel-section").data([["aa","aa","aa"]]);
-        p1sections.exit().remove();
-        p1.sections = p1sections.enter().append("div").classed("dashboard-panel-section c-fix",true).merge(p1sections);
-
-        var p1tiles = p1.sections.selectAll("div.dashboard-tile").data(function(d){return d});
-        p1tiles.exit().remove();
-        var p1tiles_enter = p1tiles.enter().append("div").classed("dashboard-tile",true);
-        p1.tiles = p1tiles_enter.merge(p1tiles);*/
+        ;
 
         //panel 2
         var p2sections = p2.wrap.selectAll("div.dashboard-panel-section")
-            .data([{ind:["job","gmp"], title:"Growth, 2000–16"}, 
-                   {ind:["pro", "pci"], title:"Prosperity, 2000–16"}, 
-                   {ind:["med","ert"], title:"Inclusion, 2000–16"}]);
+            .data([{ind:["job","gmp"], title:"Growth, 2000–2016"}, 
+                   {ind:["pro", "pci"], title:"Prosperity, 2000–2016"}, 
+                   {ind:["med","ert"], title:"Inclusion, 2000–2016"}]);
         p2sections.exit().remove();
         
         var p2sectionse = p2sections.enter().append("div").classed("dashboard-panel-section c-fix",true);
@@ -1087,7 +1058,7 @@ function oic_profile(store){
         //what makes xxx an OIC
         var oic_data = store.data[code];
 
-        var criteria_boxes = criteria.selectAll("div.criterion").data([
+        var criteria_boxes = p1.criteria.selectAll("div.criterion").data([
             {
                 title: "<span>1</span>Major urban center",
                 subtitle: "Largest city population in county",
