@@ -271,6 +271,7 @@ function select_menu(container){
 	var sel = {};
 	var options = null; //the actual <option> selection
 	var option_data = [{value:null, text:"Option 1", disabled:false}];
+	var prompt_data = null;
 	var callback = null;
 
 	var wrap = d3.select(container);
@@ -307,6 +308,11 @@ function select_menu(container){
 
 	sel.prompt = function(text){
 		prompt.text(text).style("display","block");
+		return sel;
+	};
+
+	sel.promptOption = function(text){
+		prompt_data = text;
 		return sel;
 	};
 
@@ -382,6 +388,10 @@ function select_menu(container){
 		var all_options = options.enter().append("option").merge(options)
 			.attr("value", function(d){return d.value})
 			.text(function(d){return d.text});
+
+		if(prompt_data !== null){
+			select.append("option").lower().text(prompt_data).attr("disabled","1").attr("selected","1").attr("hidden",1);
+		}
 
 		return select;
 	};
@@ -479,10 +489,19 @@ function palette(){
     };
 
     p.categories = {
-        oic:"#CD3D4B",
-        alloic:"#FFCF00",
-        urban:"#324661",
-        urbani:"#578F82"
+        oic:"#F1EA47",
+        alloic:"#16A9ED",
+        urbani:"#166E96",
+        urban:"#0D4159",
+        yellow:"#F1EA47"
+    };
+
+    p.categories = {
+        oic:"#F4B734",
+        alloic:"#6ECBE6",
+        urbani:"#2589AE",
+        urban:"#08516E",
+        yellow:"#F1EA47"
     };
     
     /*p.categories = {
@@ -618,11 +637,7 @@ function oic_profile(store){
     // MENU PANEL //
     ////////////////
     var opt = {};
-    opt.select_menu = d3.select("#oic-select")
-                        .style("height","1.5rem")
-                        .style("float","left")
-                        .style("margin","6px 0px")
-                        ;
+    opt.select_menu = d3.select("#oic-select");
 
 
     var opt_data = [];
@@ -664,8 +679,8 @@ function oic_profile(store){
                     return d;
                 });
 
-    d3.select("#geography-note").append("p").classed("oic-help",true).attr("data-help","geography")
-        .html('The data presented here are for <span class="county-name"> the county</span>')
+    d3.select("#geography-note").append("p") //.classed("oic-help",true).attr("data-help","geography")
+        .html('The data presented here represent <span class="county-name"> the county</span>. <span class="oic-name">This city</span> is the largest city in the county.  [REWORK WITH AUTHORS].')
         ;
 
     //oic_menu(opt.button, store.id, update);
@@ -678,14 +693,23 @@ function oic_profile(store){
     p1.wrap = d3.select("#dash-panel-1").classed("c-fix",true);
 
     p1.header = p1.wrap.append("div").classed("dashboard-panel-image",true);
+    
+    p1.image_source = p1.header.append("div").style("position","absolute")
+            .style("top","100%").style("left","0px").style("width","100%")
+            .style("height","12px").style("overflow","visible").append("p")
+            .style("float","right").style("color","#444444").style("margin","1px 5px 0px 5px")
+            .style("font-size","11px").style("line-height","1.2em")
+            ;    
+
     p1.content = p1.wrap.append("div").classed("panel1-content c-fix",true);
 
-    var continuum_color = {"Vulnerable":"#CD3D4B", "Stabilizing":"#FFCF00", "Emerging":"#324661", "Strong":"#578F82"};
     var continuum_threshold = d3.scaleThreshold().domain([-0.905, -0.528, 0]).range(["Vulnerable","Stabilizing","Emerging","Strong"]);
 
-    p1.content.append("p").html('What makes <span class="oic-name">___</span> an Older Industrial City (OIC)?')
+
+
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> an Older Industrial City (OIC)? [CLARIFY RELATIONSHIP B/N CITY AND COUNTY]')
         .style("font-weight","bold").style("font-size","1rem")
-        .style("margin","1.25rem 1rem 0rem 1rem").style("font-style","italic");
+        .style("margin","1.75rem 1rem 0rem 1rem").style("font-style","italic");
    
     p1.criteria = p1.content.append("div");
 
@@ -989,11 +1013,16 @@ function oic_profile(store){
         dash_wrap.selectAll(".state-abbr").text(store.id[code].state);
 
         p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
+        p1.image_source.text(store.id[code].source);
 
         var oictype = continuum_threshold(store.data[code].score_0016);
 
-        opt.typep.style("background-color", function(d){
-            return d==oictype ? continuum_color.Vulnerable : "transparent";
+        opt.typep
+        .style("background-color", function(d){
+            return d==oictype ? pal.categories.oic : "transparent";
+        })
+        .style("color", function(d){
+            return d==oictype ? "#333333" : "#ffffff";
         })
         ;
 
@@ -1054,20 +1083,34 @@ function oic_profile(store){
         var hhh = (hh+5)+"px";
         tile_headers.style("height", hhh).style("line-height", hhh);
 
+        //set panel header heights
+        var panel_headers = dash_wrap.selectAll("div.dashboard-panel-title");
+        hh = 25; //reuse
+        panel_headers.each(function(){
+            var thiz = d3.select(this);
+            var box = thiz.select("p").node().getBoundingClientRect();
+            var h = box.bottom - box.top;
+            if(h > hh){
+                hh = h;
+            }
+        });
+        hhh = (hh+20)+"px";
+        panel_headers.style("height", hhh);
+
 
         //what makes xxx an OIC
         var oic_data = store.data[code];
 
         var criteria_boxes = p1.criteria.selectAll("div.criterion").data([
             {
-                title: "<span>1</span>Major urban center",
-                subtitle: "Largest city population in county",
+                title: "<span>1</span>Largest city in county",
+                subtitle: "City population, 2016",
                 value: "<span>" + format.num0(oic_data.largest_city_pop) + "</span>",
                 caption: ""
             },
             {
                 title: "<span>2</span>Manufacturing heritage",
-                subtitle: "Share of jobs in manufacturing, 1970",
+                subtitle: "Share of county jobs in manufacturing, 1970",
                 value: "<span>" + format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970) + "</span>",
                 caption: "By 2016 this had fallen to " + format.sh1(oic_data.mf_jobs_2016/oic_data.RET_2016)
             },
@@ -1075,7 +1118,7 @@ function oic_profile(store){
                 title: "<span>3</span>Slow job growth",
                 subtitle: "",
                 value: "<span>" + format.sh1(oic_data.percent_job_deficit*-1) + "</span>",
-                caption: "fewer jobs in 2016 than expected, based on 1970 industrial structure"
+                caption: "fewer county jobs in 2016 than expected, based on 1970 industrial structure"
             }
         ]);
 
@@ -1095,7 +1138,7 @@ function oic_profile(store){
     var hist = history(); //wrapper of browser history api
  
     //initialization and user selection of an OIC -- push these onto browser history
-    var select = select_menu(opt.select_menu.node()).optgroups(optnest);
+    var select = select_menu(opt.select_menu.node()).promptOption("Select an OIC").optgroups(optnest);
 
     select.on("change", function(){
         var code = this.value;
@@ -1148,7 +1191,7 @@ function oic_profile(store){
     }
 
     update(validhash);
-    select.node().value = validhash; //update select menu
+    //select.node().value = validhash; //update select menu -- UPDATE -- Initial view should be of prompt
     hist.push({code:validhash}, "#"+validhash, true); //push this onto history, overwriting current page in history         
 
 
