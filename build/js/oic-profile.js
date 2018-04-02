@@ -150,27 +150,27 @@ export default function oic_profile(store){
             r.format = format.pct1(r.value);
         }
         else if(ind == "pci"){
-            r.title = "Percent change in real per capita income";
+            r.sig = dict.incpercap_sigch0016;
+            r.title = "Percent change in real per capita income" + (r.sig==1 ? "" : "*");
             r.value = (dict.incpercap_ch0016/dict.incpercap_00);
-            r.sig = incpercap_sigch0016;
-            r.format = format.pct1(r.value);
+            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "med"){
-            r.title = "Percent change in real median household income";
-            r.value = dict.medinc_ch_0016/dict.medinc00;
             r.sig = dict.medinc_sigch_0016;
-            r.format = format.pct1(r.value);
+            r.title = "Percent change in real median household income" + (r.sig==1 ? "" : "*");
+            r.value = dict.medinc_ch_0016/dict.medinc00;
+            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "ert"){
-            r.title = "Change in the employment-to-population ratio (25–64 year-olds)";
-            r.value = dict.epop_ch_0016;
             r.sig = dict.epop_sigch_0016;
-            r.format = format.shch1(r.value);
+            r.title = "Change in the employment-to-population ratio (25–64 year-olds)" + (r.sig==1 ? "" : "*");
+            r.value = dict.epop_ch_0016;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita";
+            r.title = "NSF/NIH funding per capita, 2016";
             r.value = dict.nsfnihpc;
-            r.format = format.doll1(r.value);
+            r.format = format.doll0(r.value);
         }
         else if(ind == "aij"){
             r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
@@ -188,16 +188,16 @@ export default function oic_profile(store){
             r.format = format.pct1(r.value);
         }
         else if(ind == "for"){
-            r.title = "Change in share foreign born, <span>2010–16</span>";
-            r.value = dict.fb_share_ch_1016;
             r.sig = dict.fb_share_sigch_1016;
-            r.format = format.shch1(r.value);
+            r.title = "Change in share foreign born, <span>2010–16</span>" + (r.sig==1 ? "" : "*");
+            r.value = dict.fb_share_ch_1016;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "edu"){
-            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016";
-            r.value = dict.ba_gap;
             r.sig = dict.ba_gap_sig;
-            r.format = format.shch1(r.value);
+            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016" + (r.sig==1 ? "" : "*");
+            r.value = dict.ba_gap;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
 
         return r;
@@ -474,33 +474,35 @@ export default function oic_profile(store){
             bar_chart(this, "bar", code, d)
         });
 
-        //set tile header heights
-        var tile_headers = dash_wrap.selectAll("div.tile-header");
-        var hh = 25;
-        tile_headers.each(function(){
-            var thiz = d3.select(this);
-            var box = thiz.select("p").node().getBoundingClientRect();
-            var h = box.bottom - box.top;
-            if(h > hh){
-                hh = h;
-            }
-        });
-        var hhh = (hh+5)+"px";
-        tile_headers.style("height", hhh).style("line-height", hhh);
+        //set tile header heights allow for repaint
+        setTimeout(function(){
+            var tile_headers = dash_wrap.selectAll("div.tile-header");
+            var hh = 25;
+            tile_headers.each(function(){
+                var thiz = d3.select(this);
+                var box = thiz.select("p").node().getBoundingClientRect();
+                var h = box.bottom - box.top;
+                if(h > hh){
+                    hh = h;
+                }
+            });
+            var hhh = (hh+5)+"px";
+            tile_headers.style("height", hhh).style("line-height", hhh);
 
-        //set panel header heights
-        var panel_headers = dash_wrap.selectAll("div.dashboard-panel-title");
-        hh = 25; //reuse
-        panel_headers.each(function(){
-            var thiz = d3.select(this);
-            var box = thiz.select("p").node().getBoundingClientRect();
-            var h = box.bottom - box.top;
-            if(h > hh){
-                hh = h;
-            }
-        });
-        hhh = (hh+20)+"px";
-        panel_headers.style("height", hhh);
+            //set panel header heights
+            var panel_headers = dash_wrap.selectAll("div.dashboard-panel-title");
+            hh = 25; //reuse
+            panel_headers.each(function(){
+                var thiz = d3.select(this);
+                var box = thiz.select("p").node().getBoundingClientRect();
+                var h = box.bottom - box.top;
+                if(h > hh){
+                    hh = h;
+                }
+            });
+            hhh = (hh+20)+"px";
+            panel_headers.style("height", hhh);
+        },0)
 
 
         //what makes xxx an OIC
@@ -537,6 +539,16 @@ export default function oic_profile(store){
             .classed("criteria-title", function(d,i){return i==0})
             .classed("criteria-value", function(d,i){return i==2})
             ;
+
+        var significance = p3.wrap.selectAll("p.significance-note")
+                                  .data(["*Not statistically significant at the 90% confidence level"])
+        significance.exit().remove();
+        significance.enter().append("p").classed("significance-note",true).merge(significance)     
+            .style("font-size","15px").style("color","#555555").style("float","right")
+            .style("font-style","italic").style("margin","0px 10px").style("padding","5px 0px")
+            .style("border-top","0px solid #d0d0d0")
+            .text(function(d){return d});
+
 
     }
 

@@ -576,8 +576,13 @@ function oic_help(pn){
 
     var info = {
         typology: {
-            title: "A typology for Older Industrial Cities",
-            text: []
+            title: "A typology of Older Industrial Cities",
+            text: ["This typology incorporates change in seven growth, prosperity, and inclusion indicators: GDP (gross value added), jobs, jobs at young firms (those less than five years old), GDP per job, per-capita household income, prime-age employment-to-population ratio, and median household income. For a given OIC, its performance on each of these indicators from 2000 to 2016 is scored relative to a group of 360 urban counties. These scores are combined to produce an overall performance index (for full methodological details, please see the full report). The four OIC types are derived from this index.",
+            "<strong>Strong</strong> OICs rank among the top half of all urban counties on the performance index. While most of these 16 counties are not growing particularly rapidly, they tend to achieve high marks on prosperity and inclusion, suggesting that the economic well-being of their existing residents is improving over time. Most of these counties cluster along the eastern seaboard, including those in New York City (Brooklyn and Queens), and within the orbit of Boston (Bristol, Essex, Norfolk, and Worcester counties) and Philadelphia (including the city itself, and the counties surrounding Bethlehem, Pa. and Trenton, N.J.). Buffalo, St. Louis, and Waterloo, Iowa are strong performers in the interior.",
+            "<strong>Emerging</strong> OICs include a regionally diverse group of 24 counties that, while also growing relatively slowly, manage average marks among all urban counties on prosperity and inclusion. Many of these also locate near the east coast in southern New England, upstate New York, New Jersey, and eastern Pennsylvania. Among emerging OICs, Louisville, Milwaukee, St. Paul, and Cincinnati in the Midwest, and Birmingham in the South, are all bouncing back strongly from a difficult 2000s decade.",
+            "<strong>Stabilizing</strong> OICs generally rank among the bottom third of all counties on measures of growth, prosperity, and inclusion. Among the 16 are a number of small-to-midsized markets in Ohio, Indiana, and Michigan (along with a couple large ones such as Cleveland and Indianapolis) negatively affected by the manufacturing downturn of the 2000s that are beginning to regain their footing, yet still struggling to ensure wider prosperity. Compared to 2000, nearly all of these counties today have fewer jobs, lower incomes, and lower rates of employment, though most remain within shouting distance of those previous peaks.",
+            "<strong>Vulnerable</strong> OICs, 14 in all, rank among the bottom 5 percent of all urban counties on the performance index, and in the bottom quartile in each of the index’s three dimensions (growth, prosperity, inclusion). Detroit (Wayne County) is the only large older industrial county on this list; the rest include smaller cities in Georgia, Illinois, and Indiana. Some of these places, including Albany, Detroit, Flint, Kokomo, and Muncie, are bouncing back this decade. Median household income in Dougherty County, Georgia (around Albany), for instance, is up 19 percent since 2010, and the employment rate in Wayne County, Mich. (around Detroit) has risen 7 percentage points. But given how devastating the 2000s were for nearly all of these counties, they overall remain considerably smaller and poorer than they were at the turn of the century."]
+
         },
         geography: {
             title: "Notes on data and geography",
@@ -585,33 +590,59 @@ function oic_help(pn){
         },
         performance: {
             title: "Performance indicators",
-            text: []
+            text: ['We assess the performance of local and regional economies based on a more expansive definition than typical headline metrics such as population, job growth, or the unemployment rate. We adapt the definition from a framework developed for <a href="https://www.brookings.edu/research/metro-monitor-2018/" target="_blank">Brookings’s Metro Monitor</a>. While headline statistics measure outcomes that certainly matter, they constitute only part of what true economic development should seek to achieve: putting local economies on a higher trajectory of long-run growth, by improving the productivity of individuals and firms in order to raise local standards of living (prosperity) for all people (inclusion).',
+                'We use a series of indicators to examine outcomes over time in each of these three areas—growth, prosperity, and inclusion—for the 70 older industrial counties:',
+                '<strong>Growth</strong>',
+                '<ul><li>GDP (gross value added)</li><li>Jobs</li><li>Jobs at young firms (those less than five years old)</li></ul>',
+                '<em>Sources: Moody\'s Analytics (jobs and GDP) and U.S. Census Bureau’s Longitudinal Employer Household Dynamics program (jobs at young firms)</em>',
+                '<strong>Prosperity</strong>',
+                '<ul><li>GDP per job</li><li>Per-capita household income</li></ul>',
+                '<em>Sources: Moody\'s Analytics, the American Community Survey, and Census 2000</em>',                
+                '<strong>Inclusion</strong>',
+                '<ul><li>Prime-age employment-to-population ratio</li><li>Median household income</li></ul>', 
+                '<em>Sources: The American Community Survey and Census 2000</em>'
+            ]
         },
         assets: {
             title: "Assets and challenges",
-            text: []
+            text: ["Older industrial cities are not economies unto themselves. They function amid wider regional, national, and global dynamics that shape opportunities for places through major economic and social forces. Chief among these forces are technological change, urbanization, and demographic transformation. The fortunes of older industrial cities in coming years will depend greatly on how well their companies, institutions, and residents recognize and navigate those forces.",
+                '<strong>Technological change</strong>',
+                '<ul><li>NSF and NIH funding per capita</li><li>Jobs in advanced industries</li></ul>',
+                '<em>Sources: USAspending.gov and Brookings analysis of data from Moody\'s Analytics</em>',
+                '<strong>Urbanization</strong>',
+                '<ul><li>Share of jobs in dense clusters</li><li>Housing units permitted</li></ul>',
+                '<em>Sources: LEHD LODES and Census Building Permits Survey</em>',                
+                '<strong>Demographic transformation</strong>',
+                '<ul><li>Share of population that is foreign born</li><li>Difference between white and non-white bachelor’s attainment rate</li></ul>', 
+                '<em>Sources: The American Community Survey</em>'
+            ]
         }
     };
 
-    var dummy_text = [
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam non nunc eget sapien suscipit scelerisque quis non ante. Phasellus vitae lectus ac ipsum gravida tincidunt. Vivamus iaculis eleifend risus quis molestie. Etiam euismod et urna id luctus. Pellentesque libero risus, sagittis eu neque ac, elementum varius turpis. Suspendisse convallis sapien ac fermentum dapibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aliquam erat volutpat. Nam blandit nisi vitae faucibus tempus.",
-    "Donec fringilla ut nibh ac pulvinar. Aenean efficitur malesuada magna, quis pulvinar ex mollis faucibus. In nec tincidunt turpis, ut tempus eros. Sed consequat mi eu pulvinar consectetur. Proin quis purus lacus. Nulla aliquet sem id risus lacinia, laoreet faucibus leo elementum. Nam pulvinar, justo sed mattis pellentesque, velit est interdum nibh, quis vehicula risus felis sit amet nibh. Integer malesuada risus sed dignissim efficitur.",
-    "Sed laoreet ex in velit rutrum, et aliquam eros cursus. Duis eleifend ex a est bibendum egestas. Integer et aliquam nunc, vel aliquam urna. Aenean nunc leo, iaculis in velit id, commodo porttitor erat. Pellentesque ac lacus ac diam sodales ullamcorper. Suspendisse dictum ipsum et facilisis placerat. Maecenas eget urna nec dolor aliquam hendrerit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam id interdum est. Vestibulum maximus turpis eget elit hendrerit, id convallis quam interdum. Praesent eu dui eget tellus consequat convallis sit amet eget lorem. Curabitur pharetra mi dictum leo lacinia, quis iaculis massa ultrices."
-    ];
+
+
+
+
+
+
+
+
 
     function fill_help(attr){
         
         var title = opanel_content.selectAll("p.help-title").data([attr]);
+        title.exit().remove();
         title.enter().append("p").classed("help-title",true).merge(title)
             .text(function(d){return info[attr].title})
             .style("font-size","1.25rem").style("font-weight","bold")
             .style("margin","0rem 0rem 1rem 0rem")
             ;
 
-        var text = opanel_content.selectAll("p.help-content").data(dummy_text);
+        var text = opanel_content.selectAll("p.help-content").data(info[attr].text);
+        text.exit().remove();
         text.enter().append("p").classed("help-content",true).merge(text)
-            .text(function(d){return d})
-            .style("font-style","italic").style("margin","0rem 0rem 1rem 0rem")
+            .html(function(d){return d})
+            .style("font-style","normal").style("margin","0rem 0rem 1rem 0rem")
             ;
     }
 
@@ -762,27 +793,27 @@ function oic_profile(store){
             r.format = format.pct1(r.value);
         }
         else if(ind == "pci"){
-            r.title = "Percent change in real per capita income";
+            r.sig = dict.incpercap_sigch0016;
+            r.title = "Percent change in real per capita income" + (r.sig==1 ? "" : "*");
             r.value = (dict.incpercap_ch0016/dict.incpercap_00);
-            r.sig = incpercap_sigch0016;
-            r.format = format.pct1(r.value);
+            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "med"){
-            r.title = "Percent change in real median household income";
-            r.value = dict.medinc_ch_0016/dict.medinc00;
             r.sig = dict.medinc_sigch_0016;
-            r.format = format.pct1(r.value);
+            r.title = "Percent change in real median household income" + (r.sig==1 ? "" : "*");
+            r.value = dict.medinc_ch_0016/dict.medinc00;
+            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "ert"){
-            r.title = "Change in the employment-to-population ratio (25–64 year-olds)";
-            r.value = dict.epop_ch_0016;
             r.sig = dict.epop_sigch_0016;
-            r.format = format.shch1(r.value);
+            r.title = "Change in the employment-to-population ratio (25–64 year-olds)" + (r.sig==1 ? "" : "*");
+            r.value = dict.epop_ch_0016;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita";
+            r.title = "NSF/NIH funding per capita, 2016";
             r.value = dict.nsfnihpc;
-            r.format = format.doll1(r.value);
+            r.format = format.doll0(r.value);
         }
         else if(ind == "aij"){
             r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
@@ -800,16 +831,16 @@ function oic_profile(store){
             r.format = format.pct1(r.value);
         }
         else if(ind == "for"){
-            r.title = "Change in share foreign born, <span>2010–16</span>";
-            r.value = dict.fb_share_ch_1016;
             r.sig = dict.fb_share_sigch_1016;
-            r.format = format.shch1(r.value);
+            r.title = "Change in share foreign born, <span>2010–16</span>" + (r.sig==1 ? "" : "*");
+            r.value = dict.fb_share_ch_1016;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
         else if(ind == "edu"){
-            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016";
-            r.value = dict.ba_gap;
             r.sig = dict.ba_gap_sig;
-            r.format = format.shch1(r.value);
+            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016" + (r.sig==1 ? "" : "*");
+            r.value = dict.ba_gap;
+            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
         }
 
         return r;
@@ -1086,33 +1117,35 @@ function oic_profile(store){
             bar_chart(this, "bar", code, d);
         });
 
-        //set tile header heights
-        var tile_headers = dash_wrap.selectAll("div.tile-header");
-        var hh = 25;
-        tile_headers.each(function(){
-            var thiz = d3.select(this);
-            var box = thiz.select("p").node().getBoundingClientRect();
-            var h = box.bottom - box.top;
-            if(h > hh){
-                hh = h;
-            }
-        });
-        var hhh = (hh+5)+"px";
-        tile_headers.style("height", hhh).style("line-height", hhh);
+        //set tile header heights allow for repaint
+        setTimeout(function(){
+            var tile_headers = dash_wrap.selectAll("div.tile-header");
+            var hh = 25;
+            tile_headers.each(function(){
+                var thiz = d3.select(this);
+                var box = thiz.select("p").node().getBoundingClientRect();
+                var h = box.bottom - box.top;
+                if(h > hh){
+                    hh = h;
+                }
+            });
+            var hhh = (hh+5)+"px";
+            tile_headers.style("height", hhh).style("line-height", hhh);
 
-        //set panel header heights
-        var panel_headers = dash_wrap.selectAll("div.dashboard-panel-title");
-        hh = 25; //reuse
-        panel_headers.each(function(){
-            var thiz = d3.select(this);
-            var box = thiz.select("p").node().getBoundingClientRect();
-            var h = box.bottom - box.top;
-            if(h > hh){
-                hh = h;
-            }
-        });
-        hhh = (hh+20)+"px";
-        panel_headers.style("height", hhh);
+            //set panel header heights
+            var panel_headers = dash_wrap.selectAll("div.dashboard-panel-title");
+            hh = 25; //reuse
+            panel_headers.each(function(){
+                var thiz = d3.select(this);
+                var box = thiz.select("p").node().getBoundingClientRect();
+                var h = box.bottom - box.top;
+                if(h > hh){
+                    hh = h;
+                }
+            });
+            hhh = (hh+20)+"px";
+            panel_headers.style("height", hhh);
+        },0);
 
 
         //what makes xxx an OIC
@@ -1149,6 +1182,16 @@ function oic_profile(store){
             .classed("criteria-title", function(d,i){return i==0})
             .classed("criteria-value", function(d,i){return i==2})
             ;
+
+        var significance = p3.wrap.selectAll("p.significance-note")
+                                  .data(["*Not statistically significant at the 90% confidence level"]);
+        significance.exit().remove();
+        significance.enter().append("p").classed("significance-note",true).merge(significance)     
+            .style("font-size","15px").style("color","#555555").style("float","right")
+            .style("font-style","italic").style("margin","0px 10px").style("padding","5px 0px")
+            .style("border-top","0px solid #d0d0d0")
+            .text(function(d){return d});
+
 
     }
 
