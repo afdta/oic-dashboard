@@ -78,7 +78,6 @@ export default function oic_help(pn){
         performance: {
             title: "Performance indicators",
             text: ['We assess the performance of local and regional economies based on a more expansive definition than typical headline metrics such as population, job growth, or the unemployment rate. We adapt the definition from a framework developed for <a href="https://www.brookings.edu/research/metro-monitor-2018/" target="_blank">Brookings’s Metro Monitor</a>. While headline statistics measure outcomes that certainly matter, they constitute only part of what true economic development should seek to achieve: putting local economies on a higher trajectory of long-run growth, by improving the productivity of individuals and firms in order to raise local standards of living (prosperity) for all people (inclusion).',
-                'We use a series of indicators to examine outcomes over time in each of these three areas—growth, prosperity, and inclusion—for the 70 older industrial counties:',
                 '<strong>Growth</strong>',
                 '<ul><li>GDP (gross value added)</li><li>Jobs</li><li>Jobs at young firms (those less than five years old)</li></ul>',
                 '<em>Sources: Moody\'s Analytics (jobs and GDP) and U.S. Census Bureau’s Longitudinal Employer Household Dynamics program (jobs at young firms)</em>',
