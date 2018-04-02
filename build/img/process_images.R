@@ -40,7 +40,7 @@ convert <- function(input_file, output_file){
   fqinput <- shQuote(paste0(input_dir, input_file))
   fqoutput <- shQuote(paste0(output_dir, output_file))
   
-  #resize image to at least 320px tall or at least 580px wide
+  #resize image to at least 320px tall and at least 600px wide
   command <- paste("convert", fqinput , "-resize 600x320^ -quality 74", fqoutput)
   
   cat(command)

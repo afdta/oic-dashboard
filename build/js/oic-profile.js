@@ -152,6 +152,7 @@ export default function oic_profile(store){
         else if(ind == "pci"){
             r.title = "Percent change in real per capita income";
             r.value = (dict.incpercap_ch0016/dict.incpercap_00);
+            r.sig = incpercap_sigch0016;
             r.format = format.pct1(r.value);
         }
         else if(ind == "med"){
@@ -167,8 +168,8 @@ export default function oic_profile(store){
             r.format = format.shch1(r.value);
         }
         else if(ind == "nsf"){
-            r.title = "NSF/NIH funding per capita ($ths) [DUMMY DATA]";
-            r.value = Math.random()*1000;
+            r.title = "NSF/NIH funding per capita";
+            r.value = dict.nsfnihpc;
             r.format = format.doll1(r.value);
         }
         else if(ind == "aij"){
@@ -194,8 +195,8 @@ export default function oic_profile(store){
         }
         else if(ind == "edu"){
             r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016";
-            r.value = dict.nhw_baplus_rate - dict.nonwhite_baplus_rate;
-            r.sig = 0;
+            r.value = dict.ba_gap;
+            r.sig = dict.ba_gap_sig;
             r.format = format.shch1(r.value);
         }
 
