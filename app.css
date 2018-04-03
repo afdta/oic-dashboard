@@ -32,6 +32,37 @@
 
 /*end core styles*/
 
+/*image grids*/
+
+.metro-interactive .mpp-image-grid.three-wide{
+  max-width:1600px;
+  margin:0rem auto;
+}
+
+.metro-interactive .mpp-image-grid.two-wide{
+  max-width:1000px;
+  margin:0rem auto;
+}
+
+.metro-interactive .mpp-image-grid > p{
+  margin:1rem 3%;
+}
+
+.metro-interactive .mpp-image-grid > div{
+  width:100%;
+  display:table;
+  table-layout: fixed;
+}
+
+.metro-interactive .mpp-image-grid > div > div{
+  display:table-row;
+}
+
+.metro-interactive .mpp-image-grid > div > div > div{
+  display:table-cell;
+  padding:0rem 1rem 0rem 0rem;
+}
+
 
 /*oic dashboard*/
 .metro-interactive .dashboard-wrap{
