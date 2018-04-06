@@ -218,7 +218,7 @@ export default function oic_profile(store){
         var e = u.enter().append("div").classed("legend-entry", true);
         e.append("div").style("width","1.25rem").style("height","0.75rem").style("display","inline-block")
             .style("vertical-align","middle").style("margin-right","4px");
-        e.append("p").style("margin","0px").style("line-height","1em").style("font-size","15px")
+        e.append("p").style("margin","0px").style("line-height","1em").style("font-size","16px")
             .style("font-weight","bold")
             .style("vertical-align","middle").style("display","inline-block");
 
@@ -544,7 +544,7 @@ export default function oic_profile(store){
                                   .data(["*Not statistically significant at the 90% confidence level"])
         significance.exit().remove();
         significance.enter().append("p").classed("significance-note",true).merge(significance)     
-            .style("font-size","15px").style("color","#555555").style("float","right")
+            .style("font-size","16px").style("color","#555555").style("float","right")
             .style("font-style","italic").style("margin","0px 10px").style("padding","5px 0px")
             .style("border-top","0px solid #d0d0d0")
             .text(function(d){return d});
