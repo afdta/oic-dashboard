@@ -116,7 +116,7 @@
   border:0px solid #ffffff;
   color:#ffffff;
   float:left;
-  font-size:15px;
+  font-size:16px;
   line-height:1em;
   padding:5px 10px;
   border-radius:5px;
@@ -129,7 +129,7 @@
 .metro-interactive #geography-note p{
   margin:5px 0rem;
   padding:5px 0px;
-  font-size:15px;
+  font-size:16px;
   line-height:20px;
   vertical-align:middle;
   font-style:italic;
@@ -311,7 +311,7 @@
 }
 
 .metro-interactive .dashboard-tile p{
-  font-size:15px;
+  font-size:16px;
   line-height:20px;
 }
 
@@ -338,7 +338,7 @@
 
 .metro-interactive .criterion p{
   margin:5px 15px 0em 30px;
-  font-size:15px;
+  font-size:16px;
   line-height: 24px;
   font-style:italic;
 }
@@ -362,7 +362,7 @@
   border-radius:12px;
   height:24px;
   line-height:1em;
-  padding:4.5px;
+  padding:4px;
   width:24px;
   text-align:center;
   margin:0px 6px 0px 0px;
