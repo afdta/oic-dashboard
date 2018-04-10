@@ -92,7 +92,7 @@
 }
 
 .metro-interactive p.dashboard-title{
-  font-size:2.5rem;
+  font-size:45px;
   font-weight:bold;
   margin:0px 1rem 0px 0px;
   padding:5px 0px;
@@ -142,7 +142,7 @@
 }
 
 .metro-interactive select{
-  font-size:0.9rem;
+  font-size:16px;
   color:#555555;
   padding:0em 1rem 0rem 0.5rem;
   margin:0px;
@@ -213,7 +213,7 @@
 .metro-interactive .dashboard-panel-title > p:first-child{
   font-weight:bold;
   font-style:normal;
-  font-size:1.25rem;
+  font-size:23px;
   margin:7px 0rem 0px 0px;
 }
 
@@ -286,7 +286,7 @@
 
 .metro-interactive .dashboard-panel-section .section-title{
   font-weight:bold;
-  font-size:0.85rem;
+  font-size:16px;
   line-height:1em;
   margin:0px;
   /*padding:10px 0px 10px 12px;*/
@@ -406,7 +406,7 @@
 
   .metro-interactive #oic-type > p{padding:5px 3px;}
   .metro-interactive #oic-type p:first-child{display:none;}
-  .metro-interactive p.dashboard-title {font-size:1.75rem;}
+  .metro-interactive p.dashboard-title {font-size:34px;}
   /*.metro-interactive #oic-type{line-height:1.75rem;}*/
 }
 
@@ -441,7 +441,7 @@
 
   .metro-interactive #oic-type p{padding:5px 8px;}  
   .metro-interactive #oic-type p:first-child{display:block;}
-  .metro-interactive p.dashboard-title {font-size:2.5rem;}
+  .metro-interactive p.dashboard-title {font-size:45px;}
   /*.metro-interactive #oic-type{line-height:2.5rem;}*/
 
 }
