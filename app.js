@@ -526,6 +526,7 @@ function oic_help(pn){
         .style("width","100vw")
         .style("height","100vh")
         .style("background-color", "rgba(240,240,240,1)")
+        .style("padding-bottom","2%")
         .style("display","none")
         .style("opacity","0")
         .style("z-index","1000")
@@ -535,7 +536,7 @@ function oic_help(pn){
 
     var opanel_buttons = opanel.append("div")
         .style("max-width","900px")
-        .style("margin","5% auto 0px auto")
+        .style("margin","2% auto 0px auto")
         .style("padding","1rem")
         .classed("c-fix",true);
 
@@ -596,10 +597,10 @@ function oic_help(pn){
                 '<em>Sources: Moody\'s Analytics (jobs and GDP) and U.S. Census Bureau’s Longitudinal Employer Household Dynamics program (jobs at young firms)</em>',
                 '<strong>Prosperity</strong>',
                 '<ul><li>GDP per job</li><li>Per-capita household income</li></ul>',
-                '<em>Sources: Moody\'s Analytics, the American Community Survey, and Census 2000</em>',                
+                '<em>Sources: Moody\'s Analytics, American Community Survey, and Census 2000</em>',                
                 '<strong>Inclusion</strong>',
                 '<ul><li>Prime-age employment-to-population ratio</li><li>Median household income</li></ul>', 
-                '<em>Sources: The American Community Survey and Census 2000</em>'
+                '<em>Sources: American Community Survey and Census 2000</em>'
             ]
         },
         assets: {
@@ -613,7 +614,7 @@ function oic_help(pn){
                 '<em>Sources: LEHD LODES and Census Building Permits Survey</em>',                
                 '<strong>Demographic transformation</strong>',
                 '<ul><li>Share of population that is foreign born</li><li>Difference between white and non-white bachelor’s attainment rate</li></ul>', 
-                '<em>Sources: The American Community Survey</em>'
+                '<em>Sources: American Community Survey</em>'
             ]
         }
     };
@@ -1153,22 +1154,22 @@ function oic_profile(store){
 
         var criteria_boxes = p1.criteria.selectAll("div.criterion").data([
             {
-                title: "<span>1</span>Largest city in county",
+                title: "<span>1</span>Presence of a major urban center",
                 subtitle: "City population, 2016",
                 value: "<span>" + format.num0(oic_data.largest_city_pop) + "</span>",
                 caption: ""
             },
             {
-                title: "<span>2</span>Manufacturing heritage",
+                title: "<span>2</span>Industrial heritage",
                 subtitle: "Share of county jobs in manufacturing, 1970",
                 value: "<span>" + format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970) + "</span>",
                 caption: "By 2016 this had fallen to " + format.sh1(oic_data.mf_jobs_2016/oic_data.RET_2016)
             },
             {
-                title: "<span>3</span>Slow job growth",
-                subtitle: "",
+                title: "<span>3</span>Competitive challenge",
+                subtitle: "Jobs deficit in 2016 based on 1970 industrial structure",
                 value: "<span>" + format.sh1(oic_data.percent_job_deficit*-1) + "</span>",
-                caption: "fewer county jobs in 2016 than expected, based on 1970 industrial structure"
+                caption: ""
             }
         ]);
 

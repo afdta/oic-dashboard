@@ -511,22 +511,22 @@ export default function oic_profile(store){
 
         var criteria_boxes = p1.criteria.selectAll("div.criterion").data([
             {
-                title: "<span>1</span>Largest city in county",
+                title: "<span>1</span>Presence of a major urban center",
                 subtitle: "City population, 2016",
                 value: "<span>" + format.num0(oic_data.largest_city_pop) + "</span>",
                 caption: ""
             },
             {
-                title: "<span>2</span>Manufacturing heritage",
+                title: "<span>2</span>Industrial heritage",
                 subtitle: "Share of county jobs in manufacturing, 1970",
                 value: "<span>" + format.sh1(oic_data.mf_jobs_1970/oic_data.RET_1970) + "</span>",
                 caption: "By 2016 this had fallen to " + format.sh1(oic_data.mf_jobs_2016/oic_data.RET_2016)
             },
             {
-                title: "<span>3</span>Slow job growth",
-                subtitle: "",
+                title: "<span>3</span>Competitive challenge",
+                subtitle: "Jobs deficit in 2016 based on 1970 industrial structure",
                 value: "<span>" + format.sh1(oic_data.percent_job_deficit*-1) + "</span>",
-                caption: "fewer county jobs in 2016 than expected, based on 1970 industrial structure"
+                caption: ""
             }
         ]);
 

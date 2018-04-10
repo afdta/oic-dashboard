@@ -10,6 +10,7 @@ export default function oic_help(pn){
         .style("width","100vw")
         .style("height","100vh")
         .style("background-color", "rgba(240,240,240,1)")
+        .style("padding-bottom","2%")
         .style("display","none")
         .style("opacity","0")
         .style("z-index","1000")
@@ -20,7 +21,7 @@ export default function oic_help(pn){
 
     var opanel_buttons = opanel.append("div")
         .style("max-width","900px")
-        .style("margin","5% auto 0px auto")
+        .style("margin","2% auto 0px auto")
         .style("padding","1rem")
         .classed("c-fix",true)
         ;
@@ -83,10 +84,10 @@ export default function oic_help(pn){
                 '<em>Sources: Moody\'s Analytics (jobs and GDP) and U.S. Census Bureau’s Longitudinal Employer Household Dynamics program (jobs at young firms)</em>',
                 '<strong>Prosperity</strong>',
                 '<ul><li>GDP per job</li><li>Per-capita household income</li></ul>',
-                '<em>Sources: Moody\'s Analytics, the American Community Survey, and Census 2000</em>',                
+                '<em>Sources: Moody\'s Analytics, American Community Survey, and Census 2000</em>',                
                 '<strong>Inclusion</strong>',
                 '<ul><li>Prime-age employment-to-population ratio</li><li>Median household income</li></ul>', 
-                '<em>Sources: The American Community Survey and Census 2000</em>'
+                '<em>Sources: American Community Survey and Census 2000</em>'
             ]
         },
         assets: {
@@ -100,7 +101,7 @@ export default function oic_help(pn){
                 '<em>Sources: LEHD LODES and Census Building Permits Survey</em>',                
                 '<strong>Demographic transformation</strong>',
                 '<ul><li>Share of population that is foreign born</li><li>Difference between white and non-white bachelor’s attainment rate</li></ul>', 
-                '<em>Sources: The American Community Survey</em>'
+                '<em>Sources: American Community Survey</em>'
             ]
         }
     }
