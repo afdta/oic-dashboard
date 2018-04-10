@@ -710,7 +710,7 @@ function oic_profile(store){
                 });
 
     d3.select("#geography-note").append("p") //.classed("oic-help",true).attr("data-help","geography")
-        .html('The data presented here represent <span class="county-name"> the county</span>. <span class="oic-name">This city</span> is the largest city in the county.  [REWORK WITH AUTHORS].')
+        .html('Data presented here represent <span class="county-name"> the county</span>. <span class="oic-name">This city</span> is the largest city in the county.')
         ;
 
     //oic_menu(opt.button, store.id, update);
