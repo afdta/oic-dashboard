@@ -737,7 +737,7 @@ function oic_profile(store){
 
 
 
-    p1.content.append("p").html('What makes <span class="oic-name">___</span> an Older Industrial City (OIC)? [CLARIFY RELATIONSHIP B/N CITY AND COUNTY]')
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> an older industrial city?')
         .style("font-weight","bold").style("font-size","1rem")
         .style("margin","1.75rem 1rem 0rem 1rem").style("font-style","italic");
    
@@ -849,7 +849,7 @@ function oic_profile(store){
         var cols = pal.categories;
         var dat = [
             {label: store.id[oic].city, col:cols.oic },
-            {label: "All Older Industrial Cities", col:cols.alloic },
+            {label: "Older industrial counties", col:cols.alloic },
             {label: "Urban industrial counties", col:cols.urbani },
             {label: "Urban counties", col:cols.urban }
         ];
@@ -858,8 +858,8 @@ function oic_profile(store){
         u.exit().remove();
 
         var e = u.enter().append("div").classed("legend-entry", true);
-        e.append("div").style("width","1.25rem").style("height","0.75rem").style("display","inline-block")
-            .style("vertical-align","middle").style("margin-right","4px");
+        e.append("div").style("width","1.25rem").style("height","16px").style("display","inline-block")
+            .style("vertical-align","middle").style("margin-right","5px");
         e.append("p").style("margin","0px").style("line-height","1em").style("font-size","16px")
             .style("font-weight","bold")
             .style("vertical-align","middle").style("display","inline-block");
@@ -893,7 +893,7 @@ function oic_profile(store){
         var urban_all = store.data["00001"];
 
         var val = get_ind(ind, oic_individual, store.id[oic].city);
-        var val1 = get_ind(ind, oic_avg, "All OICs");
+        var val1 = get_ind(ind, oic_avg, "Older industrial counties");
         var val2 = get_ind(ind, urban_industrial, "Urban industrial counties");
         var val3 = get_ind(ind, urban_all, "Urban counties");
         
