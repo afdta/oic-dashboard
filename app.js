@@ -737,7 +737,7 @@ function oic_profile(store){
 
 
 
-    p1.content.append("p").html('What makes <span class="oic-name">___</span> an older industrial city?')
+    p1.content.append("p").html('What makes <span class="oic-name">___</span> <span class="county-name-parenthetical">(___)</span> an older industrial city?')
         .style("font-weight","bold").style("font-size","1rem")
         .style("margin","1.75rem 1rem 0rem 1rem").style("font-style","italic");
    
@@ -1057,6 +1057,7 @@ function oic_profile(store){
 
         dash_wrap.selectAll(".oic-name").text(store.id[code].city);
         dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].state);
+        dash_wrap.selectAll(".county-name-parenthetical").text("(" + store.id[code].county + ")");
         dash_wrap.selectAll(".state-abbr").text(store.id[code].state);
 
         p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
