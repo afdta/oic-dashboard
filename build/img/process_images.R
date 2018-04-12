@@ -7,18 +7,17 @@ input_dir <- "/home/alec/Projects/Brookings/older-industrial-cities/build/img/ci
 output_dir <- "/home/alec/Projects/Brookings/older-industrial-cities/assets/city_photos/"
 
 filesheet <- read_excel("/home/alec/Projects/Brookings/older-industrial-cities/build/img/Spreadsheet_OIC pictures_LZ with photo credit.xlsx", na=c("","N/A","NA")) %>% select(city1=City, state=State, source=Source)
-filesheet$city <- ifelse(filesheet$city1 == "Louisville/Jefferson County", "Louisville", filesheet$city1) 
 
-filesheet$filename <-  case_when(
-  filesheet$city=="New York (Brooklyn)" ~ "NY Brooklyn",
-  filesheet$city=="New York (Queens)" ~ "Queens",
-  TRUE ~ filesheet$city
+filesheet$city <-  case_when(
+  filesheet$city1 == "Louisville/Jefferson County" ~ "Louisville",
+  filesheet$city1=="New York (Brooklyn)" ~ "Brooklyn",
+  filesheet$city1=="New York (Queens)" ~ "Queens",
+  TRUE ~ filesheet$city1
 )
 
-filter(filesheet, city!=city1) #recode 1
-filter(filesheet, filename!=city) #recode 2
+filter(filesheet, city!=city1) #recode
 
-filesheet$filename <- paste0(2:(nrow(filesheet)+1), " - ", filesheet$filename, ".jpg")
+filesheet$filename <- paste0(2:(nrow(filesheet)+1), " - ", filesheet$city, ".jpg")
 
 files <- list.files(input_dir)
 

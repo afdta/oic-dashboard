@@ -7,8 +7,8 @@ cities$city1 <- sub("\\s*city|/.*$", "", cities$city2)
 city1 <- cities$city1
 
 cities$city <- case_when(
-  city1=="New York" & cities$county=="Kings County" ~ "New York (Brooklyn)",
-  city1=="New York" & cities$county=="Queens County" ~ "New York (Queens)",
+  city1=="New York" & cities$county=="Kings County" ~ "Brooklyn",
+  city1=="New York" & cities$county=="Queens County" ~ "Queens",
   TRUE ~ city1
 )
 
