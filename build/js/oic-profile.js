@@ -234,8 +234,8 @@ export default function oic_profile(store){
         var dim = dimensions(el);
         var pad = [(is_mobile ? 10 : 20), (type != "bar" ? 21 : 15), 20, (type != "bar" ? 21 : 15)];
 
-        var bar_height = 12;
-        var bar_pad = is_mobile ? 19 : 5;
+        var bar_height = 11;
+        var bar_pad = is_mobile ? 19 : 4;
 
         //chart (svg) dimensions
         var width = (dim.width < 120 ? 120 : dim.width) - 20; //account for tile padding, not available for plotting
