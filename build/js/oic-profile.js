@@ -67,9 +67,7 @@ export default function oic_profile(store){
                     return d;
                 });
 
-    d3.select("#geography-note").append("p") //.classed("oic-help",true).attr("data-help","geography")
-        .html('Data presented here represent <span class="county-name"> the county</span>. <span class="oic-name">This city</span> is the largest city in the county.')
-        ;
+    var geo_note = d3.select("#geography-note").append("p");
 
     //oic_menu(opt.button, store.id, update);
 
@@ -413,10 +411,27 @@ export default function oic_profile(store){
         //legend(code, p3.legend);
         legend(code, legend_wrap);
 
-        dash_wrap.selectAll(".oic-name").text(store.id[code].city);
-        dash_wrap.selectAll(".county-name").text(store.id[code].county + ", " + store.id[code].state);
+        var oic_name = store.id[code].city;
+        var county_name = store.id[code].county + ", " + store.id[code].state;
+        var state_abbr = store.id[code].state;
+
+        dash_wrap.selectAll(".oic-name").text(oic_name);
+        dash_wrap.selectAll(".county-name").text(county_name);
         dash_wrap.selectAll(".county-name-parenthetical").text("(" + store.id[code].county + ")");
-        dash_wrap.selectAll(".state-abbr").text(store.id[code].state);
+        dash_wrap.selectAll(".state-abbr").text(state_abbr);
+
+        //update geograhy note
+        if(oic_name==="Brooklyn" || oic_name==="Queens"){
+            geo_note.text("Data presented here represent " + county_name + " which is geographically coterminous with the borough of " + oic_name + ".");
+        }
+        else if(oic_name in {"St. Louis":1, "Baltimore": 1}){
+            geo_note.text("Data presented here represent " + oic_name + ", " + state_abbr + ". As an independent city, it is treated as a county equivalent.");
+        }
+        else{
+            geo_note.text("Data presented here represent " + county_name + ". " + oic_name + " is the largest city in the county.");
+        }
+
+        ;
 
         p1.header.style("background-image", 'url("' + dir.url("img", store.id[code].filename) + '")');
         p1.image_source.text(store.id[code].source);
