@@ -780,67 +780,67 @@ function oic_profile(store){
         if(ind == "job"){
             r.title = "Percent change in jobs";
             r.value = (dict.RET_2016/dict.RET_2000)-1;
-            r.format = format.pct1(r.value);
+            r.format = format.fn(r.value, "pct1");
         }
         else if(ind == "gmp"){
             r.title = "Percent change in real gross metropolitan product (GMP)";
             r.value = (dict.rgdp_2016/dict.rgdp_2000)-1;
-            r.format = format.pct1(r.value);
+            r.format = format.fn(r.value, "pct1");
         }
         else if(ind == "pro"){
             r.title = "Percent change in real GMP per job";
             r.value = ((dict.rgdp_2016/dict.RET_2016)/(dict.rgdp_2000/dict.RET_2000))-1;
-            r.format = format.pct1(r.value);
+            r.format = format.fn(r.value, "pct1");
         }
         else if(ind == "pci"){
             r.sig = dict.incpercap_sigch0016;
-            r.title = "Percent change in real per capita income" + (r.sig==1 ? "" : "*");
+            r.title = "Percent change in real per capita income" + (r.sig==1 || r.sig===null ? "" : "*");
             r.value = (dict.incpercap_ch0016/dict.incpercap_00);
-            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
+            r.format = format.fn(r.value,"pct1") + (r.sig==1 || r.sig===null ? "" : "*");
         }
         else if(ind == "med"){
             r.sig = dict.medinc_sigch_0016;
-            r.title = "Percent change in real median household income" + (r.sig==1 ? "" : "*");
+            r.title = "Percent change in real median household income" + (r.sig==1 || r.sig===null ? "" : "*");
             r.value = dict.medinc_ch_0016/dict.medinc00;
-            r.format = format.pct1(r.value) + (r.sig==1 ? "" : "*");
+            r.format = format.fn(r.value,"pct1") + (r.sig==1 || r.sig===null  ? "" : "*");
         }
         else if(ind == "ert"){
             r.sig = dict.epop_sigch_0016;
-            r.title = "Change in the employment-to-population ratio (25–64 year-olds)" + (r.sig==1 ? "" : "*");
+            r.title = "Change in the employment-to-population ratio (25–64 year-olds)" + (r.sig==1 || r.sig===null ? "" : "*");
             r.value = dict.epop_ch_0016;
-            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
+            r.format = format.fn(r.value, "shch1") + (r.sig==1 || r.sig===null ? "" : "*");
         }
         else if(ind == "nsf"){
             r.title = "NSF/NIH funding per capita, 2016";
             r.value = dict.nsfnihpc;
-            r.format = format.doll0(r.value);
+            r.format = format.fn(r.value, "doll1");
         }
         else if(ind == "aij"){
             r.title = "Percent change in advanced industries jobs, <span>2010–16</span>";
             r.value = (dict.ai_jobs_2016 / dict.ai_jobs_2010) - 1;
-            r.format = format.pct1(r.value);
+            r.format = format.fn(r.value, "pct1");
         }
         else if(ind == "clu"){
             r.title = "Share of jobs in dense clusters, 2015";
             r.value = dict.hub_share_15;
-            r.format = format.sh1(r.value);
+            r.format = format.fn(r.value, "sh1");
         }
         else if(ind == "pmt"){
             r.title = "Percent change in housing units permitted, <span>2010–16</span>";
             r.value = (dict.units_16 / dict.units_10) - 1;
-            r.format = format.pct1(r.value);
+            r.format = format.fn(r.value, "pct1");
         }
         else if(ind == "for"){
             r.sig = dict.fb_share_sigch_1016;
-            r.title = "Change in share foreign born, <span>2010–16</span>" + (r.sig==1 ? "" : "*");
+            r.title = "Change in share foreign born, <span>2010–16</span>" + (r.sig==1 || r.sig===null ? "" : "*");
             r.value = dict.fb_share_ch_1016;
-            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
+            r.format = format.fn(r.value, "shch1") + (r.sig==1 || r.sig===null ? "" : "*");
         }
         else if(ind == "edu"){
             r.sig = dict.ba_gap_sig;
-            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016" + (r.sig==1 ? "" : "*");
+            r.title = "Difference b/w white and non-white bachelor’s attainment rate, 2016" + (r.sig==1 || r.sig===null ? "" : "*");
             r.value = dict.ba_gap;
-            r.format = format.shch1(r.value) + (r.sig==1 ? "" : "*");
+            r.format = format.fn(r.value, "shch1") + (r.sig==1 || r.sig===null ? "" : "*");
         }
 
         return r;
