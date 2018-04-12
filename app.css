@@ -78,7 +78,7 @@
 
 .metro-interactive .dashboard-menu{
   position:relative;
-  margin-bottom:1.5rem;
+  margin-bottom:1.25rem;
   margin-right:1rem;
   border-radius:0px 15px 15px 0px;
   overflow:hidden;
@@ -92,18 +92,18 @@
 }
 
 .metro-interactive p.dashboard-title{
-  font-size:45px;
+  font-size:42px;
+  line-height:1em;
   font-weight:bold;
   margin:0px 1rem 0px 0px;
-  padding:5px 0px;
+  padding:0px 0px 2px 0px;
   color:#ffffff;
   float:left;
 }
 
 .metro-interactive #oic-type{
   float:right;
-  margin:5px 0rem;
-  /*line-height:2.5rem;*/
+  margin:12px 0rem 0px 0rem;
 }
 
 .metro-interactive #oic-type > div{
@@ -407,7 +407,6 @@
   .metro-interactive #oic-type > p{padding:5px 3px;}
   .metro-interactive #oic-type p:first-child{display:none;}
   .metro-interactive p.dashboard-title {font-size:34px;}
-  /*.metro-interactive #oic-type{line-height:1.75rem;}*/
 }
 
 
@@ -441,7 +440,7 @@
 
   .metro-interactive #oic-type p{padding:5px 8px;}  
   .metro-interactive #oic-type p:first-child{display:block;}
-  .metro-interactive p.dashboard-title {font-size:45px;}
+  .metro-interactive p.dashboard-title {font-size:42px;}
   /*.metro-interactive #oic-type{line-height:2.5rem;}*/
 
 }
